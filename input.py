@@ -10,7 +10,7 @@ class Input(object):
             self.shortcuts[event] = {}
         self.shortcuts[event][label] = (action, arg)
 
-    def use(self, event, key):
+    def _use(self, event, key):
         action, argument = event[key]
         if action:
             if hasattr(action, "__call__"):
@@ -28,4 +28,4 @@ class Input(object):
                 validShortcut = self.keys.get(key)
                 if validEvent and validShortcut:
                     if validEvent.get(validShortcut):
-                        self.use(validEvent, validShortcut)
+                        self._use(validEvent, validShortcut)

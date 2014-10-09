@@ -4,7 +4,7 @@ from files import *
 
 
 class Display(object):
-    def __init__(self, Tileset, classs, Size, Transparent, Anim=False, TLength=1):
+    def __init__(self, Tileset, classs, Size, Transparent, Anim=(False, 1)):
         self.Class = classs
         if isinstance(Tileset, str):
             self.fileMod = Files()
@@ -13,8 +13,8 @@ class Display(object):
             self.image.blit(image, (0, 0))
         else:
             self.image = Tileset
-        if Anim:
-            self.animation = Animation(image, TLength, self.Class)
+        if Anim[0]:
+            self.animation = Animation(image, Anim[1], self.Class)
         self.trans = Transparent
         if self.trans:
             self.transColor = self.image.get_at((0, 0))

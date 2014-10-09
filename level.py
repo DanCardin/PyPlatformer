@@ -1,43 +1,49 @@
 import pygame
+import const
 from map import *
-from camera import *
-from editor import *
-from mchar import *
-from const import *
-from platform import *
+from background import Background
+from camera import Camera
+from editor import Editor
+from input import Input
+from mchar import MChar
 
 
 class Level(object):
-    def __init__(self, Levels):
-        self.map = Map(Levels[0], Levels[1])
-        self.map.initDrawMap()
+    def __init__(self, level):
         self.camera = None
         self.editor = None
         self.entities = {}
         self.entityId = 0
-        self.background = pygame.surface.Surface((screenSize[0] * res, screenSize[1] * res))
+
+        self.map = Map(level[0], level[1])
+        self.input = Input()
+        self.input.set(pygame.KEYDOWN, pygame.K_e, "editor", self.toggleEditor)
+        self.map.initDrawMap()
 
     def start(self):
         self.entities = {}
-        self.addEntity(MChar((self.map.start[0], self.map.start[1], 20, 26), (playerSpeed[0] * self.map.res, playerSpeed[1] * self.map.res), playerTileset, True, self))
-        #for i in range(1):
-        #    self.addEntity(Platform((96,416 - i * 32, 200, 10), (96,416 - i * 32, 20, 10), [randrange(1,4),randrange(1,4)], "assets\\platform.bmp", self))
-        self.camera = Camera((0, 0, screenSize[0] * res, screenSize[1] * res), (150, 200, 150, 200), self.get(0), (self.map.size[0] * res, self.map.size[1] * res))
+        self.addEntity(entity=MChar((self.map.start[0], self.map.start[1], 20, 26),
+                             (playerSpeed[0] * self.map.res, playerSpeed[1] * self.map.res),
+                             playerTileset, True, self))
+        self.camera = Camera((0, 0, screenSize[0] * res, screenSize[1] * res), (150, 200, 150, 200),
+                             self.get(0), (self.map.size[0] * res, self.map.size[1] * res))
+        self.background = Background(self.camera, const.backgrounds, self.map.res)
         self.editor = Editor(self.map, self.camera)
 
-    def addEntity(self, entity):
-        self.entities[self.entityId] = entity
-        entity.id = self.entityId
-        self.entityId += 1
+    def addEntity(self, id=None, entity=None):
+        if entity:
+            if not id:
+                self.entities[self.entityId] = entity
+                entity.id = self.entityId
+                self.entityId += 1
+            else:
+                self.entities[id] = entity
 
     def removeEntity(self, entity):
         del self.entities[entity.id]
 
     def get(self, entityId):
-        if entityId in self.entities:
-            return self.entities[entityId]
-        else:
-            return None
+        return self.entities.get(entityId)
 
     def process(self, input):
         for entity in self.entities.values():
@@ -45,11 +51,15 @@ class Level(object):
                 entity.tick(input)
             else:
                 entity.tick([])
+            if hasattr(entity, "weapon"):
+                entity.weapon.tick()
 
     def render(self, surface):
-        surface.blit(self.background, (0, 0))
+        self.background.draw(surface, self.camera)
         for entity in self.entities.values():
             entity.display.draw(surface, self.camera)
+            if hasattr(entity, "weapon"):
+                entity.weapon.draw(surface, self.camera)
         self.map.draw(surface, self.camera)
         if self.editor.enabled:
             self.editor.draw(surface, self.camera)
@@ -63,13 +73,20 @@ class Level(object):
                 return entity
         return None
 
-    def tick(self, input, surface):
+    def toggleEditor(self):
         global screen
+        self.editor.enabled = not self.editor.enabled
+        size = 2 if self.editor.enabled else 0
+        screen = pygame.display.set_mode((screenSize[0] * res, screenSize[1] * res + size * res))
+
+    def tick(self, input, surface):
         self.process(input)
         self.camera.tick()
+        self.background.tick()
+
         if (pygame.KEYDOWN, pygame.K_e) in input:
             self.editor.enabled = not self.editor.enabled
-            screen = pygame.display.set_mode((screenSize[0] * res, screenSize[1] * res + {False: 0, True: 2}[self.editor.enabled] * res))
         if self.editor.enabled:
             self.editor.edit(input)
+
         self.render(surface)

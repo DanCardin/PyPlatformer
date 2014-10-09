@@ -1,8 +1,9 @@
 #!/user/bin/env python
-import pygame
 import os
+import sys
+import pygame
+import const
 from game import Game
-from const import *
 
 #--- Inits
 os.environ["SDL_VIDEO_CENTERED"] = "1"
@@ -12,14 +13,15 @@ pygame.font.init()
 clock = pygame.time.Clock()
 
 #--- Object Creation
-pygame.display.set_caption(gameName)
-screen = pygame.display.set_mode((screenSize[0] * res, screenSize[1] * res))
-game = Game([(levelFile, tilesetFile)])
+pygame.display.set_caption(const.gameName)
+screen = pygame.display.set_mode((const.screenSize[0] * const.res,
+                                  const.screenSize[1] * const.res))
+game = Game(const.levelFiles)
 
 #--- Main Loop
 while game.started:
     game.tick(screen)
-    clock.tick(FPS)
+    clock.tick(const.FPS)
     pygame.display.flip()
 pygame.quit()
 sys.exit()

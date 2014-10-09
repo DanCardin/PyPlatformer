@@ -6,18 +6,19 @@ from menu import *
 
 
 class Game(object):
-    def __init__(self, Levels):
-        self.levAttr = Levels
-        self.world = 0  # World(Levels)
-        self.camera = 0
+    def __init__(self, levels):
+        self.levAttr = levels
+        self.world = None
+        self.camera = None
         self.enabled = False
         self.started = True
 
         text = ['Resume', 'Start', 'Editor', 'Exit']
         self.menu = Menu((screenSize[0] * res / 2 - 50, screenSize[1] * res / 2 - 50 * len(text) / 2), True)
         for i in range(0, len(text)):
-            self.menu.addItem(rect=(0, 50 * i, 100, 48), rColor=(255, 0, 0), oColor=(0, 0, 255),
-                              text=text[i], tColor=(0, 255, 0), action=text[i].lower())
+            self.menu.addItem(text[i].lower(), rect=(0, 50 * i, 100, 48),
+                              rColor=(255, 0, 0), oColor=(0, 0, 255), text=text[i],
+                              tColor=(0, 255, 0))
 
     def start(self):
         self.enabled = True
@@ -35,7 +36,7 @@ class Game(object):
             self.start()
             self.menu.enabled = False
         elif 'editor' in action:
-            if self.started:
+            if self.world:
                 self.world.level.enabled = True
                 self.menu.enabled = False
         elif 'exit' in action:
@@ -46,7 +47,6 @@ class Game(object):
         if (pygame.KEYDOWN, pygame.K_m) in inputer:
             self.menu.enabled = not self.menu.enabled
             self.enabled = not self.enabled
-            print(self.menu.items)
         if (pygame.KEYDOWN, pygame.K_r) in inputer:
             self.menu.enabled = False
             self.enabled = True

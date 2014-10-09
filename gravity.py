@@ -22,13 +22,16 @@ class Gravity(object):
     def _applyGravity(self):
         self._parent.move.incrSpeed(y=self._value)
 
+    def _resetFromCollision(self, collisions):
+        self._parent.move.setSpeed(y=0)
+
     def tick(self, collisions):
         direction = Bottom if self.positiveDir() else Top
         if not direction in collisions:
             self._applyGravity()
 
         if [i for i in [Bottom, Top] if i in collisions]:
-            self._parent.move.setSpeed(y=0)
+            self._resetFromCollision(collisions)
 
 
 class GravityLine(Gravity):
@@ -44,9 +47,15 @@ class GravityLine(Gravity):
         self._crossedLine = False
         """True while parent has crossed the gravity line, but not yet landed on ground."""
 
-    def _applyGravity(self):
-        if not self._crossedLine:
-            super()._applyGravity()
+    # def _applyGravity(self):
+    #     print(self._crossedLine)
+    #     if not self._crossedLine:
+    #         super()._applyGravity()
+
+    def _resetFromCollision(self, collisions):
+        super()._resetFromCollision(collisions)
+
+        self._crossedLine = False
 
     def tick(self, collision):
         super().tick(collision)
@@ -55,4 +64,5 @@ class GravityLine(Gravity):
             oldValue = self._value
             lower = self._parent.y > self.h
             self._value = -self._mag if lower else self._mag
-            self._crossedLine = True if oldValue != self._value else False
+            if oldValue != self._value:
+                self._crossedLine = True
