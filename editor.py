@@ -1,5 +1,5 @@
 import pygame
-from const import *
+import const
 from display import *
 from menu import *
 from input import *
@@ -7,7 +7,7 @@ from input import *
 
 class Editor(Object):
     def __init__(self, Map, Camera):
-        Object.__init__(self, (0, 0, Map.size[0] * res, Map.size[1] * res))
+        Object.__init__(self, (0, 0, Map.size[0] * const.res, Map.size[1] * const.res))
         self.map = Map
         self.camera = Camera
         self.brush = 0
@@ -24,14 +24,15 @@ class Editor(Object):
         self.acmap.set_colorkey((0, 0, 0))
         self.display = Display(self.acmap, self, self.acmap.get_rect(), False)
         self.input = Input()
-        self.input.set(pygame.KEYDOWN, pygame.K_l, "emenu", self.toggleMenu)
+        self.input.set(pygame.KEYDOWN, pygame.K_o, "overlay", self.toggleOverlay)
+        self.input.set(pygame.KEYDOWN, pygame.K_t, "menu", self.toggleMenu)
         self.input.set(pygame.KEYDOWN, pygame.K_RETURN, "save", self.map.save)
         self.input.set(pygame.KEYDOWN, pygame.K_LCTRL, "start", self.startBlock)
         self.input.set(pygame.KEYDOWN, pygame.K_LSHIFT, "end", self.endBlock)
-        self.create()
+        self.createMenu()
 
-    def create(self):
-        self.menu = Menu((0, screenSize[1] * res), False)
+    def createMenu(self):
+        self.menu = Menu((0, const.screenSize[1] * const.res), True)
         self.menu.addItem("save", rect=(0, 0, 32, 32), text="Save")
         self.menu.addItem("pen", rect=(32, 0, 32, 32), text="Pen", toggle=True, tGroup=0)
         self.menu.addItem("box", rect=(64, 0, 32, 32), text="Box", toggle=True, tGroup=0)
@@ -42,20 +43,23 @@ class Editor(Object):
         self.menu.addItem("collision", rect=(500, 0, 100, 32), text="Coll", toggle=True, tGroup=3)
         self.menu.select("pen").togState = True
         self.menu.select("tiles").togState = True
-        for i in range(TILE_SET_LENGTH):
+        for i in range(const.TILE_SET_LENGTH):
             surf = pygame.surface.Surface((30, 30))
-            surf.blit(self.map.tileset, pygame.Rect(-1, -i * res, res - 2, res - 2))
-            self.menu.addItem(i, rect=(32 * i, 32, 32, 32), text="", image=surf,
-                              toggle=True, tGroup=2)
+            surf.blit(self.map.tileset, pygame.Rect(-1, -i * const.res, const.res - 2, const.res - 2))
+            print(i)
+            self.menu.addItem(i, rect=(32 * i, 32, 32, 32), image=surf, toggle=True, tGroup=2)
 
     def pen(self, key):
-        tile = (int((key[0] + self.camera.x) / res), int((key[1] + self.camera.y) / res))
+        tile = (int((key[0] + self.camera.x) / const.res), int((key[1] + self.camera.y) / const.res))
         print(self.bType)
         print(tile)
-        if self.bType == -1:
-            self.map.setTile(tile[0], tile[1], self.brush)
-        elif self.bType >= 0:
-            self.map.setType(tile[0], tile[1], self.bType)
+        try:
+            if self.bType == -1:
+                self.map.setTile(tile[0], tile[1], self.brush)
+            elif self.bType >= 0:
+                self.map.setType(tile[0], tile[1], self.bType)
+        except:
+            print("Unable to set tile {} to {}.", tile, self.brush)
 
     def box(self, input, key):
         if not hasattr(self, "gen"):
@@ -65,6 +69,9 @@ class Editor(Object):
                 self.gen = {-1: 1, 1: -1}[self.gen]
 
     def toggleMenu(self):
+        self.menu.enabled = not self.menu.enabled
+
+    def toggleOverlay(self):
         self.menuShowing = not self.menuShowing
 
     def startBlock(self):
@@ -110,7 +117,7 @@ class Editor(Object):
         if "collision" in action:
             self.menuShowing = not self.menuShowing
 
-        for i in range(TILE_SET_LENGTH):
+        for i in range(const.TILE_SET_LENGTH):
             if i in action:
                 self.brush = i
 
@@ -129,7 +136,7 @@ class Editor(Object):
             for e in range(self.map.size[1]):
                 col = {0: (0, 0, 0), 1: (0, 0, 255), 2: (0, 255, 0), 3: (255, 0, 255), 4: (255, 0, 0)}[self.map.getType(i, e)]
                 if col != self.map.transColor:
-                    pygame.draw.rect(self.acmap, col,  (i * res, e * res, res, res))
+                    pygame.draw.rect(self.acmap, col,  (i * const.res, e * const.res, const.res, const.res))
 
     def draw(self, surface, camera):
         if self.mChange:

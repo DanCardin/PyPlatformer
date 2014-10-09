@@ -5,29 +5,30 @@ from display import *
 
 
 class Menu(object):
-    def __init__(self, Pos, Showing):
-        self.pos = Pos
+    def __init__(self, pos, enabled):
+        self.pos = pos
         self.items = {}
-        self.enabled = Showing
+        self.enabled = enabled
 
     def select(self, key):
         return self.items.get(key)
 
     def tick(self, input, mPos):
         t = []
-        for item in self.items.values():
-            tmp = len(t)
-            if len(input) > 0:
-                for event, key in input:
-                    eTick = item.tick(event, self.pos, mPos)
-                    if eTick is not None:
-                        t.append(eTick)
-            if len(t) > tmp:
-                for e in self.items.values():
-                    if e.toggle:
-                        if e.tGroup == item.tGroup:
-                            e.togState = {True: 1, False: 0}[e.togState == 2]
-            item.tick(0, self.pos, mPos)
+        if self.enabled:
+            for item in self.items.values():
+                tmp = len(t)
+                if len(input) > 0:
+                    for event, key in input:
+                        eTick = item.tick(event, self.pos, mPos)
+                        if eTick is not None:
+                            t.append(eTick)
+                if len(t) > tmp:
+                    for e in self.items.values():
+                        if e.toggle:
+                            if e.tGroup == item.tGroup:
+                                e.togState = {True: 1, False: 0}[e.togState == 2]
+                item.tick(0, self.pos, mPos)
         return t
 
     def addItem(self, key, **kwargs):
@@ -100,40 +101,5 @@ class MenuItem(Object):
             if collide:
                 if self.toggle:
                     self.togState = 2
-                if self.action:
+                if self.action is not None:
                     return self.action
-
-    #     Object.__init__(self, rect)
-    #     self.action = action
-    #     self.images = [pygame.surface.Surface((self.w, self.h)), pygame.surface.Surface((self.w, self.h))]
-    #     self.tGroup = tGroup
-    #     self.toggle = toggle
-    #     if self.toggle:
-    #         self.togState = 0
-
-    #     colors = [rColor, oColor]
-    #     for i in range(len(colors)):
-    #         self.images[i].fill(colors[i])
-    #         if text:
-    #             txtImg = pygame.font.Font(None, 25).render(text, 1, tColor)
-    #             self.images[i].blit(txtImg, ((self.images[i].get_width() / 2) - (txtImg.get_width() / 2), (self.images[i].get_height() / 2) - (txtImg.get_height() / 2)))
-    #         if image is not False:
-    #             self.images[i].blit(image, (1, 1))
-    #     self.display = Display(self.images[0], self, self.images[0].get_rect, False)
-
-    # def move(self, vect):
-    #     self[0] += self.vect[0]
-    #     self[1] += self.vect[1]
-
-    # def tick(self, input, menu, mPos):
-    #     collide = pygame.Rect(menu[0] + self.x, menu[1] + self.y, self.w, self.h).collidepoint(mPos[0], mPos[1])
-    #     self.display.image = self.images[collide]
-    #     if self.toggle:
-    #         if self.togState:
-    #             self.display.image = self.images[1]
-    #     if input == pygame.MOUSEBUTTONDOWN:
-    #         if collide:
-    #             if self.toggle:
-    #                 self.togState = 2
-    #             if self.action:
-    #                 return self.action

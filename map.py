@@ -133,14 +133,14 @@ class Map(object):
     def getType(self, x, y):
         return self.__map[x][y].type
 
-    def setType(self, x, y, Type):
-        self.__map[x][y].type = Type
+    def setType(self, x, y, type):
+        self.__map[x][y].type = type
 
     def getTile(self, x, y):
         return self.__map[x][y].tile
 
-    def setTile(self, x, y, Tile):
-        self.__map[x][y].tile = Tile
+    def setTile(self, x, y, tile):
+        self.__map[x][y].tile = tile
 
     def wallDim(self, x, y):
         return pygame.Rect(x * res + self.__map[x][y].x, y * res + self.__map[x][y].y, self.__map[x][y].w, self.__map[x][y].h)

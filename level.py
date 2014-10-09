@@ -79,14 +79,13 @@ class Level(object):
         size = 2 if self.editor.enabled else 0
         screen = pygame.display.set_mode((screenSize[0] * res, screenSize[1] * res + size * res))
 
-    def tick(self, input, surface):
-        self.process(input)
+    def tick(self, inputs, surface):
+        self.input(inputs)
+        self.process(inputs)
         self.camera.tick()
         self.background.tick()
 
-        if (pygame.KEYDOWN, pygame.K_e) in input:
-            self.editor.enabled = not self.editor.enabled
         if self.editor.enabled:
-            self.editor.edit(input)
+            self.editor.edit(inputs)
 
         self.render(surface)
