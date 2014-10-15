@@ -15,24 +15,20 @@ class Level(object):
         self.entities = {}
         self.entityId = 0
 
-        self.map = Map(level[0], level[1], level[2])
+        self.map = Map(level[0], level[1])
         self.input = Input()
         self.input.set(pygame.KEYDOWN, pygame.K_e, "editor", self.toggleEditor)
         self.map.initDrawMap()
 
     def start(self):
         self.entities = {}
-        start = self.map.getStart()
-        self.addEntity(entity=MChar((start[0], start[1], 20, 26),
-                             (const.playerSpeed[0] * const.res, const.playerSpeed[1] * const.res),
-                             const.playerTileset, True, self))
-        self.camera = Camera((0, 0, const.screenSize[0] * const.res, const.screenSize[1] * const.res),
-                             (150, 200, 150, 200), self.get(0),
-                             (self.map.size[0] * const.res, self.map.size[1] * const.res))
-        self.background = Background(self.camera, const.backgrounds, self.map.getScale())
+        self.addEntity(entity=MChar((self.map.start[0], self.map.start[1], 20, 26),
+                             (playerSpeed[0] * self.map.res, playerSpeed[1] * self.map.res),
+                             playerTileset, True, self))
+        self.camera = Camera((0, 0, screenSize[0] * res, screenSize[1] * res), (150, 200, 150, 200),
+                             self.get(0), (self.map.size[0] * res, self.map.size[1] * res))
+        self.background = Background(self.camera, const.backgrounds, self.map.res)
         self.editor = Editor(self.map, self.camera)
-        self.sound = pygame.mixer.Sound("assets\\music.ogg")
-        self.sound.play(-1)
 
     def addEntity(self, id=None, entity=None):
         if entity:
@@ -83,13 +79,14 @@ class Level(object):
         size = 2 if self.editor.enabled else 0
         screen = pygame.display.set_mode((screenSize[0] * res, screenSize[1] * res + size * res))
 
-    def tick(self, inputs, surface):
-        self.input(inputs)
-        self.process(inputs)
+    def tick(self, input, surface):
+        self.process(input)
         self.camera.tick()
         self.background.tick()
 
+        if (pygame.KEYDOWN, pygame.K_e) in input:
+            self.editor.enabled = not self.editor.enabled
         if self.editor.enabled:
-            self.editor.edit(inputs)
+            self.editor.edit(input)
 
         self.render(surface)

@@ -1,4 +1,4 @@
-from collision import Bottom, Top
+from collision import Direction
 
 
 class Gravity(object):
@@ -26,11 +26,11 @@ class Gravity(object):
         self._parent.move.setSpeed(y=0)
 
     def tick(self, collisions):
-        direction = Bottom if self.positiveDir() else Top
+        direction = Direction.Bottom if self.positiveDir() else Direction.Top
         if not direction in collisions:
             self._applyGravity()
 
-        if [i for i in [Bottom, Top] if i in collisions]:
+        if [i for i in [Direction.Bottom, Direction.Top] if i in collisions]:
             self._resetFromCollision(collisions)
 
 

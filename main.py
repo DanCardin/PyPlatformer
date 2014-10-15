@@ -8,7 +8,7 @@ from game import Game
 #--- Inits
 os.environ["SDL_VIDEO_CENTERED"] = "1"
 pygame.mixer.pre_init(44100, 16, 2, 4096)
-pygame.init
+pygame.init()
 pygame.font.init()
 clock = pygame.time.Clock()
 

@@ -1,4 +1,4 @@
-from collision import Top, Bottom
+from collision import Direction
 
 
 class Jumping(object):
@@ -23,7 +23,7 @@ class Jumping(object):
             self.parent.setSpeed(y=jumpSpeed)
 
     def tick(self, collisions):
-        direction = Bottom if self.gravity.positiveDir() else Top
+        direction = Direction.Bottom if self.gravity.positiveDir() else Direction.Top
         if direction in collisions:
             self.curJump = self.maxJump
 

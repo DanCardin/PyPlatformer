@@ -6,7 +6,7 @@ class World(object):
         for i in levels:
             self.levels.append(Level(i))
         self.currLevel = 0
-        self.level = self.levels[currLevel]
+        self.level = self.levels[self.currLevel]
 
     def nextLevel(self):
         if len(self.levels) > self.currLevel:

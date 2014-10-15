@@ -17,7 +17,7 @@ class Background(object):
             c = camera.copy()
             c.x -= camera.x - i.x
             c.y -= camera.y - i.y
-            i.display.draw(surface, camera)#, c)
+            i.display.draw(surface, camera)
 
     def tick(self):
         diff = (self.camera.x - self._prevCameraPos[0],

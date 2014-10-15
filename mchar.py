@@ -1,3 +1,4 @@
+import const
 from object import *
 from move import *
 from collision import *
@@ -5,7 +6,6 @@ from display import *
 from gravity import *
 from jumping import *
 from input import *
-from const import res, screenSize
 
 
 class MChar(Object):
@@ -14,7 +14,7 @@ class MChar(Object):
         self.collision = Collision(self, level)
         self.move = Move(self, speed, collision=self.collision)
         self.display = Display(tileset, self, size, True, (True, 11))
-        self.gravity = GravityLine(self, level.map.res, h=res * screenSize[1] / 2)
+        self.gravity = GravityLine(self, const.res, h=const.res * const.screenSize[1] / 2)
         self.jumping = Jumping(self.move, self.gravity, 2)
         self.input = Input()
         self.controlled = control

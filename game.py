@@ -13,8 +13,10 @@ class Game(object):
         self.enabled = False
         self.started = True
 
+        self._size = (screenSize[0] * res, screenSize[1] * res)
+
         text = ['Resume', 'Start', 'Editor', 'Exit']
-        self.menu = Menu((screenSize[0] * res / 2 - 50, screenSize[1] * res / 2 - 50 * len(text) / 2), True)
+        self.menu = Menu((self._size[0] / 2 - 50, self._size[1] / 2 - 50 * len(text) / 2), True)
         for i in range(0, len(text)):
             self.menu.addItem(text[i].lower(), rect=(0, 50 * i, 100, 48),
                               rColor=(255, 0, 0), oColor=(0, 0, 255), text=text[i],

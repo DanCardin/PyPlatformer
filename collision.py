@@ -1,5 +1,12 @@
+from enum import Enum
 from const import *
 
+
+class Direction(Enum):
+    Top = 1
+    Bottom = 2
+    Left = 3
+    Right = 4
 
 class Top:
     pass
@@ -28,16 +35,16 @@ class Collision(object):
         if self.pRect.colliderect(collideBox):
             if dx > 0:
                 self.pRect.right = collideBox.left
-                result = Right
+                result = Direction.Right
             if dx < 0:
                 self.pRect.left = collideBox.right
-                result = Left
+                result = Direction.Left
             if dy > 0:
                 self.pRect.bottom = collideBox.top
-                result = Bottom
+                result = Direction.Bottom
             if dy < 0:
                 self.pRect.top = collideBox.bottom
-                result = Top
+                result = Direction.Top
 
         return result
 
