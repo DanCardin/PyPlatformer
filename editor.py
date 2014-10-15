@@ -3,7 +3,7 @@ import const
 from display import *
 from menu import *
 from input import *
-
+from wall import Tile
 
 class Editor(Object):
     def __init__(self, map, camera):
@@ -131,7 +131,11 @@ class Editor(Object):
     def drawMap(self):
         for i in range(self.map.size[0]):
             for e in range(self.map.size[1]):
-                col = {0: (0, 0, 0), 1: (0, 0, 255), 2: (0, 255, 0), 3: (255, 0, 255), 4: (255, 0, 0)}[self.map.getType(i, e)]
+                col = {Tile.Empty: (0, 0, 0),
+                       Tile.Solid: (0, 0, 255),
+                       Tile.Start: (0, 255, 0),
+                       Tile.End: (255, 0, 255),
+                       Tile.Deadly: (255, 0, 0)}[self.map.getType(i, e)]
                 if col != self.map.transColor:
                     pygame.draw.rect(self.acmap, col,  (i * const.res, e * const.res, const.res, const.res))
 

@@ -9,8 +9,8 @@ from input import *
 
 
 class MChar(Object):
-    def __init__(self, size, speed, tileset, control, level):
-        Object.__init__(self, size)
+    def __init__(self, start, size, speed, tileset, control, level):
+        Object.__init__(self, start[0], start[0], size[0], size[1])
         self.collision = Collision(self, level)
         self.move = Move(self, speed, collision=self.collision)
         self.display = Display(tileset, self, size, True, (True, 11))

@@ -22,8 +22,8 @@ class Level(object):
 
     def start(self):
         self.entities = {}
-        start = self.map.getStart()
-        self.addEntity(entity=MChar((start[0], start[1], 20, 26),
+        self.map.load()
+        self.addEntity(entity=MChar(self.map.getStart(), (20, 26),
                              (const.playerSpeed[0] * const.res, const.playerSpeed[1] * const.res),
                              const.playerTileset, True, self))
         self.camera = Camera((0, 0, const.screenSize[0] * const.res, const.screenSize[1] * const.res),

@@ -5,6 +5,7 @@ from object import Object
 from files import Files
 from wall import Wall
 from display import Display
+from wall import Tile
 
 
 class Map(Object):
@@ -12,8 +13,9 @@ class Map(Object):
         Object.__init__(self)
         self._map = {}
         self._tiles = {}
+
+        self._file = file
         self._scale = const.res / resolution
-        self.load(file)
 
         if tileset:
             self.tileset = Files().loadImage(tileset)
@@ -76,8 +78,8 @@ class Map(Object):
                       self._map[(x, y)].w,
                       self._map[(x, y)].h))
 
-    def load(self, filename):
-        file = Files().openFile(filename)
+    def load(self):
+        file = Files().openFile(self._file)
         match = re.search("^\((\d+),(\d+)\)", file)
         self.x = int(match.group(1))
         self.y = int(match.group(2))
@@ -88,28 +90,16 @@ class Map(Object):
         tiles = re.findall(search, file)
         for i in range(self.x):
             for e in range(self.y):
-                tile = tiles[i * self.y + e]
-                wall = Wall((i * const.res + self._scale * int(tile[0]),
-                             e * const.res + self._scale * int(tile[1]),
-                            int(tile[2]) * self._scale, int(tile[3]) * self._scale),
-                            int(tile[4]), int(tile[5]))
-                print(wall.x, wall.y, wall.w, wall.h)
+                x, y, w, h, type, tile = tiles[i * self.y + e]
+                wall = Wall((i * const.res + self._scale * int(x),
+                             e * const.res + self._scale * int(y),
+                            int(w) * self._scale, int(h) * self._scale),
+                            int(type), int(tile))
                 self._map[(i, e)] = wall
-                self._tiles.setdefault(int(tile[4]), [])
-                self._tiles[int(tile[4])].append(wall)
-                if tile == 2:
+                self._tiles.setdefault(int(type), [])
+                self._tiles[int(type)].append(wall)
+                if wall.type == Tile.Start:
                     self._start = (i * const.res + 32, e * const.res - 48)
-
-        for i in range(self.y):
-            s = ""
-            for e in range(self.x):
-                if self._map[(e, i)].type == 1:
-                    s += "#"
-                elif self._map[(e, i)].type == 2:
-                    s += "S"
-                else:
-                    s += '_'
-            print(s)
 
     def save(self):
         s = ["(%s,%s)\n" % (int(const.res / self.const.res), self.x, self.y)]

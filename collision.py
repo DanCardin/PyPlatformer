@@ -1,5 +1,6 @@
 from enum import Enum
 from const import *
+from wall import Tile
 
 
 class Direction(Enum):
@@ -7,21 +8,6 @@ class Direction(Enum):
     Bottom = 2
     Left = 3
     Right = 4
-
-class Top:
-    pass
-
-
-class Bottom:
-    pass
-
-
-class Left:
-    pass
-
-
-class Right:
-    pass
 
 
 class Collision(object):
@@ -53,9 +39,9 @@ class Collision(object):
         rects = [[tx, ty], [tx + 1, ty], [tx, ty + 1], [tx + 1, ty + 1]]
 
         result = None
-        for h in rects:
-            if self.level.map.getType(int(h[0]), int(h[1])) == 1:
-                wam = self.level.map.wallDim(int(h[0]), int(h[1]))
+        for x, y in rects:
+            if self.level.map.getType(x, y) == Tile.Solid:
+                wam = self.level.map.wallDim(x, y)
                 result = self.collDir(dx, dy, wam)
                 if result:
                     return result
