@@ -14,7 +14,7 @@ class MChar(Object):
         self.collision = Collision(self, level)
         self.move = Move(self, speed, collision=self.collision)
         self.display = Display(tileset, self, True, 11)
-        self.gravity = GravityLine(self, const.res, h=2 * const.screenSize[1] / 2)
+        self.gravity = GravityLine(self, 2, h=const.res * const.screenSize[1] / 2)
         self.jumping = Jumping(self.move, self.gravity, 2)
         self.input = Input()
         self.controlled = control

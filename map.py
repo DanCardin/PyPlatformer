@@ -22,6 +22,9 @@ class Map(Object):
         self.tileset = Files().loadImage(tileset)
         self.tileset = pygame.transform.scale(Files().loadImage(tileset),
                             (const.res, const.res * const.TILE_SET_LENGTH)).convert()
+        transColor = self.tileset.get_at((0, 0))
+        self.tileset.set_colorkey(transColor)
+
 
 
     def __call__(self, x=None, y=None):

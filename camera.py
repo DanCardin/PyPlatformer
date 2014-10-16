@@ -3,11 +3,11 @@ from object import *
 
 
 class Camera(Object):
-    def __init__(self, Size, Bounds, Target, Res):
-        Object.__init__(self, Size)
-        self.target = Target
-        self.bounds = Rect(Bounds)
-        self.res = Res
+    def __init__(self, size, bounds, target, res):
+        Object.__init__(self, size)
+        self.target = target
+        self.bounds = Rect(bounds)
+        self.res = res
 
     def tick(self):
         if self.x > self.target.x - self.bounds.x:
