@@ -5,6 +5,7 @@ from menu import *
 from input import *
 from wall import Tile
 
+
 class Editor(Object):
     def __init__(self, map, camera):
         Object.__init__(self, (0, 0, map.w, map.h))
@@ -22,7 +23,7 @@ class Editor(Object):
         self.acmap = pygame.surface.Surface((self.w, self.h))
         self.acmap.set_alpha(75, pygame.RLEACCEL)
         self.acmap.set_colorkey((0, 0, 0))
-        self.display = Display(self.acmap, self, self.acmap.get_rect(), False)
+        self.display = Display(self.acmap, self, False)
         self.input = Input()
         self.input.set(pygame.KEYDOWN, pygame.K_o, "overlay", self.toggleOverlay)
         self.input.set(pygame.KEYDOWN, pygame.K_t, "menu", self.toggleMenu)
@@ -49,14 +50,19 @@ class Editor(Object):
             self.menu.addItem(i, rect=(32 * i, 32, 32, 32), image=surf, toggle=True, tGroup=2)
 
     def pen(self, key):
-        tile = (int((key[0] + self.camera.x) / const.res), int((key[1] + self.camera.y) / const.res))
+        block = None
+        tile = (int((key[0] + self.camera.x) / const.res),
+                int((key[1] + self.camera.y) / const.res))
+
         try:
-            if self.bType == -1:
-                self.map.setTile(tile[0], tile[1], self.brush)
-            elif self.bType >= 0:
-                self.map.setType(tile[0], tile[1], self.bType)
+            block = self.map.get(tile[0], tile[1])
         except:
-            print("Unable to set tile {} to {}.", tile, self.brush)
+            print("Unable to set tile {}.", tile)
+        else:
+            if self.bType == -1:
+                block.setTile(self.brush)
+            elif self.bType >= 0:
+                block.setType(self.bType)
 
     def box(self, input, key):
         if not hasattr(self, "gen"):

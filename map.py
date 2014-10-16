@@ -1,3 +1,4 @@
+import pygame
 import re
 import const
 
@@ -13,27 +14,15 @@ class Map(Object):
         Object.__init__(self)
         self._map = {}
         self._tiles = {}
+        self._mapDelta = []
+        self.display = None
 
         self._file = file
         self._scale = const.res / resolution
+        self.tileset = Files().loadImage(tileset)
+        self.tileset = pygame.transform.scale(Files().loadImage(tileset),
+                            (const.res, const.res * const.TILE_SET_LENGTH)).convert()
 
-        if tileset:
-            self.tileset = Files().loadImage(tileset)
-
-            self.mapDelta = []
-            for i in self._map.keys():
-                self.mapDelta.append(i)
-
-            self.display = Display(self.tileset, self, self, False)
-            # Display(self.acmap, Object((0, 0, 0, 0)), self.acmap.get_rect(), False)
-# class Map(object):
-#     def __init__(self, File, Tileset, res):
-#         self.tileset = pygame.transform.scale(self.fileMod.loadImage(Tileset), (res, res * TILE_SET_LENGTH)).convert()
-#         self.transColor = self.tileset.get_at((0, 0))
-#         self.acmap = pygame.surface.Surface((self.size[0] * res, self.size[1] * res))
-#         self.acmap.set_colorkey(self.transColor)
-#         self.mChange = True
-#         self.display = Display(self.acmap, Object((0, 0, 0, 0)), self.acmap.get_rect(), False)
 
     def __call__(self, x=None, y=None):
         if x is None and y is None:
@@ -54,29 +43,13 @@ class Map(Object):
         return self._map[(x, y)]
 
     def getStart(self):
-        print(self._tiles[2][0])
         return self._tiles[2][0]
 
     def getScale(self):
         return self._scale
 
-    def getType(self, x, y):
-        return self._map[(x, y)].type
-
-    def setType(self, x, y, type):
-        self._map[(x, y)].type = type
-
-    def getTile(self, x, y):
-        return self._map[(x, y)].tile
-
-    def setTile(self, x, y, tile):
-        self._map[(x, y)].tile = tile
-
-    def wallDim(self, x, y):
-        return Object((x * const.res + self._map[(x, y)].x,
-                      y * const.res + self._map[(x, y)].y,
-                      self._map[(x, y)].w,
-                      self._map[(x, y)].h))
+    def get(self, x, y):
+        return self._map[(x, y)]
 
     def load(self):
         file = Files().openFile(self._file)
@@ -98,8 +71,12 @@ class Map(Object):
                 self._map[(i, e)] = wall
                 self._tiles.setdefault(int(type), [])
                 self._tiles[int(type)].append(wall)
-                if wall.type == Tile.Start:
-                    self._start = (i * const.res + 32, e * const.res - 48)
+                if wall.getType() == Tile.Start:
+                    self._start = (wall.x, wall.y)
+
+                self._mapDelta.append(wall)
+
+        self.display = Display(pygame.surface.Surface((self.w, self.h)), self, True)
 
     def save(self):
         s = ["(%s,%s)\n" % (int(const.res / self.const.res), self.x, self.y)]
@@ -111,14 +88,13 @@ class Map(Object):
             s.append("\n")
         Files().saveFile(''.join(s), self.file)
 
-    def initDrawMap(self):
-        for i, e in self.mapDelta:
-            self.display.image.blit(self.tileset,
-                                    (i * const.res, e * const.res),
-                                    (0, self._map[(i, e)].tile * const.res, const.res, const.res))
+    def _updateMap(self):
+        for block in self._mapDelta:
+            self.display.updateImage(self.tileset, (block.x, block.y),
+                                     (0, block.getTile() * const.res, const.res, const.res))
+        self._mapDelta = []
 
     def draw(self, surface, camera):
-        if self.mapDelta:
-            self.initDrawMap()
-            self.mapDelta = []
+        if self._mapDelta:
+            self._updateMap()
         self.display.draw(surface, camera)

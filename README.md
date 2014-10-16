@@ -8,7 +8,10 @@ pyPlatform
 - sounds class, will play music, most likely should work off just events happening
 - objectSpawn will be a class that essentially has a list of children that it keeps a list of and spawns based off of whatever
 - display char/enemy correctly at any resolution (preferably also menus, which i think are static)
-- scale camera to work like a camera. difference between the correct size of camera (screenSize) and actual size translates to the zoom amount of all images. ie. pygame.translate.scale(image, (camIdeal - camActual), dest image)
+- scale camera to work like a camera. difference between the correct size of camera (screenSize) and actual size translates to the zoom amount of all images.
+	- ie. pygame.translate.scale(image, (camIdeal - camActual), dest image)
+	- This might be easiest by: using an in-game unit of 1, then scaling from a scale,
+	  caching the last image size from that scale to avoid scaling each frame, and finally dynamically changing scale.
 
 ### weapons
 - make weapons actually kill things

@@ -4,26 +4,24 @@ from files import *
 
 
 class Display(object):
-    def __init__(self, tileset, klass, size, transparent, anim=(False, 1)):
+    def __init__(self, surface, klass, transparent, anim=None):
         self.klass = klass
-        if isinstance(tileset, str):
-            image = Files().loadImage(tileset)
-            self.image = pygame.surface.Surface((size[2], size[3]))
+        if isinstance(surface, str):
+            image = Files().loadImage(surface)
+            self.image = pygame.surface.Surface((self.klass.w, self.klass.h))
             self.image.blit(image, (0, 0))
         else:
-            self.image = tileset
-        if anim[0]:
-            self.animation = Animation(image, anim[1], self.klass)
-        self.trans = transparent
-        if self.trans:
+            self.image = surface
+        self.animation = Animation(image, anim, self.klass) if anim else None
+        if transparent:
             self.transColor = self.image.get_at((0, 0))
             self.image.set_colorkey(self.transColor)
 
-    def changeImage(self, image, pos):
-        """"""
+    def updateImage(self, *args):
+        self.image.blit(*args)
 
     def draw(self, surface, camera):
-        if hasattr(self, "animation"):
+        if self.animation:
             self.animation.animate(1)
         rect = self.translate(self.klass, camera)
         surface.blit(self.image, rect)

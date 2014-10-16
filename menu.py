@@ -51,7 +51,7 @@ class MenuItem(Object):
         self.toggle = toggle
         if self.toggle:
             self.togState = 0
-        self.display = Display(self.images[0], self, self.images[0].get_rect, False)
+        self.display = Display(self.images[0], self, False)
 
         self.rcolor = rColor
         self.ocolor = oColor

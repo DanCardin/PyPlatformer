@@ -10,11 +10,11 @@ from input import *
 
 class MChar(Object):
     def __init__(self, start, size, speed, tileset, control, level):
-        Object.__init__(self, start[0], start[0], size[0], size[1])
+        Object.__init__(self, (start[0], start[1], size[0], size[1]))
         self.collision = Collision(self, level)
         self.move = Move(self, speed, collision=self.collision)
-        self.display = Display(tileset, self, size, True, (True, 11))
-        self.gravity = GravityLine(self, const.res, h=const.res * const.screenSize[1] / 2)
+        self.display = Display(tileset, self, True, 11)
+        self.gravity = GravityLine(self, const.res, h=2 * const.screenSize[1] / 2)
         self.jumping = Jumping(self.move, self.gravity, 2)
         self.input = Input()
         self.controlled = control

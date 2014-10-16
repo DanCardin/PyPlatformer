@@ -13,5 +13,17 @@ class Tile(Enum):
 class Wall(Object):
     def __init__(self, pos, type, tile):
         Object.__init__(self, pos)
-        self.type = Tile(type)
-        self.tile = tile
+        self._type = Tile(type)
+        self._tile = tile
+
+    def getTile(self):
+        return self._tile
+
+    def getType(self):
+        return self._type
+
+    def setType(self, type):
+        self._type = type
+
+    def setTile(self, tile):
+        self._tile = tile

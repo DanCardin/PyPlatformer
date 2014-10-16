@@ -18,14 +18,14 @@ class Level(object):
         self.map = Map(level[0], level[1], level[2])
         self.input = Input()
         self.input.set(pygame.KEYDOWN, pygame.K_e, "editor", self.toggleEditor)
-        self.map.initDrawMap()
+        # self.map.initDrawMap()
 
     def start(self):
         self.entities = {}
         self.map.load()
         self.addEntity(entity=MChar(self.map.getStart(), (20, 26),
-                             (const.playerSpeed[0] * const.res, const.playerSpeed[1] * const.res),
-                             const.playerTileset, True, self))
+                       tuple([x * self.map.getScale() for x in const.playerSpeed]),
+                       const.playerTileset, True, self))
         self.camera = Camera((0, 0, const.screenSize[0] * const.res, const.screenSize[1] * const.res),
                              (150, 200, 150, 200), self.get(0),
                              (self.map.size[0] * const.res, self.map.size[1] * const.res))
@@ -33,6 +33,8 @@ class Level(object):
         self.editor = Editor(self.map, self.camera)
         self.sound = pygame.mixer.Sound("assets\\music.ogg")
         self.sound.play(-1)
+
+        # self.gravity = GravityLine(self, const.res, h=self.map.getScale() * const.screenSize[1] / 2)
 
     def addEntity(self, id=None, entity=None):
         if entity:
@@ -57,6 +59,10 @@ class Level(object):
                 entity.tick([])
             if hasattr(entity, "weapon"):
                 entity.weapon.tick()
+            # try:
+            #     # self.gravity.tick(entity)
+            # except:
+            #     pass
 
     def render(self, surface):
         self.background.draw(surface, self.camera)

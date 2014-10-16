@@ -13,7 +13,7 @@ class Enemy(Object):
         self.level = Level
         self.move = Move(Speed, self)
         self.collision = Collision(self, Level, "enemy")
-        self.display = Display(Tileset, self, Size, True, (True, 11))
+        self.display = Display(Tileset, self, True, (True, 11))
         self.gravity = Gravity(self.level.map.res, self.move, self)
         self.ai = AI("goomba", self, Level)
         self.inertia = 1

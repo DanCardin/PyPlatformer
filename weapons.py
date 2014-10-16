@@ -10,7 +10,7 @@ class Bullet(Object):
         Object.__init__(self, Size)
         self.move = Move(Speed, self)
         self.collision = Collision(self, Level, "bullet")
-        self.display = Display(Tileset, self, Size, False)
+        self.display = Display(Tileset, self, False)
         self.dead = False
         self.move.speed[0] = self.move.topSpeed[0]
         self.move.speed[1] = self.move.topSpeed[1]

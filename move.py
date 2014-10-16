@@ -1,9 +1,9 @@
 class Move(object):
     def __init__(self, pRect, speed, collision=None):
-        self.pRect = pRect
-        self.collision = collision
-        self._topSpeed = speed
         self._speed = [0, 0]
+        self.pRect = pRect
+        self._topSpeed = speed
+        self.collision = collision
 
     def _incrSpeed(self, backing, x=None, y=None):
         if x is not None:

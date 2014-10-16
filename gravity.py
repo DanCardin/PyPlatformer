@@ -47,11 +47,6 @@ class GravityLine(Gravity):
         self._crossedLine = False
         """True while parent has crossed the gravity line, but not yet landed on ground."""
 
-    # def _applyGravity(self):
-    #     print(self._crossedLine)
-    #     if not self._crossedLine:
-    #         super()._applyGravity()
-
     def _resetFromCollision(self, collisions):
         super()._resetFromCollision(collisions)
 

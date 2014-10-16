@@ -40,12 +40,10 @@ class Collision(object):
 
         result = None
         for x, y in rects:
-            if self.level.map.getType(x, y) == Tile.Solid:
-                wam = self.level.map.wallDim(x, y)
-                result = self.collDir(dx, dy, wam)
+            if self.level.map.get(x, y).getType() == Tile.Solid:
+                result = self.collDir(dx, dy, self.level.map.get(x, y))
                 if result:
                     return result
-        # return result
 
     def collideEntities(self, dx, dy):
         for i in range(self.level.entityId):

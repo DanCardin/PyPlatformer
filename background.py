@@ -36,4 +36,4 @@ class Layer(Object):
         self.dampSpeed = dampSpeed
         self.picture = pygame.transform.scale(Files().loadImage(picture),
                                               (self[2], self[3])).convert()
-        self.display = Display(self.picture, self, self, True)
+        self.display = Display(self.picture, self, True)
