@@ -6,6 +6,7 @@ from display import *
 from gravity import *
 from jumping import *
 from input import *
+from files import Files
 
 
 class MChar(Object):
@@ -13,7 +14,7 @@ class MChar(Object):
         Object.__init__(self, (start[0], start[1], size[0], size[1]))
         self.collision = Collision(self, level)
         self.move = Move(self, speed, collision=self.collision)
-        self.display = Display(tileset, self, True, 11)
+        self.display = Display(Files().loadImage(tileset), self, True, 11)
         self.gravity = GravityLine(self, 2, h=const.res * const.screenSize[1] / 2)
         self.jumping = Jumping(self.move, self.gravity, 2)
         self.input = Input()

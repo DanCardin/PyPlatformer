@@ -60,7 +60,7 @@ class Map(Object):
         tiles = re.findall("\((\d+),(\d+),(\d+),(\d+):(\d+),(\d+)\)", file)
         for i in range(self._wx):
             for e in range(self._hy):
-                x, y, w, h, typ, tile = tiles[i * self._hy + e]
+                x, y, w, h, typ, tile = tiles[i + e * self._wx]
                 x, y, w, h, typ, tile = int(x), int(y), int(w), int(h), int(typ), int(tile)
                 wall = Wall((i * const.res + self._scale * x,
                              e * const.res + self._scale * y,
@@ -70,17 +70,22 @@ class Map(Object):
                 self._tiles.setdefault(wall.getType(), []).append(wall)
                 self._mapDelta.append(wall)
 
+        for i in range(self._hy):
+            s = ""
+            for e in range(self._wx):
+                s += "X" if self._map[(e, i)].getType().value ==1 else " "
+            print(s)
         self.display = Display(pygame.surface.Surface((self.w, self.h)), self, True)
 
     def save(self):
-        s = ["(%s,%s)\n" % (int(const.res / self.const.res), self._wx, self._hy)]
-        for i in range(self.size[1]):
-            for e in range(self.size[0]):
-                tile = self._map(None, i)
-                rect = tile.rect
-                s.append("(%s,%s,%s,%s:%s,%s)" % (rect.x, rect.y, rect.w, rect.h, tile.type, tile.tile).ljust(20))
+        s = ["(%s,%s)\n" % (self._wx, self._hy)]
+        for i in range(self._hy):
+            for e in range(self._wx):
+                tile = self._map[(e, i)]
+                s.append(("(%s,%s,%s,%s:%s,%s)" % (tile.x, tile.y, tile.w, tile.h,
+                                                   tile.getType().value, tile.getTile())).ljust(20))
             s.append("\n")
-        Files().saveFile(''.join(s), self.file)
+        Files().saveFile(''.join(s), self._file)
 
     def _updateMap(self):
         for block in self._mapDelta:

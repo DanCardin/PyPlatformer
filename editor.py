@@ -39,12 +39,14 @@ class Editor(Object):
         self.menu.addItem("pen", rect=(32, 0, 32, 32), text="Pen", toggle=True, tGroup=0)
         self.menu.addItem("box", rect=(64, 0, 32, 32), text="Box", toggle=True, tGroup=0)
         self.menu.addItem("tiles", rect=(96, 0, 32, 32), text="Tiles", toggle=True, tGroup=1)
-        self.menu.addItem("wall", rect=(196, 0, 100, 32), text="Wall", toggle=True, tGroup=1)
-        self.menu.addItem("empty", rect=(296, 0, 100, 32), text="Empty", toggle=True, tGroup=1)
-        self.menu.addItem("death", rect=(396, 0, 100, 32), text="Death", toggle=True, tGroup=1)
+        self.menu.addItem("wall", rect=(196, 0, 32, 32), text="W", toggle=True, tGroup=1)
+        self.menu.addItem("empty", rect=(228, 0, 32, 32), text="V", toggle=True, tGroup=1)
+        self.menu.addItem("death", rect=(260, 0, 32, 32), text="D", toggle=True, tGroup=1)
+        # self.menu.addItem("start", rect=(292, 0, 32, 32), text="S", toggle=True, tGroup=1)
+        # self.menu.addItem("end", rect=(324, 0, 32, 32), text="E", toggle=True, tGroup=1)
         self.menu.addItem("collision", rect=(500, 0, 100, 32), text="Coll", toggle=True, tGroup=3)
         self.menu.select("pen").togState = True
-        self.menu.select("tiles").togState = True
+        self.menu.select("wall").togState = True
         ts = self.map.getTileset()
         for i in range(const.TILE_SET_LENGTH):
             surf = pygame.surface.Surface((30, 30))
