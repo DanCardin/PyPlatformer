@@ -18,7 +18,6 @@ class Level(object):
         self.map = Map(level[0], level[1], level[2])
         self.input = Input()
         self.input.set(pygame.KEYDOWN, pygame.K_e, "editor", self.toggleEditor)
-        # self.map.initDrawMap()
 
     def start(self):
         self.entities = {}
@@ -26,15 +25,13 @@ class Level(object):
         self.addEntity(entity=MChar(self.map.getStart(), (20, 26),
                        tuple([x * self.map.getScale() for x in const.playerSpeed]),
                        const.playerTileset, True, self))
-        self.camera = Camera((0, 0, const.screenSize[0] * const.res, const.screenSize[1] * const.res),
+        self.camera = Camera(tuple([s * const.res for s in const.screenSize]),
                              (150, 200, 150, 200), self.get(0),
                              (self.map.size[0] * const.res, self.map.size[1] * const.res))
         self.background = Background(self.camera, const.backgrounds, self.map.getScale())
         self.editor = Editor(self.map, self.camera)
         self.sound = pygame.mixer.Sound("assets\\music.ogg")
-        self.sound.play(-1)
-
-        # self.gravity = GravityLine(self, const.res, h=self.map.getScale() * const.screenSize[1] / 2)
+        #self.sound.play(-1)
 
     def addEntity(self, id=None, entity=None):
         if entity:
@@ -59,10 +56,6 @@ class Level(object):
                 entity.tick([])
             if hasattr(entity, "weapon"):
                 entity.weapon.tick()
-            # try:
-            #     # self.gravity.tick(entity)
-            # except:
-            #     pass
 
     def render(self, surface):
         self.background.draw(surface, self.camera)
@@ -87,7 +80,8 @@ class Level(object):
         global screen
         self.editor.enabled = not self.editor.enabled
         size = 2 if self.editor.enabled else 0
-        screen = pygame.display.set_mode((screenSize[0] * res, screenSize[1] * res + size * res))
+        screen = pygame.display.set_mode((const.screenSize[0] * const.res,
+                                          const.screenSize[1] * const.res + size * const.res))
 
     def tick(self, inputs, surface):
         self.input(inputs)

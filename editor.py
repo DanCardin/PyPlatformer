@@ -8,9 +8,12 @@ from wall import Tile
 
 class Editor(Object):
     def __init__(self, map, camera):
-        Object.__init__(self, (0, 0, map.w, map.h))
+        Object.__init__(self, (map.w, map.h))
         self.map = map
         self.camera = camera
+
+        self._delta = [(i, e) for e in range(self.map.getSize(y=True))
+                        for i in range(self.map.getSize(x=True))]
         self.brush = 0
         self.bType = -1
         self.tool = 0
@@ -20,10 +23,8 @@ class Editor(Object):
         self.tile = False
         self.menuShowing = True
         self.mChange = True
-        self.acmap = pygame.surface.Surface((self.w, self.h))
-        self.acmap.set_alpha(75, pygame.RLEACCEL)
-        self.acmap.set_colorkey((0, 0, 0))
-        self.display = Display(self.acmap, self, False)
+
+        self.display = Display(pygame.surface.Surface((self.w, self.h)), self, True, alpha=True)
         self.input = Input()
         self.input.set(pygame.KEYDOWN, pygame.K_o, "overlay", self.toggleOverlay)
         self.input.set(pygame.KEYDOWN, pygame.K_t, "menu", self.toggleMenu)
@@ -44,9 +45,10 @@ class Editor(Object):
         self.menu.addItem("collision", rect=(500, 0, 100, 32), text="Coll", toggle=True, tGroup=3)
         self.menu.select("pen").togState = True
         self.menu.select("tiles").togState = True
+        ts = self.map.getTileset()
         for i in range(const.TILE_SET_LENGTH):
             surf = pygame.surface.Surface((30, 30))
-            surf.blit(self.map.tileset, pygame.Rect(-1, -i * const.res, const.res - 2, const.res - 2))
+            surf.blit(ts, pygame.Rect(-1, -i * const.res, const.res - 2, const.res - 2))
             self.menu.addItem(i, rect=(32 * i, 32, 32, 32), image=surf, toggle=True, tGroup=2)
 
     def pen(self, key):
@@ -63,6 +65,7 @@ class Editor(Object):
                 block.setTile(self.brush)
             elif self.bType >= 0:
                 block.setType(self.bType)
+                self._delta.append(tile)
 
     def box(self, input, key):
         if not hasattr(self, "gen"):
@@ -134,21 +137,21 @@ class Editor(Object):
             elif self.tool == 1:
                 self.box(inputs, mPos)
 
-    def drawMap(self):
-        for i in range(self.map.size[0]):
-            for e in range(self.map.size[1]):
-                col = {Tile.Empty: (0, 0, 0),
-                       Tile.Solid: (0, 0, 255),
-                       Tile.Start: (0, 255, 0),
-                       Tile.End: (255, 0, 255),
-                       Tile.Deadly: (255, 0, 0)}[self.map.getType(i, e)]
-                if col != self.map.transColor:
-                    pygame.draw.rect(self.acmap, col,  (i * const.res, e * const.res, const.res, const.res))
+    def update(self):
+        tile = pygame.surface.Surface((const.res, const.res))
+        for i, e in self._delta:
+            colorKey = {Tile.Empty: (0, 0, 0),
+                        Tile.Solid: (0, 0, 255),
+                        Tile.Start: (0, 255, 0),
+                        Tile.End: (255, 0, 255),
+                        Tile.Deadly: (255, 0, 0)}[self.map.get(i, e).getType()]
+            tile.fill(colorKey)
+            self.display.update(tile, (i * const.res, e * const.res))
+        self._delta = []
 
     def draw(self, surface, camera):
-        if self.mChange:
-            self.drawMap()
-            self.mChange = False
+        if self._delta:
+            self.update()
         if self.menuShowing:
             self.display.draw(surface, camera)
         self.menu.draw(surface)

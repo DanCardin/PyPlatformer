@@ -27,6 +27,12 @@ class Move(object):
 
         raise Exception("Either x, y, or both should be True")
 
+    def getDir(self, x=None, y=None):
+        speed = self._getSpeed(self._speed, x, y)
+        if x and y:
+            return ((speed[0] > 0) - (0 > speed[0]), (speed[1] > 0) - (0 > speed[1]))
+        return (speed > 0) - (0 > speed)
+
     def setSpeed(self, x=None, y=None):
         self._setSpeed(self._speed, x, y)
 

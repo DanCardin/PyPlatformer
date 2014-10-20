@@ -4,27 +4,30 @@ from files import *
 
 
 class Display(object):
-    def __init__(self, surface, klass, transparent, anim=None):
-        self.klass = klass
+    def __init__(self, surface, klass, transparent=False, anim=None, alpha=0):
+        self._klass = klass
         if isinstance(surface, str):
-            image = Files().loadImage(surface)
-            self.image = pygame.surface.Surface((self.klass.w, self.klass.h))
-            self.image.blit(image, (0, 0))
+            self._image = pygame.surface.Surface((self._klass.w, self._klass.h))
+            self._image.blit(Files().loadImage(surface), (0, 0))
         else:
-            self.image = surface
-        self.animation = Animation(image, anim, self.klass) if anim else None
+            self._image = surface
+        self._animation = Animation(self._klass, self._image, anim) if anim else None
         if transparent:
-            self.transColor = self.image.get_at((0, 0))
-            self.image.set_colorkey(self.transColor)
+            self._image.set_colorkey(self._image.get_at((0, 0)))
+        if alpha:
+            self._image.set_alpha(75)
 
-    def updateImage(self, *args):
-        self.image.blit(*args)
+    def update(self, *args):
+        self._image.blit(*args)
+
+    def replace(self, image):
+        self._image = image
 
     def draw(self, surface, camera):
-        if self.animation:
-            self.animation.animate(1)
-        rect = self.translate(self.klass, camera)
-        surface.blit(self.image, rect)
+        if self._animation:
+            self._animation.animate(self._klass.move.getDir(x=True))
+        rect = self.translate(self._klass, camera)
+        surface.blit(self._image, rect)
 
     def translate(self, rect, Cam):
         return pygame.Rect(rect.x - Cam.x, rect.y - Cam.y, rect.w, rect.h)

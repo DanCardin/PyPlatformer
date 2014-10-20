@@ -15,74 +15,65 @@ class Map(Object):
         self._map = {}
         self._tiles = {}
         self._mapDelta = []
+        self._wx = 0
+        self._hy = 0
         self.display = None
 
         self._file = file
         self._scale = const.res / resolution
-        self.tileset = Files().loadImage(tileset)
-        self.tileset = pygame.transform.scale(Files().loadImage(tileset),
+        self._tileset = pygame.transform.scale(Files().loadImage(tileset),
                             (const.res, const.res * const.TILE_SET_LENGTH)).convert()
-        transColor = self.tileset.get_at((0, 0))
-        self.tileset.set_colorkey(transColor)
-
-
-
-    def __call__(self, x=None, y=None):
-        if x is None and y is None:
-            return self._map
-
-        if x is None:
-            result = []
-            for i in range(self.size[0] - 1):
-                result.append(map[(i, y)])
-            return result
-
-        if y is None:
-            result = []
-            for i in range(self.size[1] - 1):
-                result.append(map[(x, i)])
-            return result
-
-        return self._map[(x, y)]
+        transColor = self._tileset.get_at((0, 0))
+        self._tileset.set_colorkey(transColor)
 
     def getStart(self):
-        return self._tiles[2][0]
+        return self._tiles[Tile.Start][0]
+
+    def getTileset(self):
+        return self._tileset
 
     def getScale(self):
         return self._scale
 
+    def getSize(self, x=None, y=None):
+        if x and y:
+            return (self._wx, self._hy)
+        if x:
+            return self._wx
+        if y:
+            return self._hy
+
     def get(self, x, y):
         return self._map[(x, y)]
+
+    def set(self, x, y, to):
+        self._map[(x, y)] = to
 
     def load(self):
         file = Files().openFile(self._file)
         match = re.search("^\((\d+),(\d+)\)", file)
-        self.x = int(match.group(1))
-        self.y = int(match.group(2))
-        self.w = self.x * const.res
-        self.h = self.y * const.res
+        self._wx = int(match.group(1))
+        self._hy = int(match.group(2))
+        self.w = self._wx * const.res
+        self.h = self._hy * const.res
 
-        search = "\((\d+),(\d+),(\d+),(\d+),(\d+),(\d+),\)"
-        tiles = re.findall(search, file)
-        for i in range(self.x):
-            for e in range(self.y):
-                x, y, w, h, type, tile = tiles[i * self.y + e]
-                wall = Wall((i * const.res + self._scale * int(x),
-                             e * const.res + self._scale * int(y),
-                            int(w) * self._scale, int(h) * self._scale),
-                            int(type), int(tile))
+        tiles = re.findall("\((\d+),(\d+),(\d+),(\d+):(\d+),(\d+)\)", file)
+        for i in range(self._wx):
+            for e in range(self._hy):
+                x, y, w, h, typ, tile = tiles[i * self._hy + e]
+                x, y, w, h, typ, tile = int(x), int(y), int(w), int(h), int(typ), int(tile)
+                wall = Wall((i * const.res + self._scale * x,
+                             e * const.res + self._scale * y,
+                             w * self._scale, h * self._scale), typ, tile)
+
                 self._map[(i, e)] = wall
-                self._tiles.setdefault(int(type), [])
-                self._tiles[int(type)].append(wall)
-                if wall.getType() == Tile.Start:
-                    self._start = (wall.x, wall.y)
-
+                self._tiles.setdefault(wall.getType(), []).append(wall)
                 self._mapDelta.append(wall)
 
         self.display = Display(pygame.surface.Surface((self.w, self.h)), self, True)
 
     def save(self):
-        s = ["(%s,%s)\n" % (int(const.res / self.const.res), self.x, self.y)]
+        s = ["(%s,%s)\n" % (int(const.res / self.const.res), self._wx, self._hy)]
         for i in range(self.size[1]):
             for e in range(self.size[0]):
                 tile = self._map(None, i)
@@ -93,7 +84,7 @@ class Map(Object):
 
     def _updateMap(self):
         for block in self._mapDelta:
-            self.display.updateImage(self.tileset, (block.x, block.y),
+            self.display.update(self._tileset, (block.x, block.y),
                                      (0, block.getTile() * const.res, const.res, const.res))
         self._mapDelta = []
 

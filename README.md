@@ -4,9 +4,6 @@ pyPlatform
 ## TODO: (In order of importance and doing)
 ### unformated ideas
 - menus with keyboard input
-- fix inter object actions, for example bots dont correctly turn on different block types and die on bullet hits
-- sounds class, will play music, most likely should work off just events happening
-- objectSpawn will be a class that essentially has a list of children that it keeps a list of and spawns based off of whatever
 - display char/enemy correctly at any resolution (preferably also menus, which i think are static)
 - scale camera to work like a camera. difference between the correct size of camera (screenSize) and actual size translates to the zoom amount of all images.
 	- ie. pygame.translate.scale(image, (camIdeal - camActual), dest image)
@@ -26,11 +23,11 @@ pyPlatform
 
 ### sound
 - Add sound effects on actions
-- Add background music
 
 ### smarter npcs
 - Spawn Points
 - Paths
+- fix inter object actions, for example bots dont correctly turn on different block types and die on bullet hits
 
 ### add triggers/textual triggers
 - When colliding with this it will make some action happen.

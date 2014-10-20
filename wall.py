@@ -23,7 +23,7 @@ class Wall(Object):
         return self._type
 
     def setType(self, type):
-        self._type = type
+        self._type = Tile(type)
 
     def setTile(self, tile):
         self._tile = tile

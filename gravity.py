@@ -8,7 +8,7 @@ class Gravity(object):
         self._value = value
 
     def getDir(self):
-        return (self._value > 0) - (0 - self._value)
+        return (self._value > 0) - (0 > self._value)
 
     def positiveDir(self):
         return self.getDir() > 0

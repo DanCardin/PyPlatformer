@@ -93,10 +93,10 @@ class MenuItem(Object):
 
     def tick(self, input, menu, mPos):
         collide = pygame.Rect(menu[0] + self.x, menu[1] + self.y, self.w, self.h).collidepoint(mPos[0], mPos[1])
-        self.display.image = self.images[collide]
+        self.display.replace(self.images[collide])
         if self.toggle:
             if self.togState:
-                self.display.image = self.images[1]
+                self.display.replace(self.images[1])
         if input == pygame.MOUSEBUTTONDOWN:
             if collide:
                 if self.toggle:
