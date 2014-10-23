@@ -1,19 +1,20 @@
 import pygame
 import const
-from map import *
+from map import Map
 from background import Background
 from camera import Camera
 from editor import Editor
 from input import Input
 from mchar import MChar
+from wall import Tile
 
 
 class Level(object):
     def __init__(self, level):
-        self.camera = None
-        self.editor = None
-        self.entities = {}
+        self._complete = False
         self.entityId = 0
+        self.entities = {}
+        self.registered = {}
 
         self.map = Map(level[0], level[1], level[2])
         self.input = Input()
@@ -22,59 +23,61 @@ class Level(object):
     def start(self):
         self.entities = {}
         self.map.load()
-        self.addEntity(entity=MChar(self.map.getStart(), (20, 26),
-                       tuple([x * self.map.getScale() for x in const.playerSpeed]),
-                       const.playerTileset, True, self))
+        self.addEntity(register=True,
+                       entity=MChar(self.map.getStart(), (20, 26),
+                                    tuple([x * self.map.getScale() for x in const.playerSpeed]),
+                                    const.playerTileset, True, self))
         self.camera = Camera(tuple([s * const.res for s in const.screenSize]),
                              (150, 200, 150, 200), self.get(0),
                              (self.map.size[0] * const.res, self.map.size[1] * const.res))
         self.background = Background(self.camera, const.backgrounds, self.map.getScale())
         self.editor = Editor(self.map, self.camera)
         self.sound = pygame.mixer.Sound("assets\\music.ogg")
-        #self.sound.play(-1)
+        # self.sound.play(-1)
 
-    def addEntity(self, id=None, entity=None):
-        if entity:
-            if not id:
-                self.entities[self.entityId] = entity
-                entity.id = self.entityId
-                self.entityId += 1
-            else:
-                self.entities[id] = entity
+    def addEntity(self, register=False, id=None, entity=None):
+        if not entity:
+            raise Exception("Entity must not be None.")
+
+        reg = self.registered if register else self.entities
+        tid = self.entityId if not id else id
+
+        reg[tid] = entity
+        if not id:
+            entity.id = self.entityId
+            self.entityId += 1
 
     def removeEntity(self, entity):
         del self.entities[entity.id]
 
     def get(self, entityId):
-        return self.entities.get(entityId)
+        result = self.entities.get(entityId)
+        if not result:
+            result = self.registered.get(entityId)
+        return result
+
+    def isLevelComplete(self):
+        return self._complete
 
     def process(self, input):
+        for entity in self.registered.values():
+            result = entity.tick(input)
+            if Tile.Start in result.values():
+                self._complete = True
+
         for entity in self.entities.values():
-            if hasattr(entity, "controlled"):
-                entity.tick(input)
-            else:
-                entity.tick([])
-            if hasattr(entity, "weapon"):
-                entity.weapon.tick()
+            entity.tick([])
 
     def render(self, surface):
         self.background.draw(surface, self.camera)
-        for entity in self.entities.values():
-            entity.display.draw(surface, self.camera)
-            if hasattr(entity, "weapon"):
-                entity.weapon.draw(surface, self.camera)
+        for entities in [self.entities, self.registered]:
+            for entity in entities.values():
+                entity.display.draw(surface, self.camera)
+                if hasattr(entity, "weapon"):
+                    entity.weapon.draw(surface, self.camera)
         self.map.draw(surface, self.camera)
         if self.editor.enabled:
             self.editor.draw(surface, self.camera)
-
-    def getCloseEntity(self, name, location, range=100.):
-        location = Vector2(*location)
-        for entity in self.entities.values():
-            if entity.name == name:
-                distance = location.get_distance_to(entity.location)
-            if distance < range:
-                return entity
-        return None
 
     def toggleEditor(self):
         global screen

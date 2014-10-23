@@ -18,12 +18,9 @@ class MChar(Object):
         self.gravity = GravityLine(self, 2, h=const.res * const.screenSize[1] / 2)
         self.jumping = Jumping(self.move, self.gravity, 2)
         self.input = Input()
-        self.controlled = control
 
-        if self.controlled:
-            self.applyInputSettings()
+        self.applyInputSettings()
 
-        self.inertia = 1
         self.dir = 1
 
     def applyInputSettings(self):
@@ -59,5 +56,7 @@ class MChar(Object):
         self.dir = 1 if self.move.getSpeed(x=True) > 0 else -1
 
         collisions = self.move.move()
-        self.jumping.tick(collisions)
-        self.gravity.tick(collisions)
+        colDirs = collisions.keys()
+        self.jumping.tick(colDirs)
+        self.gravity.tick(colDirs)
+        return collisions

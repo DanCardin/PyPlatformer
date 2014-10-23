@@ -1,10 +1,10 @@
 from object import Object
-from object import *
 
 
 class Camera(Object):
     def __init__(self, size, bounds, target, res):
         Object.__init__(self, size)
+        assert target is not None
         self.target = target
         self.bounds = Object(bounds)
         self.res = Object(res)

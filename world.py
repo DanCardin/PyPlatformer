@@ -1,4 +1,5 @@
-from level import *
+from level import Level
+
 
 class World(object):
     def __init__(self, levels):
@@ -21,3 +22,5 @@ class World(object):
 
     def tick(self, input, surface):
         self.level.tick(input, surface)
+        if self.level.isLevelComplete():
+            self.nextLevel()

@@ -20,9 +20,9 @@ class Map(Object):
         self.display = None
 
         self._file = file
-        self._scale = const.res / resolution
+        self._scale = const.res // resolution
         self._tileset = pygame.transform.scale(Files().loadImage(tileset),
-                            (const.res, const.res * const.TILE_SET_LENGTH)).convert()
+                                               (const.res, const.res * const.TILE_SET_LENGTH)).convert()
         transColor = self._tileset.get_at((0, 0))
         self._tileset.set_colorkey(transColor)
 
@@ -58,23 +58,17 @@ class Map(Object):
         self.h = self._hy * const.res
 
         tiles = re.findall("\((\d+),(\d+),(\d+),(\d+):(\d+),(\d+)\)", file)
-        for i in range(self._wx):
-            for e in range(self._hy):
-                x, y, w, h, typ, tile = tiles[i + e * self._wx]
+        for i in range(self._hy):
+            for e in range(self._wx):
+                x, y, w, h, typ, tile = tiles[i * self._wx + e]
                 x, y, w, h, typ, tile = int(x), int(y), int(w), int(h), int(typ), int(tile)
-                wall = Wall((i * const.res + self._scale * x,
-                             e * const.res + self._scale * y,
-                             w * self._scale, h * self._scale), typ, tile)
+                x, y, w, h = x * self._scale, y * self._scale, w * self._scale, h * self._scale
+                wall = Wall((x, y, w, h), typ, tile)
 
-                self._map[(i, e)] = wall
+                self._map[(e, i)] = wall
                 self._tiles.setdefault(wall.getType(), []).append(wall)
                 self._mapDelta.append(wall)
 
-        for i in range(self._hy):
-            s = ""
-            for e in range(self._wx):
-                s += "X" if self._map[(e, i)].getType().value ==1 else " "
-            print(s)
         self.display = Display(pygame.surface.Surface((self.w, self.h)), self, True)
 
     def save(self):
@@ -82,15 +76,16 @@ class Map(Object):
         for i in range(self._hy):
             for e in range(self._wx):
                 tile = self._map[(e, i)]
-                s.append(("(%s,%s,%s,%s:%s,%s)" % (tile.x, tile.y, tile.w, tile.h,
-                                                   tile.getType().value, tile.getTile())).ljust(20))
+                s.append("({},{},{},{}:{},{})".format(tile.x // self._scale, tile.y // self._scale,
+                                                      tile.w // self._scale, tile.h // self._scale,
+                                                      tile.getType().value, tile.getTile()).ljust(20))
             s.append("\n")
         Files().saveFile(''.join(s), self._file)
 
     def _updateMap(self):
         for block in self._mapDelta:
             self.display.update(self._tileset, (block.x, block.y),
-                                     (0, block.getTile() * const.res, const.res, const.res))
+                                (0, block.getTile() * const.res, const.res, const.res))
         self._mapDelta = []
 
     def draw(self, surface, camera):
