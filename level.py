@@ -62,8 +62,7 @@ class Level(object):
     def process(self, input):
         for entity in self.registered.values():
             result = entity.tick(input)
-            if Tile.Start in result.values():
-                self._complete = True
+            #     self._complete = True
 
         for entity in self.entities.values():
             entity.tick([])

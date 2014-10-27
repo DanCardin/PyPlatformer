@@ -1,8 +1,8 @@
 import pygame
 
 from const import *
-from world import *
-from menu import *
+from world import World
+from menu import Menu
 
 
 class Game(object):
@@ -29,7 +29,7 @@ class Game(object):
 
     def handleMenu(self, action):
         if 'resume' in action:
-            if self.world != 0:
+            if self.world is not None:
                 self.enabled = True
             else:
                 self.start()

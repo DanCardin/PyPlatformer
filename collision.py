@@ -21,16 +21,16 @@ class Collision(object):
         if self._pRect.colliderect(collideBox):
             if dx > 0:
                 self._pRect.right = collideBox.left
-                result = {Direction.Right: collideBox}
+                result = Direction.Right
             if dx < 0:
                 self._pRect.left = collideBox.right
-                result = {Direction.Left: collideBox}
+                result = Direction.Left
             if dy > 0:
                 self._pRect.bottom = collideBox.top
-                result = {Direction.Bottom: collideBox}
+                result = Direction.Bottom
             if dy < 0:
                 self._pRect.top = collideBox.bottom
-                result = {Direction.Top: collideBox}
+                result = Direction.Top
 
         return result
 
