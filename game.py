@@ -1,22 +1,24 @@
 import pygame
-
-from const import *
-from world import *
-from menu import *
+import const
+from world import World
+from menu import Menu
 
 
 class Game(object):
-    def __init__(self, levels):
+    def __init__(self, surface, levels):
+        self._surface = surface
         self.levAttr = levels
         self.world = None
         self.camera = None
         self.enabled = False
         self.started = True
 
-        self._size = (screenSize[0] * res, screenSize[1] * res)
+        self._size = (const.screenSize[0] * const.res, const.screenSize[1] * const.res)
 
         text = ['Resume', 'Start', 'Editor', 'Exit']
-        self.menu = Menu((self._size[0] / 2 - 50, self._size[1] / 2 - 50 * len(text) / 2), True)
+        self.menu = Menu(self._surface,
+                         (self._size[0] / 2 - 50, self._size[1] / 2 - 50 * len(text) / 2),
+                         True)
         for i in range(0, len(text)):
             self.menu.addItem(text[i].lower(), rect=(0, 50 * i, 100, 48),
                               rColor=(255, 0, 0), oColor=(0, 0, 255), text=text[i],
@@ -24,7 +26,7 @@ class Game(object):
 
     def start(self):
         self.enabled = True
-        self.world = World(self.levAttr)
+        self.world = World(self._surface, self.levAttr)
         self.world.level.start()
 
     def handleMenu(self, action):
@@ -44,7 +46,7 @@ class Game(object):
         elif 'exit' in action:
             self.exit()
 
-    def tick(self, surface):
+    def tick(self):
         inputer = self.getEvents()
         if (pygame.KEYDOWN, pygame.K_m) in inputer:
             self.menu.enabled = not self.menu.enabled
@@ -57,9 +59,9 @@ class Game(object):
         if self.menu.enabled:
             mPos = pygame.mouse.get_pos()
             self.handleMenu(self.menu.tick(inputer, mPos))
-            self.menu.draw(surface)
+            self.menu.draw()
         elif self.enabled:
-            self.world.tick(inputer, surface)
+            self.world.tick(inputer)
             inputer = False
 
     def exit(self):

@@ -27,7 +27,7 @@ class Gravity(object):
 
     def tick(self, collisions):
         direction = Direction.Bottom if self.positiveDir() else Direction.Top
-        if not direction in collisions:
+        if direction not in collisions:
             self._applyGravity()
 
         if [i for i in [Direction.Bottom, Direction.Top] if i in collisions]:

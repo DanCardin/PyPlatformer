@@ -2,10 +2,10 @@ from level import Level
 
 
 class World(object):
-    def __init__(self, levels):
+    def __init__(self, surface, levels):
         self.levels = []
         for i in levels:
-            self.levels.append(Level(i))
+            self.levels.append(Level(surface, i))
         self.currLevel = 0
         self.level = self.levels[self.currLevel]
 
@@ -20,7 +20,7 @@ class World(object):
     def gameOver(self):
         ''
 
-    def tick(self, input, surface):
-        self.level.tick(input, surface)
+    def tick(self, input):
+        self.level.tick(input)
         if self.level.isLevelComplete():
             self.nextLevel()

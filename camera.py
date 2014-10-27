@@ -1,35 +1,45 @@
+from python.surface import Surface
+from display import Display
 from object import Object
 
 
 class Camera(Object):
-    def __init__(self, size, bounds, target, res):
+    def __init__(self, surface, size, maxBounds, boundBox, target):
         Object.__init__(self, size)
+
+        self._surface = surface
+        self._display = Display(Surface((self.w, self.h)))
+        self._maxBounds = Object(maxBounds)
+        self._boundBox = Object(boundBox)
+        self._target = target
         assert target is not None
-        self.target = target
-        self.bounds = Object(bounds)
-        self.res = Object(res)
 
     def tick(self):
-        if self.x > self.target.x - self.bounds.x:
-            self.x = self.target.x - self.bounds.x
-        if self.x < self.target.x + self.target.w + self.bounds.w - self.w:
-            self.x = self.target.x + self.target.w + self.bounds.w - self.w
+        if self.x > self._target.x - self._boundBox.x:
+            self.x = self._target.x - self._boundBox.x
+        if self.x < self._target.x + self._target.w + self._boundBox.w - self.w:
+            self.x = self._target.x + self._target.w + self._boundBox.w - self.w
 
         if self.x < 0:
             self.x = 0
-        if self.x + self.w > self.res.w:
-            self.x = (self.res.w) - self.w
-        if (self.x < 0) and (self.x + self.w > self.res.w):
-            self.x = self.target.x + self.target.w / 2 - self.w / 2
+        if self.x + self.w > self._maxBounds.w:
+            self.x = self._maxBounds.w - self.w
+        if (self.x < 0) and (self.x + self.w > self._maxBounds.w):
+            self.x = self._target.x + self._target.w / 2 - self.w / 2
 
-        if self.y > self.target.y - self.bounds.y:
-            self.y = self.target.y - self.bounds.y
-        if self.y < self.target.y + self.target.h + self.bounds.h - self.h:
-            self.y = self.target.y + self.target.h + self.bounds.h - self.h
+        if self.y > self._target.y - self._boundBox.y:
+            self.y = self._target.y - self._boundBox.y
+        if self.y < self._target.y + self._target.h + self._boundBox.h - self.h:
+            self.y = self._target.y + self._target.h + self._boundBox.h - self.h
 
         if self.y < 0:
             self.y = 0
-        if self.y + self.h > self.res.h:
-            self.y = (self.res.h) - self.h
-        if (self.y < 0) and (self.y + self.h > self.res.h):
-            self.y = self.target.y + self.target.h / 2 - self.h / 2
+        if self.y + self.h > self._maxBounds.h:
+            self.y = self._maxBounds.h - self.h
+        if (self.y < 0) and (self.y + self.h > self._maxBounds.h):
+            self.y = self._target.y + self._target.h / 2 - self.h / 2
+
+    def draw(self, surface):
+        """Calculate the scaling and whatnot"""
+        self.
+        self.display.draw(surface)

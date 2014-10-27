@@ -1,3 +1,4 @@
+import pygame
 import const
 from object import *
 from move import *
@@ -51,12 +52,14 @@ class MChar(Object):
         if arg == "up":
             self.jumping.muteJump()
 
+    def draw(self, surface, camera):
+        self.display.draw(surface, camera)
+
     def tick(self, inputs):
         self.input(inputs)
         self.dir = 1 if self.move.getSpeed(x=True) > 0 else -1
 
         collisions = self.move.move()
-        colDirs = collisions.keys()
-        self.jumping.tick(colDirs)
-        self.gravity.tick(colDirs)
+        self.jumping.tick(collisions)
+        self.gravity.tick(collisions)
         return collisions

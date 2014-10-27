@@ -8,7 +8,7 @@ from wall import Tile
 
 class Editor(Object):
     def __init__(self, map, camera):
-        Object.__init__(self, (map.w, map.h))
+        Object.__init__(self, (map.w, map.h + const.res))
         self.map = map
         self.camera = camera
 
@@ -24,7 +24,7 @@ class Editor(Object):
         self.menuShowing = True
         self.mChange = True
 
-        self.display = Display(pygame.surface.Surface((self.w, self.h)), self, True, alpha=True)
+        self.display = Display(pygame.surface.Surface((self.w, self.h)), self, True, alpha=75)
         self.input = Input()
         self.input.set(pygame.KEYDOWN, pygame.K_o, "overlay", self.toggleOverlay)
         self.input.set(pygame.KEYDOWN, pygame.K_t, "menu", self.toggleMenu)
@@ -34,7 +34,7 @@ class Editor(Object):
         self.createMenu()
 
     def createMenu(self):
-        self.menu = Menu((0, const.screenSize[1] * const.res), True)
+        self.menu = Menu(self.display.getImage(), (0, const.screenSize[1] * const.res), True)
         self.menu.addItem("save", rect=(0, 0, 32, 32), text="Save")
         self.menu.addItem("pen", rect=(32, 0, 32, 32), text="Pen", toggle=True, tGroup=0)
         self.menu.addItem("box", rect=(64, 0, 32, 32), text="Box", toggle=True, tGroup=0)

@@ -5,7 +5,8 @@ from display import *
 
 
 class Menu(object):
-    def __init__(self, pos, enabled):
+    def __init__(self, surface, pos, enabled):
+        self._surface = surface
         self.pos = pos
         self.items = {}
         self.enabled = enabled
@@ -34,10 +35,10 @@ class Menu(object):
     def addItem(self, key, **kwargs):
         self.items[key] = MenuItem(action=key, **kwargs)
 
-    def draw(self, surface):
+    def draw(self):
         if self.enabled:
             for key, item in self.items.items():
-                item.display.draw(surface, Object((self.pos[0] * -1, self.pos[1] * -1, 0, 0)))
+                item.display.draw(self._surface, Object((self.pos[0] * -1, self.pos[1] * -1, 0, 0)))
 
 
 class MenuItem(Object):
