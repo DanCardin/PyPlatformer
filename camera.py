@@ -1,4 +1,5 @@
-from python.surface import Surface
+from pygame.surface import Surface
+from pygame.transform import scale
 from display import Display
 from object import Object
 
@@ -7,7 +8,7 @@ class Camera(Object):
     def __init__(self, surface, size, maxBounds, boundBox, target):
         Object.__init__(self, size)
 
-        self._surface = surface
+        self._surface = Display(surface)
         self._display = Display(Surface((self.w, self.h)))
         self._maxBounds = Object(maxBounds)
         self._boundBox = Object(boundBox)
@@ -41,5 +42,6 @@ class Camera(Object):
 
     def draw(self, surface):
         """Calculate the scaling and whatnot"""
-        self.
-        self.display.draw(surface)
+        self._surface.draw(self._display.getImage(), self)
+        self._display.replace(scale(self._surface.getImage(), (self.w, self.h)))
+        self._display.draw(surface)

@@ -87,7 +87,7 @@ class Level(object):
         if self.editor.enabled:
             self.editor.draw(self._total_surface, self._camera)
 
-        self.camera.draw(self._surface)
+        self._camera.draw(self._surface)
 
     def toggleEditor(self):
         self.editor.enabled = not self.editor.enabled
