@@ -57,7 +57,7 @@ class GravityLine(Gravity):
 
         if self.h:
             oldValue = self._value
-            lower = self._parent.y > self.h
+            lower = self._parent.y + self._parent.h / 2 > self.h
             self._value = -self._mag if lower else self._mag
             if oldValue != self._value:
                 self._crossedLine = True
