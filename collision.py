@@ -16,34 +16,40 @@ class Collision(object):
         self._pRect = self._parent
         self._level = level
 
+    def solidCollision(self, direc):
+        if direc is Direction.Right:
+            self._pRect.right = collideBox.left
+        if direc is Direction.Left:
+            self._pRect.left = collideBox.right
+        if direc is Direction.Bottom:
+            self._pRect.bottom = collideBox.top
+        if direc is Direction.Top:
+            self._pRect.top = collideBox.bottom
+
     def collDir(self, dx, dy, collideBox):
-        result = None
         if self._pRect.colliderect(collideBox):
             if dx > 0:
-                self._pRect.right = collideBox.left
-                result = Direction.Right
+                return Direction.Right
             if dx < 0:
-                self._pRect.left = collideBox.right
-                result = Direction.Left
+                return Direction.Left
             if dy > 0:
-                self._pRect.bottom = collideBox.top
-                result = Direction.Bottom
+                return Direction.Bottom
             if dy < 0:
-                self._pRect.top = collideBox.bottom
-                result = Direction.Top
-
-        return result
+                return Direction.Top
 
     def collideWalls(self, dx, dy):
         tx, ty = int(self._pRect.x / res), int(self._pRect.y / res)
         rects = [[tx, ty], [tx + 1, ty], [tx, ty + 1], [tx + 1, ty + 1]]
 
-        result = None
+        result = {}
         for x, y in rects:
-            if self._level.map.get(x, y).getType() == Tile.Solid:
-                result = self.collDir(dx, dy, self._level.map.get(x, y))
-                if result:
-                    return result
+            result = self.collDir(dx, dy, self._level.map.get(x, y))
+            ttype = self._level.map.get(x, y).getType()
+            if ttype == Tile.Solid:
+                self.solidCollision(result)
+
+            result.setdefault(ttype, set()).add(result)
+        return result
 
     def collideEntities(self, dx, dy):
         for i in range(self._level.entityId):

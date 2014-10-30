@@ -52,15 +52,12 @@ class Move(object):
             return self.collision.collideWalls(dx, dy)
 
     def move(self):
-        result = []
+        result = {}
         if self._speed[0] != 0:
             self._speed[0] = min(self._topSpeed[0], self._speed[0])
-
-            xresult = self.moveSingleAxis(self._speed[0], 0)
-            result.append(xresult if xresult is not None else [])
+            result.update(self.moveSingleAxis(self._speed[0], 0))
         if self._speed[1] != 0:
             self._speed[1] = min(self._topSpeed[1], self._speed[1])
+            result.update(self.moveSingleAxis(0, self._speed[1]))
 
-            yresult = self.moveSingleAxis(0, self._speed[1])
-            result.append(yresult if yresult is not None else [])
         return result
