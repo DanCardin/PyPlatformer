@@ -1,12 +1,13 @@
 import const
-from object import *
-from move import *
-from collision import *
-from display import *
-from gravity import *
-from jumping import *
-from input import *
+from object import Object
+from collision import Collision
+from move import Move
+from display import Display
+from gravity import GravityLine
+from jumping import Jumping
+from input import Input
 from files import Files
+from weapons import NewWeapon
 
 
 class MChar(Object):
@@ -18,6 +19,7 @@ class MChar(Object):
         self.gravity = GravityLine(self, 2, h=const.res * const.screenSize[1] / 2)
         self.jumping = Jumping(self.move, self.gravity, 2)
         self.input = Input()
+        self._weapon = NewWeapon(self, (0, 0))
 
         self.applyInputSettings()
 
@@ -53,9 +55,10 @@ class MChar(Object):
 
     def tick(self, inputs):
         self.input(inputs)
+        self._weapon.tick()
         self.dir = 1 if self.move.getSpeed(x=True) > 0 else -1
 
         collisions = self.move.move()
-        self.jumping.tick(collisions)
-        self.gravity.tick(collisions)
+        self.jumping.tick(collisions.get(Tile.Solid, []))
+        self.gravity.tick(collisions.get(Tile.Solid, []))
         return collisions

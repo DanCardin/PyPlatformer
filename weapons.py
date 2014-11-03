@@ -1,8 +1,38 @@
-from object import *
-from move import *
-from collision import *
-from display import *
+from object import Object
+from move import Move
+from collision import Collision
+from display import Display
 import itertools
+
+
+import pygame
+from input import Input
+from particle import Particle, ParticleEmitter, Behaviors
+
+class NewWeapon(ParticleEmitter):
+    def __init__(self, anchor, offset):
+        super().__init__(anchor, offset)
+
+        self._part = None
+
+        s = pygame.surface.Surface((20, 10))
+        s.fill((255, 0, 0))
+        self.setParticleConfig(10, s, True,
+                          Behaviors.kill_at(100, 100), Behaviors.move_at(10, 0))
+
+        self._input = Input()
+        self.input.set(pygame.KEYDOWN, pygame.K_f, "fire", self.setNew, "fire")
+
+    def setNew(self):
+        pos = Object(anchor.x + offset[0], anchor.y + offset[1], 20, 10)
+        self._part = Particle(pos, self._config)
+
+    def _emit(self):
+        if self._part:
+            self._particles.extend(self._part)
+            self._part = None
+
+
 
 
 class Bullet(Object):

@@ -16,7 +16,7 @@ class Collision(object):
         self._pRect = self._parent
         self._level = level
 
-    def solidCollision(self, direc):
+    def solidCollision(self, direc, collideBox):
         if direc is Direction.Right:
             self._pRect.right = collideBox.left
         if direc is Direction.Left:
@@ -26,7 +26,7 @@ class Collision(object):
         if direc is Direction.Top:
             self._pRect.top = collideBox.bottom
 
-    def collDir(self, dx, dy, collideBox):
+    def getColDir(self, dx, dy, collideBox):
         if self._pRect.colliderect(collideBox):
             if dx > 0:
                 return Direction.Right
@@ -43,12 +43,15 @@ class Collision(object):
 
         result = {}
         for x, y in rects:
-            result = self.collDir(dx, dy, self._level.map.get(x, y))
-            ttype = self._level.map.get(x, y).getType()
-            if ttype == Tile.Solid:
-                self.solidCollision(result)
+            tile = self._level.map.get(x, y)
+            colDir = self.getColDir(dx, dy, tile)
+            if colDir:
+                ttype = tile.getType()
+                if ttype == Tile.Solid:
+                    self.solidCollision(colDir, tile)
+                if ttype != Tile.Empty:
+                    result.setdefault(ttype, set()).add(colDir)
 
-            result.setdefault(ttype, set()).add(result)
         return result
 
     def collideEntities(self, dx, dy):
@@ -56,6 +59,6 @@ class Collision(object):
             obj = self._level.get(i)
             if self._parent != obj:
                 if self._parent.inertia < obj.inertia:
-                    if self.collDir(dx, dy, obj) == 3:
+                    if self.getColDir(dx, dy, obj) == 3:
                         return obj
         return 0

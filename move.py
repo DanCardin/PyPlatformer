@@ -36,6 +36,10 @@ class Move(object):
     def setSpeed(self, x=None, y=None):
         self._setSpeed(self._speed, x, y)
 
+    def setTopSpeed(self, x=None, y=None):
+        self._setSpeed(self._topSpeed, x, y)
+
+
     def incrSpeed(self, x=None, y=None):
         self._incrSpeed(self._speed, x, y)
 
@@ -51,13 +55,17 @@ class Move(object):
         if self.collision:
             return self.collision.collideWalls(dx, dy)
 
+    def _merge(self, orig, new):
+        for key, value in new.items():
+            orig[key] = value | orig[key] if orig.get(key) else value
+
     def move(self):
         result = {}
         if self._speed[0] != 0:
             self._speed[0] = min(self._topSpeed[0], self._speed[0])
-            result.update(self.moveSingleAxis(self._speed[0], 0))
+            self._merge(result, self.moveSingleAxis(self._speed[0], 0))
         if self._speed[1] != 0:
             self._speed[1] = min(self._topSpeed[1], self._speed[1])
-            result.update(self.moveSingleAxis(0, self._speed[1]))
+            self._merge(result, self.moveSingleAxis(0, self._speed[1]))
 
         return result

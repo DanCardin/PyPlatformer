@@ -56,13 +56,14 @@ class Level(object):
             result = self.registered.get(entityId)
         return result
 
-    def isLevelComplete(self):
+    def isComplete(self):
         return self._complete
 
     def process(self, input):
         for entity in self.registered.values():
             result = entity.tick(input)
-            #     self._complete = True
+            if Tile.End in result.keys():
+                self._complete = True
 
         for entity in self.entities.values():
             entity.tick([])
