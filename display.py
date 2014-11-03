@@ -1,6 +1,6 @@
 import pygame
-from animation import *
-from files import *
+from animation import Animation
+from files import Files
 
 
 class Display(object):
@@ -11,11 +11,11 @@ class Display(object):
             self._image.blit(Files().loadImage(surface), (0, 0))
         else:
             self._image = surface
-        self._animation = Animation(self._klass, self._image, anim) if anim else None
         if transparent:
             self._image.set_colorkey(self._image.get_at((0, 0)))
         if alpha:
             self._image.set_alpha(75)
+        self._animation = Animation(self, self._image, anim) if anim else None
 
     def update(self, *args):
         self._image.blit(*args)

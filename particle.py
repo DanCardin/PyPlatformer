@@ -2,31 +2,46 @@ from object import Object
 from move import Move
 from collision import Collision
 from display import Display
-import itertools
 
 
 class Behaviors(object):
-    @classmethod
     def kill_at(dx, dy):
         def _kill_at(particle):
-            particle._dx, particle._dy = particle.move.getSpeed(x=True, y=True)
-            if (particle._dx < -max_x or particle._dx > max_x or
-               particle._dy < -max_y or particle._dy > max_y):
+            try:
+                particle._KA_dx += particle._move.getSpeed(x=True)
+                particle._KA_dy += particle._move.getSpeed(y=True)
+            except AttributeError:
+                particle._KA_dx = 0
+                particle._KA_dy = 0
+
+            if (particle._KA_dx < -dx or particle._KA_dx > dx or
+                    particle._KA_dy < -dy or particle._KA_dy > dy):
                 particle.kill()
         return _kill_at
 
-    @classmethod
+    def kill_when(time=50):
+        def _kill_when(particle):
+            try:
+                particle._KW_iterations += 1
+            except AttributeError:
+                particle._KW_iterations = 1
+
+            if particle._KW_iterations > time:
+                particle.kill()
+        return _kill_when
+
     def move_at(sx, sy):
         def _move_at(particle):
-            particle.setSpeed(sx, sy)
+            particle._move.setSpeed(sx, sy)
+        return _move_at
 
 
 class Particle(Object):
     def __init__(self, size, topSpeed, tileset, collide, *strategies):
         Object.__init__(self, size)
 
-        self.move = Move(self, topSpeed, collide)
         self.display = Display(tileset, self)
+        self._move = Move(self, topSpeed, collide)
         self._alive = True
         self._strategies = strategies
 
@@ -39,6 +54,7 @@ class Particle(Object):
     def tick(self):
         for s in self._strategies:
             s(self)
+            self._move()
 
 
 class ParticleEmitter(object):
@@ -47,6 +63,9 @@ class ParticleEmitter(object):
         self._offset = offset
         self._particles = []
         self._config = None
+
+    def _emit(self):
+        raise NotImplementedError("Subclasses should implement this method")
 
     def setParticleConfig(self, *args):
         self._config = args
@@ -57,7 +76,9 @@ class ParticleEmitter(object):
 
     def tick(self):
         self._emit()
+        print(self._particles)
         for p in self._particles[:]:
             p.tick()
             if not p.isAlive():
                 self._particles.remove(p)
+        print(self._particles)

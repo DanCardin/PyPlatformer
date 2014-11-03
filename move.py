@@ -54,12 +54,13 @@ class Move(object):
         self.pRect.y += dy
         if self.collision:
             return self.collision.collideWalls(dx, dy)
+        return {}
 
     def _merge(self, orig, new):
         for key, value in new.items():
             orig[key] = value | orig[key] if orig.get(key) else value
 
-    def move(self):
+    def __call__(self):
         result = {}
         if self._speed[0] != 0:
             self._speed[0] = min(self._topSpeed[0], self._speed[0])

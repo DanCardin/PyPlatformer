@@ -1,12 +1,14 @@
+import pygame
 import const
-from object import Object
 from collision import Collision
-from move import Move
 from display import Display
-from gravity import GravityLine
-from jumping import Jumping
-from input import Input
 from files import Files
+from gravity import GravityLine
+from input import Input
+from jumping import Jumping
+from object import Object
+from move import Move
+from wall import Tile
 from weapons import NewWeapon
 
 
@@ -22,8 +24,6 @@ class MChar(Object):
         self._weapon = NewWeapon(self, (0, 0))
 
         self.applyInputSettings()
-
-        self.dir = 1
 
     def applyInputSettings(self):
         self.input.set(pygame.KEYDOWN, pygame.K_a, "left", self.startMove, "left")
@@ -55,10 +55,9 @@ class MChar(Object):
 
     def tick(self, inputs):
         self.input(inputs)
-        self._weapon.tick()
-        self.dir = 1 if self.move.getSpeed(x=True) > 0 else -1
+        self._weapon.tick(inputs)
 
-        collisions = self.move.move()
+        collisions = self.move()
         self.jumping.tick(collisions.get(Tile.Solid, []))
         self.gravity.tick(collisions.get(Tile.Solid, []))
         return collisions

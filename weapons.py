@@ -9,6 +9,7 @@ import pygame
 from input import Input
 from particle import Particle, ParticleEmitter, Behaviors
 
+
 class NewWeapon(ParticleEmitter):
     def __init__(self, anchor, offset):
         super().__init__(anchor, offset)
@@ -17,22 +18,32 @@ class NewWeapon(ParticleEmitter):
 
         s = pygame.surface.Surface((20, 10))
         s.fill((255, 0, 0))
-        self.setParticleConfig(10, s, True,
-                          Behaviors.kill_at(100, 100), Behaviors.move_at(10, 0))
+
+        direc = 1
+        try:
+            direc = anchor.move.getDir(x=True)
+        except AttributeError:
+            pass
+
+        self.setParticleConfig((10, 0), s, False,
+                               Behaviors.kill_at(50, 50),
+                               Behaviors.move_at(direc * 10, 0))
 
         self._input = Input()
-        self.input.set(pygame.KEYDOWN, pygame.K_f, "fire", self.setNew, "fire")
+        self._input.set(pygame.KEYDOWN, pygame.K_f, "fire", self.setNew)
 
     def setNew(self):
-        pos = Object(anchor.x + offset[0], anchor.y + offset[1], 20, 10)
-        self._part = Particle(pos, self._config)
+        pos = Object(self._anchor.x + self._offset[0], self._anchor.y + self._offset[1], 20, 10)
+        self._part = Particle(pos, *self._config)
 
     def _emit(self):
         if self._part:
-            self._particles.extend(self._part)
+            self._particles.append(self._part)
             self._part = None
 
-
+    def tick(self, inputs):
+        self._input(inputs)
+        super().tick()
 
 
 class Bullet(Object):
@@ -51,7 +62,7 @@ class Bullet(Object):
         if not self.dead:
             if (self.dMoved[0] ** 2 + self.dMoved[1] ** 2) > self.maxRange:
                 self.dead = True
-            mRes = self.move.move()
+            mRes = self.move()
             conditions = list(itertools.product(*[[1, 2, 3, "enemy", "bullet"], ["left", "right", "top", "bottom"]]))
             if [i for i in conditions if i in mRes]:
                 self.dead = True

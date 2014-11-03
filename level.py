@@ -73,8 +73,10 @@ class Level(object):
         for entities in [self.entities, self.registered]:
             for entity in entities.values():
                 entity.display.draw(surface, self.camera)
-                if hasattr(entity, "weapon"):
-                    entity.weapon.draw(surface, self.camera)
+                try:
+                    entity._weapon.draw(surface, self.camera)
+                except:
+                    pass
         self.map.draw(surface, self.camera)
         if self.editor.enabled:
             self.editor.draw(surface, self.camera)
