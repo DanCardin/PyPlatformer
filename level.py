@@ -79,6 +79,7 @@ class Level(object):
             entity.tick([])
 
     def render(self):
+        self._surface.fill((0,0,0))
         self.background.draw(self._total_surface, self._camera)
         for entities in [self.entities, self.registered]:
             for entity in entities.values():

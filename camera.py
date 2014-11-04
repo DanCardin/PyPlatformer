@@ -14,6 +14,8 @@ class Camera(Object):
         self._boundBox = Object(boundBox)
         self._target = target
         assert target is not None
+        self._scale = 1
+        self._dir = 1
 
     def tick(self):
         if self.x > self._target.x - self._boundBox.x:
@@ -43,5 +45,11 @@ class Camera(Object):
     def draw(self, surface):
         """Calculate the scaling and whatnot"""
         self._surface.draw(self._display.getImage(), self)
-        self._display.replace(scale(self._surface.getImage(), (self.w, self.h)))
+        self._scale += (0.01 * self._dir)
+        if self._scale >= 2 or self._scale <= 0.5:
+            self._dir *= -1
+
+        self._display.replace(scale(self._surface.getImage(),
+                                    (int(self.w * self._scale),
+                                        int(self.h * self._scale))))
         self._display.draw(surface)
