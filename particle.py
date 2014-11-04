@@ -76,9 +76,7 @@ class ParticleEmitter(object):
 
     def tick(self):
         self._emit()
-        print(self._particles)
         for p in self._particles[:]:
             p.tick()
             if not p.isAlive():
                 self._particles.remove(p)
-        print(self._particles)
