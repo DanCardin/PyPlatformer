@@ -10,11 +10,13 @@ from object import Object
 from move import Move
 from wall import Tile
 from weapons import NewWeapon
+from ids import Id
 
 
-class MChar(Object):
+class MChar(Object, Id):
     def __init__(self, start, size, speed, tileset, control, level):
         Object.__init__(self, (start[0], start[1], size[0], size[1]))
+        Id.__init__(self)
         self.collision = Collision(self, level)
         self.move = Move(self, speed, collision=self.collision)
         self.display = Display(Files().loadImage(tileset), self, True, 11)

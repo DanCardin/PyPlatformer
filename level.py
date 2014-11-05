@@ -13,8 +13,15 @@ class Level(object):
     def __init__(self, level):
         self._complete = False
         self.entityId = 0
+
         self.entities = {}
         self.registered = {}
+
+        self._entity_map = {}
+        self._position_map = {}
+        for i in range(19):
+            for e in range(30):
+                self._position_map[(e, i)] = []
 
         self.map = Map(level[0], level[1], level[2])
         self.input = Input()

@@ -2,6 +2,7 @@ from object import Object
 from move import Move
 from collision import Collision
 from display import Display
+from ids import Id
 
 
 class Behaviors(object):
@@ -36,9 +37,10 @@ class Behaviors(object):
         return _move_at
 
 
-class Particle(Object):
+class Particle(Object, Id):
     def __init__(self, size, topSpeed, tileset, collide, *strategies):
         Object.__init__(self, size)
+        Id.__init__(self)
 
         self.display = Display(tileset, self)
         self._move = Move(self, topSpeed, collide)
@@ -76,9 +78,7 @@ class ParticleEmitter(object):
 
     def tick(self):
         self._emit()
-        print(self._particles)
         for p in self._particles[:]:
             p.tick()
             if not p.isAlive():
                 self._particles.remove(p)
-        print(self._particles)
