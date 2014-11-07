@@ -12,7 +12,6 @@ from wall import Tile
 class Level(object):
     def __init__(self, level):
         self._complete = False
-        self.entityId = 0
 
         self.entities = {}
         self.registered = {}
@@ -42,17 +41,15 @@ class Level(object):
         self.sound = pygame.mixer.Sound("assets\\music.ogg")
         # self.sound.play(-1)
 
-    def addEntity(self, register=False, id=None, entity=None):
+    def addEntity(self, register=False, entity=None):
         if not entity:
             raise Exception("Entity must not be None.")
 
+        tid = entity.getId()
         reg = self.registered if register else self.entities
-        tid = self.entityId if not id else id
 
         reg[tid] = entity
-        if not id:
-            entity.id = self.entityId
-            self.entityId += 1
+        self._entity_map[tid] = set()
 
     def removeEntity(self, entity):
         del self.entities[entity.id]

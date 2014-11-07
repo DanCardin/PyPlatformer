@@ -36,11 +36,17 @@ class Behaviors(object):
             particle._move.setSpeed(sx, sy)
         return _move_at
 
+    def onDeathCollisionDestroy():
+        def _onDeathCollisionDestroy(particle):
+            if not particle._alive:
+                particle.collision.ceaseColliding()
+                particle.collision._level._entity_map.pop(particle.getId())
+        return _onDeathCollisionDestroy
 
 class Particle(Object, Id):
-    def __init__(self, size, topSpeed, tileset, collide, *strategies):
+    def __init__(self, size, topSpeed, tileset, collide, *strategies, altname=None):
         Object.__init__(self, size)
-        Id.__init__(self)
+        Id.__init__(self, altname)
 
         self.display = Display(tileset, self)
         if collide:
@@ -51,16 +57,14 @@ class Particle(Object, Id):
 
     def kill(self):
         self._alive = False
-        if self.collision:
-            self.collision.ceaseColliding()
 
     def isAlive(self):
         return self._alive
 
     def tick(self):
         for s in self._strategies:
-            s(self)
             self._move()
+            s(self)
 
 
 class ParticleEmitter(object):

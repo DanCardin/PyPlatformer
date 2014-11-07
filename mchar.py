@@ -79,7 +79,6 @@ class MChar(Object, Dir, Id):
         self._weapon.tick(inputs)
 
         collisions = self.move()
-        # print(collisions)
         self.jumping.tick(collisions.get(Tile.Solid, []))
         self.gravity.tick(collisions.get(Tile.Solid, []))
         return collisions

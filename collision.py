@@ -61,25 +61,24 @@ class Collision(object):
         return result
 
     def ceaseColliding(self):
-        for i in self._level._entity_map[self._parent.getId()]:
-            poss2 = self._level._position_map.get(i)
-            if i in poss2:
-                poss2.remove(i)
+        for tile in self._level._entity_map[self._parent.getId()]:
+            position = self._level._position_map.get(tile)
+            position.remove(self._parent)
 
     def __call__(self, dx, dy):
-        ents = self._level._entity_map
-        poss = self._level._position_map
+        entities = self._level._entity_map
+        tid = self._parent.getId()
 
-        if not ents.get(self._parent.getId()):
-            ents[self._parent.getId()] = self.getCollisionTiles()
+        if entities.get(tid) is None:
+            entities[tid] = set()
 
         self.ceaseColliding()
 
         result = self.collideWalls(dx, dy)
 
-        ents[self._parent.getId()] = self.getCollisionTiles()
-        for i in ents[self._parent.getId()]:
-            poss[i].append(self._parent)
+        entities[tid] = self.getCollisionTiles()
+        for i in entities[tid]:
+            self._level._position_map[i].append(self._parent)
 
         result.update(self.collideEntities(dx, dy))
         return result
@@ -87,11 +86,10 @@ class Collision(object):
     def collideEntities(self, dx, dy):
         result = {}
         for tile in self.getCollisionTiles():
-            print([x for x in self._level._position_map[tile] if hasattr(x, "collision") and x is not self._parent])
             for obj in self._level._position_map[tile]:
                 if self._parent is not obj:
                     colDir = self.getColDir(dx, dy, obj)
-                    result.setdefault(obj.getId(), set()).add(colDir)
+                    result.setdefault(obj.getAltName() or obj.getId(), set()).add(colDir)
                     try:
                         if self._solidCollision and obj.collision._solidCollision:
                             self.solidCollision(colDir, obj)
