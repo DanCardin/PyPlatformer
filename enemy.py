@@ -28,3 +28,7 @@ class Enemy(Object, Id, AI):
     def tick(self):
         super().tick()
 
+        collisions = self.move()
+        if collisions.get("bullets"):
+            self._alive = False
+
