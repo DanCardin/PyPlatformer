@@ -53,11 +53,11 @@ class GravityLine(Gravity):
         self._crossedLine = False
 
     def tick(self, collision):
-        super().tick(collision)
-
         if self.h:
             oldValue = self._value
-            lower = self._parent.y > self.h
+            lower = (self._parent.y - (self._parent.h / 2)) > self.h
             self._value = -self._mag if lower else self._mag
             if oldValue != self._value:
                 self._crossedLine = True
+
+        super().tick(collision)

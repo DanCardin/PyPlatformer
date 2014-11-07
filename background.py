@@ -5,12 +5,12 @@ from display import Display
 
 
 class Background(object):
-    def __init__(self, camera, layers, scale):
+    def __init__(self, camera, layers):
         self.camera = camera
         self._prevCameraPos = (self.camera[0], self.camera[1])
         self.layers = []
         for i in layers:
-            self.layers.append(Layer(i[0], i[1], i[2], scale))
+            self.layers.append(Layer(i[0], i[1], i[2]))
 
     def draw(self, surface, camera):
         for i in self.layers:
@@ -31,9 +31,8 @@ class Background(object):
 
 
 class Layer(Object):
-    def __init__(self, size, dampSpeed, picture, scale):
-        Object.__init__(self, (0, 0, size[0] * scale, size[1] * scale))
+    def __init__(self, size, dampSpeed, picture):
+        Object.__init__(self, (0, 0, size[0], size[1]))
         self.dampSpeed = dampSpeed
-        self.picture = pygame.transform.scale(Files().loadImage(picture),
-                                              (self[2], self[3])).convert()
+        self.picture = Files().loadImage(picture)
         self.display = Display(self.picture, self, True)

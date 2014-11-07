@@ -1,21 +1,24 @@
 from pygame.surface import Surface
-from pygame.transform import scale
+from pygame import transform
 from display import Display
 from object import Object
 
 
 class Camera(Object):
-    def __init__(self, surface, size, maxBounds, boundBox, target):
+    def __init__(self, size, surface, maxBounds, boundBox, target):
         Object.__init__(self, size)
 
         self._surface = Display(surface)
         self._display = Display(Surface((self.w, self.h)))
-        self._maxBounds = Object(maxBounds)
-        self._boundBox = Object(boundBox)
+        self._maxBounds = maxBounds
+        self._boundBox = boundBox
         self._target = target
+
+        self._scaleSurfaceCache = None
+        self._lastScale = 0
+        self._scaleChanged = True
+
         assert target is not None
-        self._scale = 1
-        self._dir = 1
 
     def tick(self):
         if self.x > self._target.x - self._boundBox.x:
@@ -42,14 +45,19 @@ class Camera(Object):
         if (self.y < 0) and (self.y + self.h > self._maxBounds.h):
             self.y = self._target.y + self._target.h / 2 - self.h / 2
 
-    def draw(self, surface):
-        """Calculate the scaling and whatnot"""
+    def draw(self, surface, scale=1):
+        """Calculate the scaling and display to the inputted surface"""
         self._surface.draw(self._display.getImage(), self)
-        self._scale += (0.01 * self._dir)
-        if self._scale >= 2 or self._scale <= 0.5:
-            self._dir *= -1
 
-        self._display.replace(scale(self._surface.getImage(),
-                                    (int(self.w * self._scale),
-                                        int(self.h * self._scale))))
+        surfImg = self._surface.getImage()
+        tScale = (int(self.w * scale), int(self.h * scale))
+        if scale != 1 or self._lastScale != 1:
+            if self._lastScale != scale:
+                self._scaleSurfaceCache = transform.scale(surfImg, tScale)
+            else:
+                transform.scale(surfImg, tScale, self._scaleSurfaceCache)
+
+            self._display.replace(self._scaleSurfaceCache)
+            self._lastScale = scale
+
         self._display.draw(surface)

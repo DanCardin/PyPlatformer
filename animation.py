@@ -26,4 +26,4 @@ class Animation(object):
             self._lastDir = direction
         img = self._anim[self._lastDir][direction][0]
         self._anim[self._lastDir][direction] = self._anim[self._lastDir][direction][1:] + [img]
-        self._klass.display.replace(img)
+        self._klass.replace(img)

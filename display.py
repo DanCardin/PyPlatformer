@@ -1,5 +1,4 @@
 from pygame.surface import Surface
-
 from animation import Animation
 from object import Object
 from files import Files
@@ -8,16 +7,17 @@ from files import Files
 class Display(object):
     def __init__(self, surface, klass=None, transparent=False, anim=None, alpha=0):
         if isinstance(surface, str):
-            self._image = Surface((self._klass.w, self._klass.h))
+            self._image = Surface((klass.w, klass.h))
             self._image.blit(Files().loadImage(surface), (0, 0))
         else:
             self._image = surface
+
         self._klass = klass if klass else self._image.get_rect()
-        self._animation = Animation(self._klass, self._image, anim) if anim else None
         if transparent:
             self._image.set_colorkey(self._image.get_at((0, 0)))
         if alpha:
             self._image.set_alpha(alpha)
+        self._animation = Animation(self, self._image, anim) if anim else None
 
     def getImage(self):
         return self._image

@@ -2,8 +2,22 @@ from pygame import Rect
 
 
 class Object(Rect):
-    def __init__(self, size=(0, 0, 0, 0)):
-        if len(size) == 2:
-            Rect.__init__(self, 0, 0, size[0], size[1])
+    def __init__(self, *size):
+        x, y, w, h = 0, 0, 0, 0
+        le = len(size)
+        if le == 0:
+            pass
+        elif le == 1:
+            le0 = len(size[0])
+            if le0 == 2:
+                w, h = size[0]
+            elif le0 == 4:
+                x, y, w, h = size[0]
+        elif le == 2:
+            w, h = size
+        elif le == 4:
+            x, y, w, h = size
         else:
-            Rect.__init__(self, size[0], size[1], size[2], size[3])
+            raise ValueError("Object should take either 0, 1, 2, or 4 arguments.")
+
+        Rect.__init__(self, x, y, w, h)

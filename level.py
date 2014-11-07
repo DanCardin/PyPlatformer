@@ -9,9 +9,11 @@ from background import Background
 from camera import Camera
 from display import Display
 from editor import Editor
+from enemy import Enemy
 from input import Input
 from map import Map
 from mchar import MChar
+from object import Object
 from wall import Tile
 
 
@@ -19,11 +21,17 @@ class Level(object):
     def __init__(self, surface, level):
         self._surface = surface
         self._complete = False
-        self.entityId = 0
+
         self.entities = {}
         self.registered = {}
 
-        self.map = Map(level[0], level[1], level[2])
+        self._entity_map = {}
+        self._position_map = {}
+        for i in range(19):
+            for e in range(30):
+                self._position_map[(e, i)] = []
+
+        self.map = Map(level[0], level[1])
         self.input = Input()
         self.input.set(KEYDOWN, K_e, "editor", self.toggleEditor)
 
@@ -32,30 +40,31 @@ class Level(object):
         self.map.load()
         self._total_surface = Surface((self.map.w, self.map.h))
         self.addEntity(register=True,
-                       entity=MChar(self.map.getStart(), (20, 26),
-                                    tuple([x * self.map.getScale() for x in const.playerSpeed]),
+                       entity=MChar(self.map.getStart(),
+                                    (20, 26),
+                                    const.playerSpeed,
                                     const.playerTileset, True, self))
-        self._camera = Camera(self._total_surface,
-                              tuple([s * const.res for s in const.screenSize]),
-                              (self.map.w, self.map.h),
-                              (150, 200, 150, 200), self.get(0))
+        self._camera = Camera(tuple([s * const.res for s in const.screenSize]),
+                              self._total_surface,
+                              self.map,
+                              Object(150, 200, 150, 200), self.get(0))
         self.background = Background(self._camera,
-                                     const.backgrounds, self.map.getScale())
+                                     const.backgrounds)
         self.editor = Editor(self.map, self._camera)
         self.sound = Sound("assets\\music.ogg")
         # self.sound.play(-1)
 
-    def addEntity(self, register=False, id=None, entity=None):
+        self.addEntity(entity=Enemy((50, 100, 20, 26), (3, 16), const.playerTileset, self))
+
+    def addEntity(self, register=False, entity=None):
         if not entity:
             raise Exception("Entity must not be None.")
 
+        tid = entity.getId()
         reg = self.registered if register else self.entities
-        tid = self.entityId if not id else id
 
         reg[tid] = entity
-        if not id:
-            entity.id = self.entityId
-            self.entityId += 1
+        self._entity_map[tid] = set()
 
     def removeEntity(self, entity):
         del self.entities[entity.id]
@@ -66,29 +75,44 @@ class Level(object):
             result = self.registered.get(entityId)
         return result
 
-    def isLevelComplete(self):
+    def isComplete(self):
         return self._complete
 
     def process(self, input):
         for entity in self.registered.values():
             result = entity.tick(input)
-            # if Tile.Start in result.values():
-            #     self._complete = True
+            if Tile.End in result.keys():
+                self._complete = True
 
         for entity in self.entities.values():
-            entity.tick([])
+            entity.tick()
 
     def render(self):
         self._surface.fill((0,0,0))
         self.background.draw(self._total_surface, self._camera)
         for entities in [self.entities, self.registered]:
             for entity in entities.values():
-                entity.draw(self._total_surface, self._camera)
+                entity.display.draw(self._total_surface, self._camera)
+                try:
+                    entity._weapon.draw(self._total_surface, self._camera)
+                except:
+                    pass
         self.map.draw(self._total_surface, self._camera)
         if self.editor.enabled:
             self.editor.draw(self._total_surface, self._camera)
 
-        self._camera.draw(self._surface)
+        # self.oscillate()
+        self._scale = 1
+        self._camera.draw(self._surface, self._scale)
+
+    def oscillate(self):
+        try:
+            self._scale += (0.01 * self._dir)
+        except AttributeError:
+            self._scale = 1
+            self._dir = 1
+        if self._scale >= 2 or self._scale <= 0.5:
+            self._dir *= -1
 
     def toggleEditor(self):
         self.editor.enabled = not self.editor.enabled

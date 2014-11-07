@@ -10,7 +10,7 @@ from wall import Tile
 
 
 class Map(Object):
-    def __init__(self, file, tileset, resolution):
+    def __init__(self, file, tileset):
         Object.__init__(self)
         self._map = {}
         self._tiles = {}
@@ -20,9 +20,7 @@ class Map(Object):
         self.display = None
 
         self._file = file
-        self._scale = const.res // resolution
-        self._tileset = pygame.transform.scale(Files().loadImage(tileset),
-                                               (const.res, const.res * const.TILE_SET_LENGTH)).convert()
+        self._tileset = Files().loadImage(tileset)
         transColor = self._tileset.get_at((0, 0))
         self._tileset.set_colorkey(transColor)
 
@@ -32,9 +30,6 @@ class Map(Object):
     def getTileset(self):
         return self._tileset
 
-    def getScale(self):
-        return self._scale
-
     def getSize(self, x=None, y=None):
         if x and y:
             return (self._wx, self._hy)
@@ -43,11 +38,15 @@ class Map(Object):
         if y:
             return self._hy
 
+    def inRange(self, x, y):
+        mx, my = self.getSize(x=True, y=True)
+        return max(0, min(mx, x)), max(0, min(my, y))
+
     def get(self, x, y):
-        return self._map[(x, y)]
+        return self._map[self.inRange(x, y)]
 
     def set(self, x, y, to):
-        self._map[(x, y)] = to
+        self._map[self.inRange(x, y)] = to
 
     def load(self):
         file = Files().openFile(self._file)
@@ -62,7 +61,6 @@ class Map(Object):
             for e in range(self._wx):
                 x, y, w, h, typ, tile = tiles[i * self._wx + e]
                 x, y, w, h, typ, tile = int(x), int(y), int(w), int(h), int(typ), int(tile)
-                x, y, w, h = x * self._scale, y * self._scale, w * self._scale, h * self._scale
                 wall = Wall((x, y, w, h), typ, tile)
 
                 self._map[(e, i)] = wall
@@ -76,8 +74,8 @@ class Map(Object):
         for i in range(self._hy):
             for e in range(self._wx):
                 tile = self._map[(e, i)]
-                s.append("({},{},{},{}:{},{})".format(tile.x // self._scale, tile.y // self._scale,
-                                                      tile.w // self._scale, tile.h // self._scale,
+                s.append("({},{},{},{}:{},{})".format(tile.x, tile.y,
+                                                      tile.w, tile.h,
                                                       tile.getType().value, tile.getTile()).ljust(20))
             s.append("\n")
         Files().saveFile(''.join(s), self._file)

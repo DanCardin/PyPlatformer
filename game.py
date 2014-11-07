@@ -27,11 +27,11 @@ class Game(object):
     def start(self):
         self.enabled = True
         self.world = World(self._surface, self.levAttr)
-        self.world.level.start()
+        self.world.nextLevel()
 
     def handleMenu(self, action):
         if 'resume' in action:
-            if self.world != 0:
+            if self.world is not None:
                 self.enabled = True
             else:
                 self.start()

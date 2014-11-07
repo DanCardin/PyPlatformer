@@ -1,25 +1,36 @@
-from object import *
-from move import *
-from collision import *
-from display import *
-from gravity import *
-from jumping import *
-from ai import *
+import const
+from object import Object
+from move import Move
+from collision import Collision
+from display import Display
+from gravity import GravityLine
+from jumping import Jumping
+from ids import Id
+from files import Files
+from wall import Tile
 
 
-class Enemy(Object):
-    def __init__(self, Size, Speed, Tileset, Level):
-        Object.__init__(self, Size)
-        self.level = Level
-        self.move = Move(Speed, self)
-        self.collision = Collision(self, Level, "enemy")
-        self.display = Display(Tileset, self, True, (True, 11))
-        self.gravity = Gravity(self.level.map.res, self.move, self)
-        self.ai = AI("goomba", self, Level)
-        self.inertia = 1
-        self.dead = False
-        self.move.speed[0] = self.move.topSpeed[0]
+class AI(object):
+    def tick(self):
+        pass
+
+
+class Enemy(Object, Id, AI):
+    def __init__(self, size, speed, tileset, level):
+        Object.__init__(self, size)
+        Id.__init__(self, altname="enemy")
+        self.collision = Collision(self, level, "enemy")
+        self.move = Move(self, speed, self.collision)
+        self.display = Display(Files().loadImage(tileset), self, True, 11)
+        self.gravity = GravityLine(self, 2, h=const.res * const.screenSize[1] / 2)
+        # self.ai = AI("goomba", self, level)
+        self._alive = True
+        self.move.setSpeed(x=self.move.getTopSpeed(x=True))
 
     def tick(self):
-        self.ai.tick()
+        super().tick()
+        collisions = self.move()
+        self.gravity.tick(collisions.get(Tile.Solid, []))
+        if collisions.get("bullet"):
+            self._alive = False
 
