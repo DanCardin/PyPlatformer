@@ -43,11 +43,15 @@ class Map(Object):
         if y:
             return self._hy
 
+    def inRange(self, x, y):
+        mx, my = self.getSize(x=True, y=True)
+        return max(0, min(mx, x)), max(0, min(my, y))
+
     def get(self, x, y):
-        return self._map[(x, y)]
+        return self._map[self.inRange(x, y)]
 
     def set(self, x, y, to):
-        self._map[(x, y)] = to
+        self._map[self.inRange(x, y)] = to
 
     def load(self):
         file = Files().openFile(self._file)

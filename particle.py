@@ -43,12 +43,16 @@ class Particle(Object, Id):
         Id.__init__(self)
 
         self.display = Display(tileset, self)
-        self._move = Move(self, topSpeed, collide)
+        if collide:
+            self.collision = Collision(self, collide, False)
+        self._move = Move(self, topSpeed, self.collision)
         self._alive = True
         self._strategies = strategies
 
     def kill(self):
         self._alive = False
+        if self.collision:
+            self.collision.ceaseColliding()
 
     def isAlive(self):
         return self._alive

@@ -11,10 +11,11 @@ class Direction(Enum):
 
 
 class Collision(object):
-    def __init__(self, parent, level):
+    def __init__(self, parent, level, solidCollision=True):
         self._parent = parent
         self._pRect = self._parent
         self._level = level
+        self._solidCollision = solidCollision
 
     def solidCollision(self, direc, collideBox):
         if direc is Direction.Right:
@@ -39,7 +40,11 @@ class Collision(object):
 
     def getCollisionTiles(self):
         tx, ty = self._pRect.x // const.res, self._pRect.y // const.res
-        return set([(tx, ty), (tx + 1, ty), (tx, ty + 1), (tx + 1, ty + 1)])
+        result = set()
+        for x, y in [(tx, ty), (tx + 1, ty), (tx, ty + 1), (tx + 1, ty + 1)]:
+            if self._level.map.inRange(x, y) == (x, y):
+                result.add((x, y))
+        return result
 
     def collideWalls(self, dx, dy):
         result = {}
@@ -48,12 +53,18 @@ class Collision(object):
             colDir = self.getColDir(dx, dy, tile)
             if colDir:
                 ttype = tile.getType()
-                if ttype == Tile.Solid:
+                if self._solidCollision and ttype == Tile.Solid:
                     self.solidCollision(colDir, tile)
                 if ttype != Tile.Empty:
                     result.setdefault(ttype, set()).add(colDir)
 
         return result
+
+    def ceaseColliding(self):
+        for i in self._level._entity_map[self._parent.getId()]:
+            poss2 = self._level._position_map.get(i)
+            if i in poss2:
+                poss2.remove(i)
 
     def __call__(self, dx, dy):
         ents = self._level._entity_map
@@ -62,10 +73,7 @@ class Collision(object):
         if not ents.get(self._parent.getId()):
             ents[self._parent.getId()] = self.getCollisionTiles()
 
-        for i in ents[self._parent.getId()]:
-            poss2 = poss.get(i)
-            if i in poss2:
-                poss2.remove(i)
+        self.ceaseColliding()
 
         result = self.collideWalls(dx, dy)
 
@@ -79,17 +87,14 @@ class Collision(object):
     def collideEntities(self, dx, dy):
         result = {}
         for tile in self.getCollisionTiles():
+            print([x for x in self._level._position_map[tile] if hasattr(x, "collision") and x is not self._parent])
             for obj in self._level._position_map[tile]:
                 if self._parent is not obj:
                     colDir = self.getColDir(dx, dy, obj)
                     result.setdefault(obj.getId(), set()).add(colDir)
-                    self.solidCollision(colDir, obj)
+                    try:
+                        if self._solidCollision and obj.collision._solidCollision:
+                            self.solidCollision(colDir, obj)
+                    except AttributeError:
+                        pass
         return result
-    # def collideEntities(self, dx, dy):
-    #     for i in range(self._level.entityId):
-    #         obj = self._level.get(i)
-    #         if self._parent != obj:
-    #             if self._parent.inertia < obj.inertia:
-    #                 if self.getColDir(dx, dy, obj) == 3:
-    #                     return obj
-    #     return 0

@@ -43,7 +43,7 @@ class MChar(Object, Dir, Id):
             return self.move.getDir(x=True)
         Dir.__init__(self, _getDir)
 
-        self._weapon = NewWeapon(self, (0, 0))
+        self._weapon = NewWeapon(self, (0, 0), level)
 
     def applyInputSettings(self):
         self.input.set(pygame.KEYDOWN, pygame.K_a, "left", self.startMove, "left")
@@ -79,6 +79,7 @@ class MChar(Object, Dir, Id):
         self._weapon.tick(inputs)
 
         collisions = self.move()
+        # print(collisions)
         self.jumping.tick(collisions.get(Tile.Solid, []))
         self.gravity.tick(collisions.get(Tile.Solid, []))
         return collisions
