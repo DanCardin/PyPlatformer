@@ -61,25 +61,22 @@ class Collision(object):
         return result
 
     def ceaseColliding(self):
-        for tile in self._level._entity_map[self._parent.getId()]:
-            position = self._level._position_map.get(tile)
-            position.remove(self._parent)
+        tEnts = self._level._entity_map.get(self._parent.getId())
+        if tEnts:
+            for tile in tEnts:
+                self._level._position_map.get(tile).remove(self._parent)
+            self._level._entity_map.pop(self._parent.getId())
 
-    def __call__(self, dx, dy):
-        entities = self._level._entity_map
-        tid = self._parent.getId()
-
-        if entities.get(tid) is None:
-            entities[tid] = set()
-
-        self.ceaseColliding()
-
-        result = self.collideWalls(dx, dy)
-
-        entities[tid] = self.getCollisionTiles()
-        for i in entities[tid]:
+    def startColliding(self):
+        self._level._entity_map[self._parent.getId()] = self.getCollisionTiles()
+        for i in self._level._entity_map[self._parent.getId()]:
             self._level._position_map[i].append(self._parent)
 
+    def __call__(self, dx, dy):
+        self.ceaseColliding()
+        self.startColliding()
+
+        result = self.collideWalls(dx, dy)
         result.update(self.collideEntities(dx, dy))
         return result
 
@@ -89,10 +86,11 @@ class Collision(object):
             for obj in self._level._position_map[tile]:
                 if self._parent is not obj:
                     colDir = self.getColDir(dx, dy, obj)
-                    result.setdefault(obj.getAltName() or obj.getId(), set()).add(colDir)
-                    try:
-                        if self._solidCollision and obj.collision._solidCollision:
-                            self.solidCollision(colDir, obj)
-                    except AttributeError:
-                        pass
+                    if colDir:
+                        result.setdefault(obj.getAltName() or obj.getId(), set()).add(colDir)
+                        try:
+                            if self._solidCollision and obj.collision._solidCollision:
+                                self.solidCollision(colDir, obj)
+                        except AttributeError:
+                            pass
         return result

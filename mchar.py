@@ -1,5 +1,6 @@
 import pygame
 import const
+from char import Dir
 from collision import Collision
 from display import Display
 from files import Files
@@ -9,22 +10,8 @@ from jumping import Jumping
 from object import Object
 from move import Move
 from wall import Tile
-from weapons import NewWeapon
+from weapons import Weapon
 from ids import Id
-
-
-class Dir(object):
-    def __init__(self, rule, default=1):
-        self._rule = rule
-        self._dir = 1
-
-    def getDir(self):
-        return self._dir
-
-    def tick(self):
-        curDir = self._rule()
-        if curDir:
-            self._dir = curDir
 
 
 class MChar(Object, Dir, Id):
@@ -43,7 +30,7 @@ class MChar(Object, Dir, Id):
             return self.move.getDir(x=True)
         Dir.__init__(self, _getDir)
 
-        self._weapon = NewWeapon(self, (0, 0), level)
+        self._weapon = Weapon(self, (0, 0), level)
 
     def applyInputSettings(self):
         self.input.set(pygame.KEYDOWN, pygame.K_a, "left", self.startMove, "left")

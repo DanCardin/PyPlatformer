@@ -1,16 +1,17 @@
-from object import Object
-from move import Move
+from char import Alive
 from collision import Collision
 from display import Display
+from move import Move
 from ids import Id
+from object import Object
 
 
 class Behaviors(object):
-    def kill_at(dx, dy):
-        def _kill_at(particle):
+    def killAt(dx, dy):
+        def _killAt(particle):
             try:
-                particle._KA_dx += particle._move.getSpeed(x=True)
-                particle._KA_dy += particle._move.getSpeed(y=True)
+                particle._KA_dx += particle.move.getSpeed(x=True)
+                particle._KA_dy += particle.move.getSpeed(y=True)
             except AttributeError:
                 particle._KA_dx = 0
                 particle._KA_dy = 0
@@ -18,10 +19,10 @@ class Behaviors(object):
             if (particle._KA_dx < -dx or particle._KA_dx > dx or
                     particle._KA_dy < -dy or particle._KA_dy > dy):
                 particle.kill()
-        return _kill_at
+        return _killAt
 
-    def kill_when(time=50):
-        def _kill_when(particle):
+    def killWhen(time=50):
+        def _killWhen(particle):
             try:
                 particle._KW_iterations += 1
             except AttributeError:
@@ -29,64 +30,77 @@ class Behaviors(object):
 
             if particle._KW_iterations > time:
                 particle.kill()
-        return _kill_when
+        return _killWhen
 
-    def move_at(sx, sy):
-        def _move_at(particle):
-            particle._move.setSpeed(sx, sy)
-        return _move_at
+    def moveAt(sx, sy):
+        def _moveAt(particle):
+            particle.move.setSpeed(sx, sy)
+        return _moveAt
 
-    def onDeathCollisionDestroy():
-        def _onDeathCollisionDestroy(particle):
-            if not particle._alive:
+    def killOnCollision(exceptions):
+        def _killOnCollisions(particle):
+            try:
+                if particle._KOC_kill:
+                    particle.kill()
+            except AttributeError:
+                particle._KOC_kill = False
+
+            for col in particle.getCollisions():
+                if col not in exceptions:
+                    particle._KOC_kill = True
+                    break
+        return _killOnCollisions
+
+    def cleanupCollision(func=None):
+        def _cleanupCollision(particle):
+            if func is not None:
+                func(particle)
+            if not particle.isAlive():
                 particle.collision.ceaseColliding()
-                particle.collision._level._entity_map.pop(particle.getId())
-        return _onDeathCollisionDestroy
+        return _cleanupCollision
 
-class Particle(Object, Id):
+
+class Particle(Object, Id, Alive):
     def __init__(self, size, topSpeed, tileset, collide, *strategies, altname=None):
         Object.__init__(self, size)
         Id.__init__(self, altname)
+        Alive.__init__(self)
 
         self.display = Display(tileset, self)
         if collide:
             self.collision = Collision(self, collide, False)
-        self._move = Move(self, topSpeed, self.collision)
-        self._alive = True
+        self.move = Move(self, topSpeed, self.collision)
         self._strategies = strategies
 
-    def kill(self):
-        self._alive = False
-
-    def isAlive(self):
-        return self._alive
+    def getCollisions(self):
+        return self._collisions
 
     def tick(self):
+        self._collisions = self.move()
         for s in self._strategies:
-            self._move()
             s(self)
 
 
-class ParticleEmitter(object):
-    def __init__(self, anchor, offset):
+class Emitter(object):
+    def __init__(self, anchor, offset, maxEmitted=0):
         self._anchor = anchor
         self._offset = offset
-        self._particles = []
-        self._config = None
+        self._children = []
+        self._maxEmitted = maxEmitted
 
     def _emit(self):
         raise NotImplementedError("Subclasses should implement this method")
 
-    def setParticleConfig(self, *args):
-        self._config = args
+    def getChildren(self):
+        return self._children[:]
 
     def draw(self, surface, camera):
-        for p in self._particles:
+        for p in self._children:
             p.display.draw(surface, camera)
 
     def tick(self):
         self._emit()
-        for p in self._particles[:]:
+        for p in self._children[:]:
             p.tick()
             if not p.isAlive():
-                self._particles.remove(p)
+                self._children.remove(p)
