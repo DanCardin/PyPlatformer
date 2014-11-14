@@ -15,7 +15,7 @@ class Camera(Object):
         self._target = target
 
         self._scaleSurfaceCache = None
-        self._lastScale = 0
+        self._lastScale = 1
         self._scaleChanged = True
 
         assert target is not None
@@ -49,9 +49,9 @@ class Camera(Object):
         """Calculate the scaling and display to the inputted surface"""
         self._surface.draw(self._display.getImage(), self)
 
-        surfImg = self._surface.getImage()
-        tScale = (int(self.w * scale), int(self.h * scale))
-        if scale != 1 or self._lastScale != 1:
+        if scale != self._lastScale:
+            surfImg = self._surface.getImage()
+            tScale = (int(self.w * scale), int(self.h * scale))
             if self._lastScale != scale:
                 self._scaleSurfaceCache = transform.scale(surfImg, tScale)
             else:

@@ -1,20 +1,16 @@
 import const
-import pygame
-from pygame import KEYDOWN, K_e
-from pygame.display import set_mode
+from pygame import KEYDOWN, K_e, K_r
 from pygame.mixer import Sound
 from pygame.surface import Surface
 
 from background import Background
 from camera import Camera
-from display import Display
 from editor import Editor
-from enemy import Enemy, EnemyEmitter
+from enemy import EnemyEmitter
 from input import Input
 from map import Map
 from mchar import MChar
 from object import Object
-from particle import Emitter
 from wall import Tile
 
 
@@ -28,32 +24,35 @@ class Level(object):
 
         self._entity_map = {}
         self._position_map = {}
-        for i in range(19):
-            for e in range(30):
-                self._position_map[(e, i)] = []
 
         self.map = Map(level[0], level[1])
-        self.input = Input()
-        self.input.set(KEYDOWN, K_e, "editor", self.toggleEditor)
 
     def start(self):
         self.entities = {}
         self.map.load()
+        for x, y in self.map.getMap().keys():
+            self._position_map[(x, y)] = []
         self._total_surface = Surface((self.map.w, self.map.h))
-        self.addEntity(register=True,
-                       entity=MChar(self.map.getStart(),
-                                    (20, 26),
-                                    const.playerSpeed,
-                                    const.playerTileset, True, self))
+        tid = self.addEntity(register=True,
+                             entity=MChar(self.map.getStart(),
+                                          (20, 26),
+                                          const.playerSpeed,
+                                          const.playerTileset, True, self))
         self._camera = Camera(tuple([s * const.res for s in const.screenSize]),
                               self._total_surface,
                               self.map,
-                              Object(150, 200, 150, 200), self.get(0))
+                              Object(150, 200, 150, 200),
+                              self.get(tid))
         self._background = Background(self._camera,
                                       const.backgrounds)
-        self.editor = Editor(self.map, self._camera)
+        self.editor = Editor(self.map, self._surface)
+
+        self.input = Input()
+        self.input.set(KEYDOWN, K_e, "editor", self.editor.toggleEnabled)
+        self.input.set(KEYDOWN, K_r, "restart", self.start)
+
         self.sound = Sound("assets\\music.ogg")
-        # self.sound.play(-1)
+        self.sound.play(-1)
 
         self._enemySpawn = EnemyEmitter(Object(50, 100, 0, 0), Object(), self, 1)
 
@@ -66,6 +65,7 @@ class Level(object):
 
         reg[tid] = entity
         self._entity_map[tid] = set()
+        return tid
 
     def removeEntity(self, entity):
         del self.entities[entity.id]
@@ -79,11 +79,9 @@ class Level(object):
     def isComplete(self):
         return self._complete
 
-    def process(self, input):
-        self._enemySpawn.tick()
-
+    def process(self, inputs):
         for entity in self.registered.values():
-            result = entity.tick(input)
+            result = entity.tick(inputs)
             if Tile.End in result.keys():
                 self._complete = True
 
@@ -92,8 +90,15 @@ class Level(object):
             if not entity.isAlive():
                 self.entities.pop(entity.getId())
 
+        self._enemySpawn.tick()
+        self._camera.tick()
+        self._background.tick()
+
+        if self.editor.enabled():
+            self.editor.edit(inputs, self._camera)
+
     def render(self):
-        self._surface.fill((0,0,0))
+        self._surface.fill((0, 0, 0))
         self._background.draw(self._total_surface, self._camera)
         self._enemySpawn.draw(self._total_surface, self._camera)
         for entities in [self.entities, self.registered]:
@@ -104,22 +109,17 @@ class Level(object):
                 except:
                     pass
         self.map.draw(self._total_surface, self._camera)
-        if self.editor.enabled:
+        if self.editor.enabled():
             self.editor.draw(self._total_surface, self._camera)
 
-        # for i in range(30):
-        #     for e in range(19):
-        #         x = self._position_map.get((i, e))
-        #         if x:
-        #             x = x[0]
-        #             pygame.draw.rect(self._total_surface, (x.getId() * 5, x.getId() * 5, x.getId() * 5),
-        #                              (i * 32, e * 32, 32, 32))
-
-        # self.oscillate()
         self._scale = 1
+        # self.oscillate_test()
         self._camera.draw(self._surface, self._scale)
 
-    def oscillate(self):
+        if self.editor.enabled():
+            self.editor.menu.draw()
+
+    def oscillate_test(self):
         try:
             self._scale += (0.01 * self._dir)
         except AttributeError:
@@ -128,19 +128,7 @@ class Level(object):
         if self._scale >= 2 or self._scale <= 0.5:
             self._dir *= -1
 
-    def toggleEditor(self):
-        self.editor.enabled = not self.editor.enabled
-        size = 2 if self.editor.enabled else 0
-        self._surface = set_mode((const.screenSize[0] * const.res,
-                                  const.screenSize[1] * const.res + size * const.res))
-
     def tick(self, inputs):
         self.input(inputs)
         self.process(inputs)
-        self._camera.tick()
-        self._background.tick()
-
-        if self.editor.enabled:
-            self.editor.edit(inputs)
-
         self.render()

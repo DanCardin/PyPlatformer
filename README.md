@@ -1,17 +1,5 @@
-pyPlatform
+pyPlatformer
 ==========
-
-## Things Done:
-- paralax background
-- menus
-- infinite scaling- map scrolling
-- compositing
-- map editor transparency
-- multiple levels
-- particle effects (gun)
-- npc/npc spawning
-- animation
-- arbitrary gravity
 
 ## TODO:
 ### add triggers/textual triggers 
@@ -45,3 +33,16 @@ pyPlatform
 
 ### add ledge grabbing (absolute least thing I care about)
 - The way its done in Stealth Bastard is really nice.
+
+
+## Things Done:
+- menus
+- compositing
+- animation
+- arbitrary gravity
+- npc/npc spawning
+- paralax background
+- infinite scaling- map scrolling
+- map editor transparency
+- multiple levels
+- particle effects (gun)

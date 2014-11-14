@@ -38,6 +38,9 @@ class Map(Object):
         if y:
             return self._hy
 
+    def getMap(self):
+        return self._map
+
     def inRange(self, x, y):
         mx, my = self.getSize(x=True, y=True)
         return max(0, min(mx, x)), max(0, min(my, y))

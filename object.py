@@ -18,6 +18,7 @@ class Object(Rect):
         elif le == 4:
             x, y, w, h = size
         else:
-            raise ValueError("Object should take either 0, 1, 2, or 4 arguments.")
+            raise ValueError("Object should take either 0, "
+                             "1, 2, or 4 arguments, got %s." % str(size))
 
-        Rect.__init__(self, x, y, w, h)
+        super().__init__(x, y, w, h)

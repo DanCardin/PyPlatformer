@@ -1,68 +1,68 @@
 import pygame
 import const
+from enableable import Enableable
+from input import Input
+from menu import Menu, MColor, MText, MAction
 from world import World
-from menu import Menu
 
 
-class Game(object):
+class Game(Enableable):
     def __init__(self, surface, levels):
+        Enableable.__init__(self, False)
         self._surface = surface
         self.levAttr = levels
         self.world = None
         self.camera = None
-        self.enabled = False
         self.started = True
 
-        self._size = (const.screenSize[0] * const.res, const.screenSize[1] * const.res)
-
         text = ['Resume', 'Start', 'Editor', 'Exit']
-        self.menu = Menu(self._surface,
-                         (self._size[0] / 2 - 50, self._size[1] / 2 - 50 * len(text) / 2),
-                         True)
+        size = (const.screenSize[0] * const.res, const.screenSize[1] * const.res)
+        self.menu = Menu((size[0] / 2 - 50, size[1] / 2 - 50 * len(text) / 2),
+                         self._surface)
         for i in range(0, len(text)):
-            self.menu.addItem(text[i].lower(), rect=(0, 50 * i, 100, 48),
-                              rColor=(255, 0, 0), oColor=(0, 0, 255), text=text[i],
-                              tColor=(0, 255, 0))
+            self.menu.addItem(text[i].lower(), (0, 50 * i, 100, 48),
+                              MColor((255, 0, 0), (0, 0, 255)),
+                              MText(text[i], (0, 255, 0)),
+                              MAction(self.handleMenu, text[i].lower()))
+
+        self._input = Input()
+        self._input.set(pygame.KEYDOWN, pygame.K_m, "menu", self._menu)
 
     def start(self):
-        self.enabled = True
+        self.enable()
         self.world = World(self._surface, self.levAttr)
         self.world.nextLevel()
 
     def handleMenu(self, action):
         if 'resume' in action:
             if self.world is not None:
-                self.enabled = True
+                self.enable()
             else:
                 self.start()
-            self.menu.enabled = False
+            self.menu.disable()
         elif 'start' in action:
             self.start()
-            self.menu.enabled = False
+            self.menu.disable()
         elif 'editor' in action:
             if self.world:
-                self.world.level.enabled = True
-                self.menu.enabled = False
+                self.world.level.enabled()
+                self.menu.disable()
         elif 'exit' in action:
             self.exit()
 
-    def tick(self):
-        inputer = self.getEvents()
-        if (pygame.KEYDOWN, pygame.K_m) in inputer:
-            self.menu.enabled = not self.menu.enabled
-            self.enabled = not self.enabled
-        if (pygame.KEYDOWN, pygame.K_r) in inputer:
-            self.menu.enabled = False
-            self.enabled = True
-            self.world.level.start()
+    def _menu(self):
+        self.menu.toggleEnabled()
+        self.toggleEnabled()
 
-        if self.menu.enabled:
+    def tick(self):
+        inputs = self.getEvents()
+        self._input(inputs)
+        if self.menu.enabled():
             mPos = pygame.mouse.get_pos()
-            self.handleMenu(self.menu.tick(inputer, mPos))
+            self.menu.tick(inputs, mPos)
             self.menu.draw()
         elif self.enabled:
-            self.world.tick(inputer)
-            inputer = False
+            self.world.tick(inputs)
 
     def exit(self):
         self.started = False

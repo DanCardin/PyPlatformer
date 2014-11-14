@@ -5,7 +5,11 @@ from files import Files
 
 
 class Display(object):
-    def __init__(self, surface, klass=None, transparent=False, anim=None, alpha=0):
+    @staticmethod
+    def translate(rect, Cam):
+        return Object((rect.x - Cam.x, rect.y - Cam.y, rect.w, rect.h))
+
+    def __init__(self, surface, klass=None, transparent=False, anim=None, alpha=None):
         if isinstance(surface, str):
             self._image = Surface((klass.w, klass.h))
             self._image.blit(Files().loadImage(surface), (0, 0))
@@ -15,7 +19,7 @@ class Display(object):
         self._klass = klass if klass else self._image.get_rect()
         if transparent:
             self._image.set_colorkey(self._image.get_at((0, 0)))
-        if alpha:
+        if alpha is not None:
             self._image.set_alpha(alpha)
         self._animation = Animation(self, self._image, anim) if anim else None
 
@@ -28,11 +32,8 @@ class Display(object):
     def replace(self, image):
         self._image = image
 
-    def draw(self, surface, camera=Object((0, 0))):
-        if self._animation:
+    def draw(self, surface, camera=Object(), animate=True):
+        if self._animation and animate:
             self._animation.animate(self._klass.move.getDir(x=True))
-        rect = self.translate(self._klass, camera)
+        rect = Display.translate(self._klass, camera)
         surface.blit(self._image, rect)
-
-    def translate(self, rect, Cam):
-        return Object((rect.x - Cam.x, rect.y - Cam.y, rect.w, rect.h))

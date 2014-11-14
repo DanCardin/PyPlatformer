@@ -9,13 +9,13 @@ class World(object):
         self.currLevel = -1
 
     def nextLevel(self):
-        if len(self.levels) > self.currLevel:
+        if self.currLevel < len(self.levels) - 1:
             self.currLevel += 1
             self._complete = False
+            self.level = self.levels[self.currLevel]
+            self.level.start()
         else:
             self._complete = True
-        self.level = self.levels[self.currLevel]
-        self.level.start()
 
     def prevLevel(self):
         if self.currLevel > 0:
