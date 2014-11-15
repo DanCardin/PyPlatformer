@@ -21,7 +21,7 @@ class Display(object):
             self._image.set_colorkey(self._image.get_at((0, 0)))
         if alpha is not None:
             self._image.set_alpha(alpha)
-        self._animation = Animation(self, self._image, anim) if anim else None
+        self._animation = Animation(self._image, anim) if anim else None
 
     def getImage(self):
         return self._image
@@ -32,8 +32,8 @@ class Display(object):
     def replace(self, image):
         self._image = image
 
-    def draw(self, surface, camera=Object(), animate=True):
-        if self._animation and animate:
-            self._animation.animate(self._klass.move.getDir(x=True))
+    def draw(self, surface, camera=Object(), animate=None):
+        if self._animation and animate is not None:
+            self.replace(self._animation.animate(animate))
         rect = Display.translate(self._klass, camera)
         surface.blit(self._image, rect)

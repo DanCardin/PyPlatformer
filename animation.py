@@ -4,8 +4,7 @@ from object import Object
 
 
 class Animation(object):
-    def __init__(self, klass, image, tLength):
-        self._klass = klass
+    def __init__(self, image, tLength):
         self._tLength = tLength
         self._anim = {-1: {0: [], -1: []}, 1: {0: [], 1: []}}
 
@@ -26,4 +25,4 @@ class Animation(object):
             self._lastDir = direction
         img = self._anim[self._lastDir][direction][0]
         self._anim[self._lastDir][direction] = self._anim[self._lastDir][direction][1:] + [img]
-        self._klass.replace(img)
+        return img

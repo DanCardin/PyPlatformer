@@ -51,8 +51,8 @@ class Level(object):
         self.input.set(KEYDOWN, K_e, "editor", self.editor.toggleEnabled)
         self.input.set(KEYDOWN, K_r, "restart", self.start)
 
-        self.sound = Sound("assets\\music.ogg")
-        self.sound.play(-1)
+        # self.sound = Sound("assets\\music.ogg")
+        # self.sound.play(-1)
 
         self._enemySpawn = EnemyEmitter(Object(50, 100, 0, 0), Object(), self, 1)
 
@@ -103,7 +103,7 @@ class Level(object):
         self._enemySpawn.draw(self._total_surface, self._camera)
         for entities in [self.entities, self.registered]:
             for entity in entities.values():
-                entity.display.draw(self._total_surface, self._camera)
+                entity.display.draw(self._total_surface, self._camera, entity.move.getDir(x=True))
                 try:
                     entity._weapon.draw(self._total_surface, self._camera)
                 except:

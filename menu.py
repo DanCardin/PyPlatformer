@@ -18,7 +18,7 @@ class Menu(Object, Enableable):
 
     def tick(self, input, mPos):
         t = []
-        if self.enabled:
+        if self.enabled():
             for item in self.items.values():
                 tmp = len(t)
                 if len(input) > 0:
@@ -38,18 +38,21 @@ class Menu(Object, Enableable):
         self.items[key] = MenuItem(*args)
 
     def draw(self):
-        if self.enabled:
+        if self.enabled():
             for key, item in self.items.items():
                 item.display.draw(self._surface,
                                   Object((self.x * -1, self.y * -1, 0, 0)),
-                                  False)# animate=item.collided)
+                                  animate=item.collided())
 
 
 class MType(object):
     def update(self, image, **kwargs):
         raise NotImplementedError("Subclasses should override this")
 
-    def tick(self, collide, inputs):
+    def getCollide(self, collide):
+        return False
+
+    def tick(self, display, collide, inputs):
         pass
 
 
@@ -64,7 +67,7 @@ class MImage(MType):
             self._image = _image
 
         for i in range(2):
-            image.blit(image, (1, 1 + i * (image.get_height() / 2)))
+            image.blit(image, (1 + i * (image.get_width() / 2), 1))
 
 
 class MToggle(MType):
@@ -77,12 +80,12 @@ class MToggle(MType):
         if toggle is not None:
             self._toggled = toggle
 
-    def tick(self, collide, inputs):
+    def getCollide(self, collide):
+        return self._toggled
+
+    def tick(self, display, collide, inputs):
         if collide and inputs == pygame.MOUSEBUTTONDOWN:
             self._toggled = not self._toggled
-        if self._toggled:
-            pass
-            # self.display.replace(self.images[1])
 
 
 class MGroup(MType):
@@ -112,10 +115,10 @@ class MText(MType):
 
         for i in range(2):
             text = pygame.font.Font(None, 25).render(self._text, 1, self._textColor)
-            quarterH = image.get_height() / 4
+            quarterW = image.get_width() / 4
             image.blit(text,
-                       ((image.get_width() / 2) - (text.get_width() / 2),
-                        (quarterH + quarterH * 2 * i) - (text.get_height() / 2)))
+                       (int(quarterW + quarterW * 2 * i - (text.get_width() / 2)),
+                        int((image.get_height() / 2) - (text.get_height() / 2))))
 
 
 class MAction(MType):
@@ -132,7 +135,7 @@ class MAction(MType):
         if args:
             self._args = args
 
-    def tick(self, collide, inputs):
+    def tick(self, display, collide, inputs):
         if collide and inputs == pygame.MOUSEBUTTONDOWN:
             self._action(*self._args)
 
@@ -141,6 +144,8 @@ class MColor(MType):
     def __init__(self, rColor=(255, 255, 255), oColor=(0, 0, 0)):
         self._rColor = rColor
         self._oColor = oColor
+        self._rImage = None
+        self._oImage = None
 
     def update(self, image, **kwargs):
         rColor = kwargs.pop("rColor", None)
@@ -150,16 +155,25 @@ class MColor(MType):
         if oColor is not None:
             self._oColor = oColor
 
-        image.subsurface(Object(image.get_width(), 0)).fill(self._rColor)
-        image.subsurface(Object(image.get_width(), image.get_height() / 2)).fill(self._oColor)
+        width = image.get_width()
+        height = image.get_height()
+        self._rImage = image.subsurface(Object(width / 2, height)).fill(self._rColor)
+        self._oImage = image.subsurface(Object(width / 2, 0, width / 2, height)).fill(self._oColor)
+
+    def tick(self, display, collide, inputs):
+        if collide:
+            display.replace(self._oImage)
+        else:
+            display.replace(self._rImage)
 
 
 class MenuItem(Object):
     def __init__(self, rect=None, *types):
         Object.__init__(self, rect)
         self._selected = False
+        self._collided = False
         self._types = types
-        self.display = Display(pygame.surface.Surface((self.w, self.h * 2)), self, anim=2)
+        self.display = Display(pygame.surface.Surface((self.w * 2, self.h)), self, anim=2)
         self.update()
 
     def update(self, **kwargs):
@@ -169,10 +183,17 @@ class MenuItem(Object):
         for typ in self._types:
             typ.update(self.display.getImage(), **kwargs)
 
+    def collided(self):
+        for typ in self._types:
+            if typ.getCollide(self._collided):
+                return True
+        return self._collided
+
+
     def tick(self, inputs, menu, mPos):
         collide = pygame.Rect(menu.x + self.x, menu.y + self.y,
                               self.w, self.h).collidepoint(mPos[0], mPos[1])
-        # self.collided = collide == collide
+        self._collided = collide
         # self.display.replace(self.images[collide])
         for typ in self._types:
-            typ.tick(collide, inputs)
+            typ.tick(self.display, collide, inputs)

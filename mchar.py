@@ -60,9 +60,6 @@ class MChar(Object, Dir, Id):
         if arg == "up":
             self.jumping.muteJump()
 
-    def draw(self, surface, camera):
-        self.display.draw(surface, camera)
-
     def tick(self, inputs):
         super().tick()
         self.input(inputs)

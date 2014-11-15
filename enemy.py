@@ -1,5 +1,5 @@
 import const
-from char import Health, Alive
+from char import Health, Alive, Dir
 from collision import Collision, Direction
 from display import Display
 from files import Files
