@@ -58,8 +58,7 @@ class Game(Enableable):
         inputs = self.getEvents()
         self._input(inputs)
         if self.menu.enabled():
-            mPos = pygame.mouse.get_pos()
-            self.menu.tick(inputs, mPos)
+            self.menu.tick(inputs)
             self.menu.draw()
         elif self.enabled:
             self.world.tick(inputs)
@@ -68,12 +67,11 @@ class Game(Enableable):
         self.started = False
 
     def getEvents(self):
-        re = []
+        result = []
         for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:
-                re.append((event.type, event.key))
+            if event.type in [pygame.KEYDOWN, pygame.KEYUP, pygame.MOUSEBUTTONDOWN,
+                              pygame.MOUSEBUTTONUP, pygame.MOUSEMOTION]:
+                result.append(event)
             if event.type == pygame.QUIT:
                 self.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.MOUSEBUTTONUP:
-                re.append((event.type, event.pos))
-        return re
+        return result

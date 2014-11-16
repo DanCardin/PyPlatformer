@@ -24,6 +24,7 @@ class Editor(Object, Enableable):
         self.tile = False
         self.menuShowing = True
         self.mChange = True
+        self._applicable = [pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP, pygame.MOUSEMOTION]
 
         self.display = Display(pygame.surface.Surface((self.w, self.h)), self, True, alpha=75)
         self.createMenu(surface)
@@ -59,8 +60,7 @@ class Editor(Object, Enableable):
                           MAction(self.toggleOverlay))
         ts = self._map.getTileset()
         for i in range(const.TILE_SET_LENGTH):
-            surf = pygame.surface.Surface((30, 30))
-            surf.blit(ts, pygame.Rect(-1, -i * const.res, const.res - 2, const.res - 2))
+            surf = ts.subsurface((0, i * const.res, 32, 32))
             self.menu.addItem(i, (32 * i, 32, 32, 32), MImage(surf), MToggle(False), MGroup(2),
                               MAction(self.handleMenu, i))
 
@@ -96,9 +96,6 @@ class Editor(Object, Enableable):
     def endBlock(self):
         self.modifier = 2
 
-    def handleMouse(self, event, input):
-        return {pygame.MOUSEBUTTONDOWN: True, pygame.MOUSEBUTTONUP: False}.get(event)
-
     def handleMenu(self, action):
         self.modifier = 0
         if "pen" == action:
@@ -113,13 +110,10 @@ class Editor(Object, Enableable):
         if "death" == action:
             self.bType = 4
         if "wall" == action:
-            #self.menu.items[4].update(OColor=((0, 0, 255)))
             self.bType = 1
         if self.modifier == 1:
-            #self.menu.items[4].update(OColor=((0, 255, 0)))
             self.bType = 2
         if self.modifier == 2:
-            #self.menu.items[4].update(OColor=((255, 0, 255)))
             self.bType = 3
 
         if "save" == action:
@@ -132,21 +126,19 @@ class Editor(Object, Enableable):
                 self.brush = i
 
     def edit(self, inputs, camera):
-        x, y = pygame.mouse.get_pos()  # fix it, it doesnt need this because "inputs" already has the mouse pos
-        self.menu.tick(inputs, (x, y))
-
         self.input(inputs)
 
-        for event, key in inputs:
-            if not (event == pygame.KEYDOWN or event == pygame.KEYUP):
-                self.painting = self.handleMouse(event, key)
+        for event in [i for i in inputs if i.type in self._applicable]:
+            inputs = self.menu.tick(inputs)
+            if event.type in [pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP]:
+                self.painting = True if event.type == pygame.MOUSEBUTTONDOWN else False
 
-        if self.painting:
-            self.mChange = True
-            if self.tool == 0:
-                self.pen(x, y, camera)
-            elif self.tool == 1:
-                self.box(inputs, x, y)
+            if self.painting:
+                self.mChange = True
+                if self.tool == 0:
+                    self.pen(event.pos[0], event.pos[1], camera)
+                elif self.tool == 1:
+                    self.box(inputs, event.pos[0], event.pos[1])
 
     def update(self):
         tile = pygame.surface.Surface((const.res, const.res))

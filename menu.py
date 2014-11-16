@@ -16,23 +16,24 @@ class Menu(Object, Enableable):
     def select(self, key):
         return self.items.get(key)
 
-    def tick(self, input, mPos):
-        t = []
+    def tick(self, inputs):
+        leftOver = []
         if self.enabled():
-            for item in self.items.values():
-                tmp = len(t)
-                if len(input) > 0:
-                    for event, key in input:
-                        eTick = item.tick(event, self, mPos)
-                        if eTick is not None:
-                            t.append(eTick)
-                if len(t) > tmp:
-                    for e in self.items.values():
-                        if e.toggle:
-                            if e.tGroup == item.tGroup:
-                                e.togState = {True: 1, False: 0}[e.togState == 2]
-                item.tick(0, self, mPos)
-        return t
+            for event in inputs:
+                matched = False
+                for item in self.items.values():
+                    if item.tick(self, event):
+                        matched = True
+
+                if matched:
+                    leftOver.append(event)
+                # if len(t) > tmp:
+                #     for e in self.items.values():
+                #         if e.toggle:
+                #             if e.tGroup == item.tGroup:
+                #                 e.togState = {True: 1, False: 0}[e.togState == 2]
+                # item.tick(0, self, mPos)
+        return leftOver
 
     def addItem(self, key, *args):
         self.items[key] = MenuItem(*args)
@@ -52,7 +53,7 @@ class MType(object):
     def getCollide(self, collide):
         return False
 
-    def tick(self, display, collide, inputs):
+    def tick(self, display, collide, event):
         pass
 
 
@@ -67,7 +68,7 @@ class MImage(MType):
             self._image = _image
 
         for i in range(2):
-            image.blit(image, (1 + i * (image.get_width() / 2), 1))
+            image.blit(image, (i * (image.get_width() / 2), 0))
 
 
 class MToggle(MType):
@@ -83,8 +84,8 @@ class MToggle(MType):
     def getCollide(self, collide):
         return self._toggled
 
-    def tick(self, display, collide, inputs):
-        if collide and inputs == pygame.MOUSEBUTTONDOWN:
+    def tick(self, display, collide, event):
+        if collide and event.type == pygame.MOUSEBUTTONDOWN:
             self._toggled = not self._toggled
 
 
@@ -135,8 +136,8 @@ class MAction(MType):
         if args:
             self._args = args
 
-    def tick(self, display, collide, inputs):
-        if collide and inputs == pygame.MOUSEBUTTONDOWN:
+    def tick(self, display, collide, event):
+        if collide and event.type == pygame.MOUSEBUTTONDOWN:
             self._action(*self._args)
 
 
@@ -160,7 +161,7 @@ class MColor(MType):
         self._rImage = image.subsurface(Object(width / 2, height)).fill(self._rColor)
         self._oImage = image.subsurface(Object(width / 2, 0, width / 2, height)).fill(self._oColor)
 
-    def tick(self, display, collide, inputs):
+    def tick(self, display, collide, event):
         if collide:
             display.replace(self._oImage)
         else:
@@ -189,11 +190,12 @@ class MenuItem(Object):
                 return True
         return self._collided
 
-
-    def tick(self, inputs, menu, mPos):
+    def tick(self, menu, event):
         collide = pygame.Rect(menu.x + self.x, menu.y + self.y,
-                              self.w, self.h).collidepoint(mPos[0], mPos[1])
+                              self.w, self.h).collidepoint(event.pos[0], event.pos[1])
         self._collided = collide
-        # self.display.replace(self.images[collide])
+
         for typ in self._types:
-            typ.tick(self.display, collide, inputs)
+            typ.tick(self.display, collide, event)
+
+        return collide

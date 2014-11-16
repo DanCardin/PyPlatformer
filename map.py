@@ -21,8 +21,7 @@ class Map(Object):
 
         self._file = file
         self._tileset = Files().loadImage(tileset)
-        transColor = self._tileset.get_at((0, 0))
-        self._tileset.set_colorkey(transColor)
+        self._tileset.set_colorkey(self._tileset.get_at((0, 0)))
 
     def getStart(self):
         return self._tiles[Tile.Start][0]

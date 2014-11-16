@@ -23,9 +23,9 @@ class Input(object):
 
     def __call__(self, inputs):
         if inputs is not None:
-            for event, key in inputs:
-                validEvent = self.shortcuts.get(event)
-                validShortcut = self.keys.get(key)
-                if validEvent and validShortcut:
-                    if validEvent.get(validShortcut):
-                        self._use(validEvent, validShortcut)
+            for event in inputs:
+                validEvent = self.shortcuts.get(event.type)
+                if validEvent:
+                    validShortcut = self.keys.get(event.key)
+                    if validShortcut and validEvent.get(validShortcut):
+                            self._use(validEvent, validShortcut)
