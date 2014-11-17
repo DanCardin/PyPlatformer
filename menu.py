@@ -1,4 +1,5 @@
 import pygame
+from animation import Animation
 from display import Display
 from enableable import Enableable
 from object import Object
@@ -25,7 +26,7 @@ class Menu(Object, Enableable):
                     if item.tick(self, event):
                         matched = True
 
-                if matched:
+                if not matched:
                     leftOver.append(event)
                 # if len(t) > tmp:
                 #     for e in self.items.values():
@@ -42,8 +43,7 @@ class Menu(Object, Enableable):
         if self.enabled():
             for key, item in self.items.items():
                 item.display.draw(self._surface,
-                                  Object((self.x * -1, self.y * -1, 0, 0)),
-                                  animate=item.collided())
+                                  Object((self.x * -1, self.y * -1, 0, 0)))
 
 
 class MType(object):
@@ -174,8 +174,14 @@ class MenuItem(Object):
         self._selected = False
         self._collided = False
         self._types = types
-        self.display = Display(pygame.surface.Surface((self.w * 2, self.h)), self, anim=2)
+
+        image = pygame.surface.Surface((self.w * 2, self.h))
+        self.display = Display(image, self)
         self.update()
+
+        anim = Animation(image, 2, self.collided, None, None)
+        anim.build()
+        self.display.addAnimation(anim)
 
     def update(self, **kwargs):
         rect = kwargs.pop("rect", None)

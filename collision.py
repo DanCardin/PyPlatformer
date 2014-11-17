@@ -1,6 +1,6 @@
 import const
 from enum import Enum
-from wall import Tile
+from wall import Tiles
 
 
 class Direction(Enum):
@@ -53,9 +53,9 @@ class Collision(object):
             colDir = self.getColDir(dx, dy, tile)
             if colDir:
                 ttype = tile.getType()
-                if self._solidCollision and ttype == Tile.Solid:
+                if self._solidCollision and ttype == Tiles.Solid:
                     self.solidCollision(colDir, tile)
-                if ttype != Tile.Empty:
+                if ttype != Tiles.Empty:
                     result.setdefault(ttype, set()).add(colDir)
 
         return result

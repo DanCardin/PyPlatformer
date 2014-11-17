@@ -6,7 +6,7 @@ from object import Object
 from files import Files
 from wall import Wall
 from display import Display
-from wall import Tile
+from wall import Tiles
 
 
 class Map(Object):
@@ -24,7 +24,7 @@ class Map(Object):
         self._tileset.set_colorkey(self._tileset.get_at((0, 0)))
 
     def getStart(self):
-        return self._tiles[Tile.Start][0]
+        return self._tiles[Tiles.Start][0]
 
     def getTileset(self):
         return self._tileset

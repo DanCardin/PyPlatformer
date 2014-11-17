@@ -4,12 +4,11 @@ class Dir(object):
         self._dir = 1
 
     def getDir(self):
-        return self._dir
-
-    def tick(self):
         curDir = self._rule()
         if curDir:
             self._dir = curDir
+
+        return self._dir
 
 
 class Alive(object):

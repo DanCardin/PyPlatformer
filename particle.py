@@ -1,6 +1,6 @@
 from char import Alive
 from collision import Collision
-from display import Display
+from display import Display, Drawable
 from move import Move
 from ids import Id
 from object import Object
@@ -60,13 +60,13 @@ class Behaviors(object):
         return _cleanupCollision
 
 
-class Particle(Object, Id, Alive):
+class Particle(Object, Id, Alive, Drawable):
     def __init__(self, size, topSpeed, tileset, collide, *strategies, altname=None):
         Object.__init__(self, size)
         Id.__init__(self, altname)
         Alive.__init__(self)
 
-        self.display = Display(tileset, self)
+        self._display = Display(tileset, self)
         if collide:
             self.collision = Collision(self, collide, False)
         self.move = Move(self, topSpeed, self.collision)
@@ -96,7 +96,7 @@ class Emitter(object):
 
     def draw(self, surface, camera):
         for p in self._children:
-            p.display.draw(surface, camera)
+            p.draw(surface, camera)
 
     def tick(self):
         self._emit()

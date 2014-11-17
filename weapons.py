@@ -4,7 +4,7 @@ from enemy import Enemy
 from input import Input
 from object import Object
 from particle import Particle, Emitter, Behaviors
-from wall import Tile
+from wall import Tiles
 
 
 class Weapon(Emitter):

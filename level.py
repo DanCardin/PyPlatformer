@@ -11,13 +11,14 @@ from input import Input
 from map import Map
 from mchar import MChar
 from object import Object
-from wall import Tile
+from wall import Tiles
 
 
 class Level(object):
     def __init__(self, surface, level):
         self._surface = surface
         self._complete = False
+        self._scale = 1
 
         self.entities = {}
         self.registered = {}
@@ -82,7 +83,7 @@ class Level(object):
     def process(self, inputs):
         for entity in self.registered.values():
             result = entity.tick(inputs)
-            if Tile.End in result.keys():
+            if Tiles.End in result.keys():
                 self._complete = True
 
         for entity in list(self.entities.values()):
@@ -95,6 +96,7 @@ class Level(object):
         self._background.tick()
 
         if self.editor.enabled():
+            print(self._camera)
             self.editor.edit(inputs, self._camera)
 
     def render(self):
@@ -103,16 +105,12 @@ class Level(object):
         self._enemySpawn.draw(self._total_surface, self._camera)
         for entities in [self.entities, self.registered]:
             for entity in entities.values():
-                entity.display.draw(self._total_surface, self._camera, entity.move.getDir(x=True))
-                try:
-                    entity._weapon.draw(self._total_surface, self._camera)
-                except:
-                    pass
+                entity.draw(self._total_surface, self._camera)
+
         self.map.draw(self._total_surface, self._camera)
         if self.editor.enabled():
             self.editor.draw(self._total_surface, self._camera)
 
-        self._scale = 1
         # self.oscillate_test()
         self._camera.draw(self._surface, self._scale)
 

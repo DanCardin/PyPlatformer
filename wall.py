@@ -2,7 +2,7 @@ from enum import Enum
 from object import Object
 
 
-class Tile(Enum):
+class Tiles(Enum):
     Empty = 0
     Solid = 1
     Start = 2
@@ -13,7 +13,7 @@ class Tile(Enum):
 class Wall(Object):
     def __init__(self, pos, type, tile):
         Object.__init__(self, pos)
-        self._type = Tile(type)
+        self._type = Tiles(type)
         self._tile = tile
 
     def getTile(self):
@@ -23,7 +23,7 @@ class Wall(Object):
         return self._type
 
     def setType(self, type):
-        self._type = Tile(type)
+        self._type = Tiles(type)
 
     def setTile(self, tile):
         self._tile = tile

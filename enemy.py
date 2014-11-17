@@ -1,15 +1,15 @@
 import const
+from animation import Animation
 from char import Health, Alive, Dir
 from collision import Collision, Direction
-from display import Display
+from display import Display, Drawable
 from files import Files
 from gravity import GravityLine
 from ids import Id
-from jumping import Jumping
 from move import Move
 from object import Object
 from particle import Emitter, Behaviors
-from wall import Tile
+from wall import Tiles
 
 
 class EnemyEmitter(Emitter):
@@ -26,40 +26,56 @@ class EnemyEmitter(Emitter):
 
 
 class AI(object):
+    def __init__(self, klass):
+        self._klass = klass
+        self._dir = 1
+
     def tick(self, collisions):
-        solid = collisions.get(Tile.Solid)
+        solid = collisions.get(Tiles.Solid)
         if solid:
             if Direction.Left in solid and Direction.Bottom in solid:
                 self._dir = 1
             if Direction.Right in solid and Direction.Bottom in solid:
                 self._dir = -1
-            self.move.setSpeed(x= self._dir * self.move.getTopSpeed(x=True))
+            self._klass.move.setSpeed(x= self._dir * self._klass.move.getTopSpeed(x=True))
 
         if collisions.get("bullet"):
-            self.decHealth(1)
-            self.move.setSpeed(y=-8)
+            self._klass.decHealth(1)
+            self._klass.move.setSpeed(y=-8)
 
-        if self.getHealth() == 0:
-            self.kill()
+        if self._klass.getHealth() == 0:
+            self._klass.kill()
 
 
-class Enemy(Object, Id, AI, Alive, Health):
+class Enemy(Object, Dir, Id, Alive, Health, Drawable):
     def __init__(self, size, speed, tileset, level, maxHealth):
         Object.__init__(self, size)
+        Dir.__init__(self, lambda: self.move.getDir(x=True))
         Id.__init__(self, altname="enemy")
         Alive.__init__(self)
         Health.__init__(self, maxHealth)
 
         self.collision = Collision(self, level, "enemy")
         self.move = Move(self, speed, self.collision)
-        self.display = Display(Files().loadImage(tileset), self, True, 11)
         self.gravity = GravityLine(self, 2, h=const.res * const.screenSize[1] / 2)
-        self._dir = 1
+        self._ai = AI(self)
+
+        def _isMoving():
+            return self.move.getSpeed(x=True) != 0
+
+        def _hDir():
+            return self.move.getDir(x=True)
+
+        def _vDir():
+            return {False: -1, True: 1}[self.gravity.positiveDir()]
+
+        image = Files().loadImage(tileset)
+        self._display = Display(image, self, True, Animation(image, 11, _isMoving, _hDir, _vDir))
 
     def tick(self):
         collisions = self.move()
-        self.gravity.tick(collisions.get(Tile.Solid, []))
-        super().tick(collisions)
+        self.gravity.tick(collisions.get(Tiles.Solid, []))
+        self._ai.tick(collisions)
 
     @Behaviors.cleanupCollision
     def kill(self):
