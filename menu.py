@@ -173,6 +173,7 @@ class MenuItem(Object):
         Object.__init__(self, rect)
         self._selected = False
         self._collided = False
+        self._applicable = [pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP, pygame.MOUSEMOTION]
         self._types = types
 
         image = pygame.surface.Surface((self.w * 2, self.h))
@@ -184,7 +185,7 @@ class MenuItem(Object):
         self.display.addAnimation(anim)
 
     def update(self, **kwargs):
-        rect = kwargs.pop("rect", None)
+        # rect = kwargs.pop("rect", None)
         # if rect:
         #     self.rect = rect
         for typ in self._types:
@@ -197,11 +198,13 @@ class MenuItem(Object):
         return self._collided
 
     def tick(self, menu, event):
-        collide = pygame.Rect(menu.x + self.x, menu.y + self.y,
-                              self.w, self.h).collidepoint(event.pos[0], event.pos[1])
-        self._collided = collide
+        if event.type in self._applicable:
+            collide = pygame.Rect(menu.x + self.x, menu.y + self.y,
+                                  self.w, self.h).collidepoint(event.pos[0], event.pos[1])
+            self._collided = collide
 
-        for typ in self._types:
-            typ.tick(self.display, collide, event)
+            for typ in self._types:
+                typ.tick(self.display, collide, event)
 
-        return collide
+            return collide
+        return None

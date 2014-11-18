@@ -42,7 +42,7 @@ class Level(object):
         self._camera = Camera(tuple([s * const.res for s in const.screenSize]),
                               self._total_surface,
                               self.map,
-                              Object(150, 200, 150, 200),
+                              Object(const.res * 2, const.res * 2, const.res * 16, const.res * 13),
                               self.get(tid))
         self._background = Background(self._camera,
                                       const.backgrounds)
@@ -96,8 +96,7 @@ class Level(object):
         self._background.tick()
 
         if self.editor.enabled():
-            print(self._camera)
-            self.editor.edit(inputs, self._camera)
+            self.editor.tick(inputs, self._camera)
 
     def render(self):
         self._surface.fill((0, 0, 0))
