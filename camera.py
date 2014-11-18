@@ -47,7 +47,7 @@ class Camera(Object):
 
     def draw(self, surface, scale=1):
         """Calculate the scaling and display to the inputted surface"""
-        self._surface.draw(self._display.getImage(), self)
+        self._surface.draw(self._display.getImage())
 
         if scale != self._lastScale:
             surfImg = self._surface.getImage()

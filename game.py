@@ -8,63 +8,56 @@ from world import World
 
 class Game(Enableable):
     def __init__(self, surface, levels):
-        Enableable.__init__(self, False)
+        Enableable.__init__(self, True)
         self._surface = surface
-        self.levAttr = levels
-        self.world = None
-        self.camera = None
-        self.started = True
+        self._levAttr = levels
+        self._world = None
 
-        text = ['Resume', 'Start', 'Editor', 'Exit']
-        size = (const.screenSize[0] * const.res, const.screenSize[1] * const.res)
-        self.menu = Menu((size[0] / 2 - 50, size[1] / 2 - 50 * len(text) / 2),
-                         self._surface)
-        for i in range(0, len(text)):
-            self.menu.addItem(text[i].lower(), (0, 50 * i, 100, 48),
-                              MColor((255, 0, 0), (0, 0, 255)),
-                              MText(text[i], (0, 255, 0)),
-                              MAction(self.handleMenu, text[i].lower()))
+        self._menu = Menu((const.screenSize[0] * const.res / 2 - 50,
+                          const.screenSize[1] * const.res / 2 - 100),
+                          self._surface)
+        self._menu.addItem("resume", (0, 0, 100, 48), MColor((255, 0, 0), (0, 0, 255)),
+                           MText("Resume", (0, 255, 0)), MAction(self._resume))
+        self._menu.addItem("start", (0, 50, 100, 48), MColor((255, 0, 0), (0, 0, 255)),
+                           MText("Start", (0, 255, 0)), MAction(self.start))
+        self._menu.addItem("editor", (0, 100, 100, 48), MColor((255, 0, 0), (0, 0, 255)),
+                           MText("Editor", (0, 255, 0)), MAction(self._editor))
+        self._menu.addItem("exit", (0, 150, 100, 48), MColor((255, 0, 0), (0, 0, 255)),
+                           MText("Exit", (0, 255, 0)), MAction(self.disable))
 
         self._input = Input()
         self._input.set(pygame.KEYDOWN, pygame.K_m, "menu", self._menu)
 
     def start(self):
         self.enable()
-        self.world = World(self._surface, self.levAttr)
-        self.world.nextLevel()
+        self._world = World(self._surface, self._levAttr)
+        self._world.nextLevel()
+        self._menu.disable()
 
-    def handleMenu(self, action):
-        if 'resume' in action:
-            if self.world is not None:
-                self.enable()
-            else:
-                self.start()
-            self.menu.disable()
-        elif 'start' in action:
+    def _resume(self):
+        if self._world is not None:
+            self.enable()
+        else:
             self.start()
-            self.menu.disable()
-        elif 'editor' in action:
-            if self.world:
-                self.world.level.enabled()
-                self.menu.disable()
-        elif 'exit' in action:
-            self.exit()
+        self._menu.disable()
+
+    def _editor(self):
+        if self._world:
+            self._world.level.enabled()
+            self._menu.disable()
 
     def _menu(self):
-        self.menu.toggleEnabled()
+        self._menu.toggleEnabled()
         self.toggleEnabled()
 
     def tick(self):
         inputs = self.getEvents()
         self._input(inputs)
-        if self.menu.enabled():
-            self.menu.tick(inputs)
-            self.menu.draw()
+        if self._menu.enabled():
+            self._menu.tick(inputs)
+            self._menu.draw()
         elif self.enabled:
-            self.world.tick(inputs)
-
-    def exit(self):
-        self.started = False
+            self._world.tick(inputs)
 
     def getEvents(self):
         result = []

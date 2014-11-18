@@ -42,7 +42,7 @@ class Level(object):
         self._camera = Camera(tuple([s * const.res for s in const.screenSize]),
                               self._total_surface,
                               self.map,
-                              Object(const.res * 2, const.res * 2, const.res * 16, const.res * 13),
+                              Object(150, 200, 150, 200),
                               self.get(tid))
         self._background = Background(self._camera,
                                       const.backgrounds)

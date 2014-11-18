@@ -19,9 +19,10 @@ screen = pygame.display.set_mode((const.screenSize[0] * const.res,
 game = Game(screen, const.levelFiles)
 
 # --- Main Loop
-while game.started:
+while game.enabled():
     game.tick()
     clock.tick(const.FPS)
     pygame.display.flip()
+
 pygame.quit()
 sys.exit()

@@ -116,17 +116,17 @@ class Editor(Enableable, Showable):
         self._input(inputs)
         inputs = self.menu.tick(inputs)
 
-
         for event in inputs:
-            if event.type in [pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP]:
-                self._painting = True if event.type == pygame.MOUSEBUTTONDOWN else False
+            if event.type in [pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP, pygame.MOUSEMOTION]:
+                if event.type in [pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP]:
+                    self._painting = True if event.type == pygame.MOUSEBUTTONDOWN else False
 
-            if self._painting and self._tool and self._brush:
-                x, y = (int((event.pos[0] + camera.x) / const.res),
-                        int((event.pos[1] + camera.y) / const.res))
-                blocks = self._tool(x, y, self._brush)
-                if blocks:
-                    self._delta.extend(blocks)
+                if self._painting and self._tool and self._brush:
+                    x, y = (int((event.pos[0] + camera.x) / const.res),
+                            int((event.pos[1] + camera.y) / const.res))
+                    blocks = self._tool(x, y, self._brush)
+                    if blocks:
+                        self._delta.extend(blocks)
 
     def update(self):
         surf = pygame.surface.Surface((const.res, const.res))
