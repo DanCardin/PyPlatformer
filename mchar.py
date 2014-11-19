@@ -22,8 +22,8 @@ class MChar(Object, Dir, Id, Drawable):
         Id.__init__(self)
         self.collision = Collision(self, level)
         self.move = Move(self, speed, collision=self.collision)
-        self.gravity = GravityLine(self, 2, h=const.res * const.screenSize[1] / 2)
-        self.jumping = Jumping(self.move, self.gravity, 2)
+        self._gravity = GravityLine(self, 2, h=level.map.h // 2)
+        self.jumping = Jumping(self.move, self._gravity, 2)
         self.input = Input()
         self.applyInputSettings()
 
@@ -34,7 +34,7 @@ class MChar(Object, Dir, Id, Drawable):
             return self.move.getDir(x=True)
 
         def _vDir():
-            return {False: -1, True: 1}[self.gravity.positiveDir()]
+            return {False: -1, True: 1}[self._gravity.positiveDir()]
 
         image = Files().loadImage(tileset)
         self._display = Display(image, self, True, Animation(image, 11, _isMoving, _hDir, _vDir))
@@ -78,5 +78,5 @@ class MChar(Object, Dir, Id, Drawable):
 
         collisions = self.move()
         self.jumping.tick(collisions.get(Tiles.Solid, []))
-        self.gravity.tick(collisions.get(Tiles.Solid, []))
+        self._gravity.tick(collisions.get(Tiles.Solid, []))
         return collisions

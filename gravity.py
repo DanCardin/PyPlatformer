@@ -30,7 +30,7 @@ class Gravity(object):
         if direction not in collisions:
             self._applyGravity()
 
-        if [i for i in [Direction.Bottom, Direction.Top] if i in collisions]:
+        if [True for i in [Direction.Bottom, Direction.Top] if i in collisions]:
             self._resetFromCollision(collisions)
 
 
@@ -41,23 +41,15 @@ class GravityLine(Gravity):
 
         super().__init__(parent, mag)
 
-        self.h = h
-        self.v = v
-
-        self._crossedLine = False
-        """True while parent has crossed the gravity line, but not yet landed on ground."""
-
-    def _resetFromCollision(self, collisions):
-        super()._resetFromCollision(collisions)
-
-        self._crossedLine = False
+        self._h = h
+        self._v = v
 
     def tick(self, collision):
-        if self.h:
-            oldValue = self._value
-            lower = (self._parent.y - (self._parent.h / 2)) > self.h
-            self._value = -self._mag if lower else self._mag
-            if oldValue != self._value:
-                self._crossedLine = True
+        if self._h:
+            parentPos = (self._parent.y + (self._parent.h / 2))
+            if parentPos > self._h:
+                self._value = -abs(self._value)
+            if parentPos < self._h:
+                self._value = abs(self._value)
 
         super().tick(collision)

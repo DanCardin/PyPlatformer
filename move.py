@@ -62,10 +62,8 @@ class Move(object):
     def __call__(self):
         result = {}
         if self._speed[0] != 0:
-            self._speed[0] = min(self._topSpeed[0], self._speed[0])
             self._merge(result, self.moveSingleAxis(self._speed[0], 0))
         if self._speed[1] != 0:
-            self._speed[1] = min(self._topSpeed[1], self._speed[1])
             self._merge(result, self.moveSingleAxis(0, self._speed[1]))
 
         return result

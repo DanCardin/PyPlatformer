@@ -57,7 +57,7 @@ class Enemy(Object, Dir, Id, Alive, Health, Drawable):
 
         self.collision = Collision(self, level, "enemy")
         self.move = Move(self, speed, self.collision)
-        self.gravity = GravityLine(self, 2, h=const.res * const.screenSize[1] / 2)
+        self.gravity = GravityLine(self, 2, h=level.map.h // 2)
         self._ai = AI(self)
 
         def _isMoving():
