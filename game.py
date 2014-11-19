@@ -66,5 +66,5 @@ class Game(Enableable):
                               pygame.MOUSEBUTTONUP, pygame.MOUSEMOTION]:
                 result.append(event)
             if event.type == pygame.QUIT:
-                self.exit()
+                self.disable()
         return result

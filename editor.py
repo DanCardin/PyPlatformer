@@ -3,7 +3,7 @@ import const
 from display import Display
 from enableable import Enableable
 from input import Input
-from menu import Menu, MText, MToggle, MAction, MGroup, MImage, MColor
+from menu import Menu, MText, MAction, MImage, MColor, MAlpha, MenuItem
 from object import Object
 from showable import Showable
 from wall import Tiles
@@ -63,14 +63,15 @@ class Editor(Enableable, Showable):
         Showable.__init__(self, True)
 
         self._map = map
-        self._delta = [tile for tile in self._map.getMap().values()]
-
         self._brush = None
         self._tool = None
         self._painting = False
 
         surf = pygame.surface.Surface((map.w, map.h))
         self._display = Display(surf, surf.get_rect(), True, alpha=75)
+        for tile in self._map.getMap().values():
+            tile.subscribe(self._update)
+
         self._createMenu(surface)
 
         self._input = Input()
@@ -80,9 +81,6 @@ class Editor(Enableable, Showable):
 
     def _createMenu(self, surface):
         self.menu = Menu((0, (const.screenSize[1] - 2) * const.res), surface)
-        color = MColor((255, 0, 0), (0, 0, 255))
-        self.menu.addItem("save", (0, 0, 32, 32), color, color, MText("Save"),
-                          MAction(self._map.save))
 
         def _setTool(tool):
             self._tool = tool
@@ -90,27 +88,38 @@ class Editor(Enableable, Showable):
         def _setBrush(brush):
             self._brush = brush
 
-        self.menu.addItem("pen", (32, 0, 32, 32), color, MText("Pen"), MToggle(), MGroup(0),
-                          MAction(_setTool, PenTool(self._map)))
-        self.menu.addItem("box", (64, 0, 32, 32), color, MText("Box"), MToggle(), MGroup(0),
-                          MAction(_setTool, BoxTool(self._map)))
-        self.menu.addItem("wall", (196, 0, 32, 32), color, MText("W"), MToggle(), MGroup(1),
-                          MAction(_setBrush, WallBrush(Tiles.Solid)))
-        self.menu.addItem("empty", (228, 0, 32, 32), color, MText("V"), MToggle(), MGroup(1),
-                          MAction(_setBrush, WallBrush(Tiles.Empty)))
-        self.menu.addItem("death", (260, 0, 32, 32), color, MText("D"), MToggle(), MGroup(1),
-                          MAction(_setBrush, WallBrush(Tiles.Deadly)))
-        self.menu.addItem("start", (292, 0, 32, 32), color, MText("S"), MToggle(), MGroup(1),
-                          MAction(_setBrush, WallBrush(Tiles.Start)))
-        self.menu.addItem("end", (324, 0, 32, 32), color, MText("E"), MToggle(), MGroup(1),
-                          MAction(_setBrush, WallBrush(Tiles.End)))
-        self.menu.addItem("collision", (500, 0, 100, 32), color, MText("Coll"), MToggle(),
-                          MAction(self.toggleShowing))
+        color = MColor((255, 0, 0), (0, 0, 255))
+        alpha = MAlpha(200)
+        self.menu.addItem("save", (450, 0, 49, 32), color, alpha, MText("Save"),
+                          MAction(self._map.save))
+        self.menu.addGroup("collision",
+                           MenuItem((500, 0, 49, 32), color, alpha, MText("Coll"),
+                                    MAction(self.toggleShowing)))
+
+        self.menu.addGroup("Tools",
+            MenuItem((0, 0, 31, 32), color, alpha, MText("Pen"),
+                     MAction(_setTool, PenTool(self._map))),
+            MenuItem((32, 0, 31, 32), color, alpha, MText("Box"),
+                     MAction(_setTool, BoxTool(self._map))))
+
+        self.menu.addGroup("Brushes",
+            MenuItem((196, 0, 31, 32), color, alpha, MText("W"),
+                     MAction(_setBrush, WallBrush(Tiles.Solid))),
+            MenuItem((228, 0, 31, 32), color, alpha, MText("V"),
+                     MAction(_setBrush, WallBrush(Tiles.Empty))),
+            MenuItem((260, 0, 31, 32), color, alpha, MText("D"),
+                     MAction(_setBrush, WallBrush(Tiles.Deadly))),
+            MenuItem((292, 0, 31, 32), color, alpha, MText("S"),
+                     MAction(_setBrush, WallBrush(Tiles.Start))),
+            MenuItem((324, 0, 31, 32), color, alpha, MText("E"),
+                     MAction(_setBrush, WallBrush(Tiles.End))))
+
         ts = self._map.getTileset()
         for i in range(const.TILE_SET_LENGTH):
             surf = ts.subsurface((0, i * const.res, 32, 32))
-            self.menu.addItem(i, (32 * i, 32, 32, 32), MImage(surf), MToggle(), MGroup(2),
-                              MAction(_setBrush, TileBrush(i)))
+            self.menu.appendGroup("Brushes",
+                MenuItem((32 * i, 32, 32, 32), MImage(surf), alpha,
+                              MAction(_setBrush, TileBrush(i))))
 
     def tick(self, inputs, camera):
         self._input(inputs)
@@ -125,22 +134,16 @@ class Editor(Enableable, Showable):
                     x, y = (int((event.pos[0] + camera.x) / const.res),
                             int((event.pos[1] + camera.y) / const.res))
                     blocks = self._tool(x, y, self._brush)
-                    if blocks:
-                        self._delta.extend(blocks)
 
-    def update(self):
+    def _update(self, block):
         surf = pygame.surface.Surface((const.res, const.res))
-        for tile in self._delta:
-            surf.fill({Tiles.Empty: (0, 0, 0),
-                       Tiles.Solid: (0, 0, 255),
-                       Tiles.Start: (0, 255, 0),
-                       Tiles.End: (255, 0, 255),
-                       Tiles.Deadly: (255, 0, 0)}[tile.getType()])
-            self._display.update(surf, tile)
-        self._delta = []
+        surf.fill({Tiles.Empty: (0, 0, 0),
+                   Tiles.Solid: (0, 0, 255),
+                   Tiles.Start: (0, 255, 0),
+                   Tiles.End: (255, 0, 255),
+                   Tiles.Deadly: (255, 0, 0)}[block.getType()])
+        self._display.update(surf, block)
 
     def draw(self, surface, camera):
-        if self._delta:
-            self.update()
         if self.showing():
             self._display.draw(surface, camera)

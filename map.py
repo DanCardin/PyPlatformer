@@ -14,7 +14,6 @@ class Map(Object):
         Object.__init__(self)
         self._map = {}
         self._tiles = {}
-        self._mapDelta = []
         self._wx = 0
         self._hy = 0
         self.display = None
@@ -57,6 +56,7 @@ class Map(Object):
         self._hy = int(match.group(2))
         self.w = self._wx * const.res
         self.h = self._hy * const.res
+        self.display = Display(pygame.surface.Surface((self.w, self.h)), self, True)
 
         tiles = re.findall("\((\d+),(\d+),(\d+),(\d+):(\d+),(\d+)\)", file)
         for i in range(self._hy):
@@ -64,12 +64,10 @@ class Map(Object):
                 x, y, w, h, typ, tile = tiles[i * self._wx + e]
                 x, y, w, h, typ, tile = int(x), int(y), int(w), int(h), int(typ), int(tile)
                 wall = Wall((x, y, w, h), typ, tile)
+                wall.subscribe(self._updateMap)
 
                 self._map[(e, i)] = wall
                 self._tiles.setdefault(wall.getType(), []).append(wall)
-                self._mapDelta.append(wall)
-
-        self.display = Display(pygame.surface.Surface((self.w, self.h)), self, True)
 
     def save(self):
         s = ["(%s,%s)\n" % (self._wx, self._hy)]
@@ -78,17 +76,14 @@ class Map(Object):
                 tile = self._map[(e, i)]
                 s.append("({},{},{},{}:{},{})".format(tile.x, tile.y,
                                                       tile.w, tile.h,
-                                                      tile.getType().value, tile.getTile()).ljust(20))
+                                                      tile.getType().value,
+                                                      tile.getTile()).ljust(20))
             s.append("\n")
         Files().saveFile(''.join(s), self._file)
 
-    def _updateMap(self):
-        for block in self._mapDelta:
-            self.display.update(self._tileset, (block.x, block.y),
-                                (0, block.getTile() * const.res, const.res, const.res))
-        self._mapDelta = []
+    def _updateMap(self, block):
+        self.display.update(self._tileset, (block.x, block.y),
+                            (0, block.getTile() * const.res, const.res, const.res))
 
     def draw(self, surface, camera):
-        if self._mapDelta:
-            self._updateMap()
         self.display.draw(surface, camera)

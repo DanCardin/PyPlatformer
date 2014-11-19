@@ -22,3 +22,21 @@ class Object(Rect):
                              "1, 2, or 4 arguments, got %s." % str(size))
 
         super().__init__(x, y, w, h)
+
+
+class ObjectOffset(Object):
+    def __init__(self, offset, *size):
+        super(self).__init__(*size)
+
+        self._offset = offset
+
+    def changeOffset(self, offset):
+        self._offset = offset
+
+    @property
+    def x(self):
+        return self.x + self._offset.x
+
+    @property
+    def y(self):
+        return self.y + self._offset.y
