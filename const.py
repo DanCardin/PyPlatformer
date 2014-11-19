@@ -3,17 +3,17 @@ PLAYER_NUM = 1
 TILE_SET_LENGTH = 20
 
 gameName = "Story of a Square"
-levelFiles = [("assets\\level1.txt", "assets\\tileset3.bmp"),
-              ("assets\\level2.txt", "assets\\tileset3.bmp")]
-playerTileset = "assets\\2run.bmp"
-settings = "assets\\settings.txt"
+levelFiles = [("level1.txt", "tileset3.bmp"),
+              ("level2.txt", "tileset3.bmp")]
+playerTileset = "2run.bmp"
+settings = "settings.txt"
 screenSize = (20, 17)
 FPS = 30
 playerSpeed = (6, 12)
 currLevel = 0
 
 backgrounds = [
-    ((480, 320), 4, "assets\\background.png"),
-    ((480, 320), 2, "assets\\background2.png"),
-    ((480, 320), 0, "assets\\background3.png")
+    ((480, 320), 4, "background.png"),
+    ((480, 320), 2, "background2.png"),
+    ((480, 320), 0, "background3.png")
 ]

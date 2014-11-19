@@ -19,7 +19,7 @@ class Map(Object):
         self.display = None
 
         self._file = file
-        self._tileset = Files().loadImage(tileset)
+        self._tileset = Files.loadImage(tileset)
         self._tileset.set_colorkey(self._tileset.get_at((0, 0)))
 
     def getStart(self):
@@ -50,7 +50,7 @@ class Map(Object):
         self._map[self.inRange(x, y)] = to
 
     def load(self):
-        file = Files().openFile(self._file)
+        file = Files.openFile(self._file)
         match = re.search("^\((\d+),(\d+)\)", file)
         self._wx = int(match.group(1))
         self._hy = int(match.group(2))
@@ -79,7 +79,7 @@ class Map(Object):
                                                       tile.getType().value,
                                                       tile.getTile()).ljust(20))
             s.append("\n")
-        Files().saveFile(''.join(s), self._file)
+        Files.saveFile(''.join(s), self._file)
 
     def _updateMap(self, block):
         self.display.update(self._tileset, (block.x, block.y),
