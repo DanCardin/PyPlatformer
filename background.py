@@ -34,5 +34,5 @@ class Layer(Object):
     def __init__(self, size, dampSpeed, picture):
         Object.__init__(self, (0, 0, size[0], size[1]))
         self.dampSpeed = dampSpeed
-        self.picture = Files().loadImage(picture)
+        self.picture = Files.loadImage(picture)
         self.display = Display(self.picture, self, True)

@@ -69,7 +69,7 @@ class Enemy(Object, Dir, Id, Alive, Health, Drawable):
         def _vDir():
             return {False: -1, True: 1}[self.gravity.positiveDir()]
 
-        image = Files().loadImage(tileset)
+        image = Files.loadImage(tileset)
         self._display = Display(image, self, True, Animation(image, 11, _isMoving, _hDir, _vDir))
 
     def tick(self):

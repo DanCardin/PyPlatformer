@@ -1,32 +1,38 @@
 import pygame
+import os
 
 
 class Files(object):
-    def saveFile(self, input, file):
-        fObj = open(file, "w")
-        fObj.write(input)
-        fObj.close()
+    @staticmethod
+    def getFilePath(file):
+        return os.path.join("assets", file)
 
-    def _load_file(self, run):
+    @staticmethod
+    def saveFile(input, file):
+        with open(Files.getFilePath(file), "w") as obj:
+            obj.write(input)
+
+    @staticmethod
+    def _load_file(run):
         try:
             return run()
         except pygame.error as message:
             print("Cannot load file:", message)
             raise (message)
 
-    def openFile(self, file):
+    @staticmethod
+    def openFile(file):
         def run():
-            fObj = open(file)
-            s = fObj.read()
-            fObj.close()
-            return s
-        return self._load_file(run)
+            with open(Files.getFilePath(file)) as obj:
+                return obj.read()
+        return Files._load_file(run)
 
-    def loadImage(self, file, colorkey=None):
+    @staticmethod
+    def loadImage(file, colorkey=None):
         def run():
-            return pygame.image.load(file)
+            return pygame.image.load(Files.getFilePath(file))
 
-        image = self._load_file(run).convert()
+        image = Files._load_file(run).convert()
         if colorkey is not None:
             if colorkey is -1:
                 colorkey = image.get_at((0, 0))
