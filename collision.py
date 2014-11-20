@@ -64,7 +64,8 @@ class Collision(object):
         tEnts = self._level._entity_map.get(self._parent.getId())
         if tEnts:
             for tile in tEnts:
-                self._level._position_map.get(tile).remove(self._parent)
+                if self._parent in self._level._position_map.get(tile):
+                    self._level._position_map.get(tile).remove(self._parent)
             self._level._entity_map.pop(self._parent.getId())
 
     def startColliding(self):

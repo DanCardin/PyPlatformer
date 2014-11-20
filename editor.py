@@ -70,7 +70,7 @@ class Editor(Enableable, Showable):
         surf = pygame.surface.Surface((map.w, map.h))
         self._display = Display(surf, surf.get_rect(), True, alpha=75)
         for tile in self._map.getMap().values():
-            tile.subscribe(self._update)
+            tile.subscribe("editor", self._update)
 
         self._createMenu(surface)
 
