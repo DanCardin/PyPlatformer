@@ -7,7 +7,7 @@ from files import Files
 from gravity import GravityLine
 from input import Input
 from jumping import Jumping
-from lib.events import EventStream
+from libs.events import EventStream
 from object import Object
 from move import Move
 from wall import Tiles

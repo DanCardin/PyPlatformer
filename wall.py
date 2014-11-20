@@ -1,6 +1,6 @@
 from enum import Enum
 from object import Object
-from lib.events import EventStream
+from libs.events import EventStream
 
 
 class Tiles(Enum):
