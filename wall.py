@@ -1,5 +1,6 @@
 from enum import Enum
 from object import Object
+from lib.events import EventStream
 
 
 class Tiles(Enum):
@@ -10,16 +11,12 @@ class Tiles(Enum):
     Deadly = 4
 
 
-class Wall(Object):
+class Wall(Object, EventStream):
     def __init__(self, pos, type, tile):
         Object.__init__(self, pos)
-        self._subs = []
+        EventStream.__init__(self)
         self._type = Tiles(type)
         self._tile = tile
-
-    def _notify(self):
-        for sub in self._subs:
-            sub(self)
 
     def getTile(self):
         return self._tile
@@ -34,7 +31,3 @@ class Wall(Object):
     def setTile(self, tile):
         self._tile = tile
         self._notify()
-
-    def subscribe(self, sub):
-        self._subs.append(sub)
-        sub(self)

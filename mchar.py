@@ -1,5 +1,4 @@
 import pygame
-import const
 from animation import Animation
 from char import Dir, Health
 from collision import Collision
@@ -8,6 +7,7 @@ from files import Files
 from gravity import GravityLine
 from input import Input
 from jumping import Jumping
+from lib.events import EventStream
 from object import Object
 from move import Move
 from wall import Tiles
@@ -15,12 +15,13 @@ from weapons import Weapon
 from ids import Id
 
 
-class MChar(Object, Dir, Id, Drawable, Health):
+class MChar(Object, Dir, Id, Drawable, Health, EventStream):
     def __init__(self, start, size, speed, tileset, control, level, maxHealth):
         Object.__init__(self, (start[0], start[1], size[0], size[1]))
         Dir.__init__(self, lambda: self.move.getDir(x=True))
         Id.__init__(self)
         Health.__init__(self, maxHealth)
+        EventStream.__init__(self)
 
         self.collision = Collision(self, level)
         self.move = Move(self, speed, collision=self.collision)
@@ -79,6 +80,12 @@ class MChar(Object, Dir, Id, Drawable, Health):
         self._weapon.tick(inputs)
 
         collisions = self.move()
-        self.jumping.tick(collisions.get(Tiles.Solid, []))
-        self._gravity.tick(collisions.get(Tiles.Solid, []))
+        self.jumping.tick(collisions)
+        self._gravity.tick(collisions)
+
+        if collisions.get(Tiles.Deadly):
+            self.decHealth(1)
+            self.move.setSpeed(y=8)
+            self._notify()
+
         return collisions

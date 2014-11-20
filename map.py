@@ -64,7 +64,7 @@ class Map(Object):
                 x, y, w, h, typ, tile = tiles[i * self._wx + e]
                 x, y, w, h, typ, tile = int(x), int(y), int(w), int(h), int(typ), int(tile)
                 wall = Wall((x, y, w, h), typ, tile)
-                wall.subscribe(self._updateMap)
+                wall.subscribe("map", self._updateMap)
 
                 self._map[(e, i)] = wall
                 self._tiles.setdefault(wall.getType(), []).append(wall)
