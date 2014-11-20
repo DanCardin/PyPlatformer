@@ -8,9 +8,11 @@ class Display(object):
     def translate(rect, cam):
         return Object((rect.x - cam.x, rect.y - cam.y, rect.w, rect.h))
 
-    def __init__(self, surface, klass=None, transparent=False, anim=None, alpha=None):
+    def __init__(self, surface=None, klass=None, transparent=False, anim=None, alpha=None):
         self._image = Files.loadImage(surface) if isinstance(surface, str) else surface
-        self._klass = klass if klass else self._image.get_rect()
+        self._klass = klass
+        if klass is None and self._image:
+            self._klass = self._image.get_rect()
 
         if transparent:
             self._image.set_colorkey(self._image.get_at((0, 0)))

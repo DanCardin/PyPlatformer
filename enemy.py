@@ -39,13 +39,6 @@ class AI(object):
                 self._dir = -1
             self._klass.move.setSpeed(x= self._dir * self._klass.move.getTopSpeed(x=True))
 
-        if collisions.get("bullet"):
-            self._klass.decHealth(1)
-            self._klass.move.setSpeed(y=-8)
-
-        if self._klass.getHealth() == 0:
-            self._klass.kill()
-
 
 class Enemy(Object, Dir, Id, Alive, Health, Drawable):
     def __init__(self, size, speed, tileset, level, maxHealth):
@@ -76,6 +69,14 @@ class Enemy(Object, Dir, Id, Alive, Health, Drawable):
         collisions = self.move()
         self.gravity.tick(collisions.get(Tiles.Solid, []))
         self._ai.tick(collisions)
+
+        if collisions.get("bullet"):
+            self.decHealth(1)
+            self.move.setSpeed(y=-8)
+
+        if self.getHealth() == 0:
+            self.kill()
+
 
     @Behaviors.cleanupCollision
     def kill(self):
