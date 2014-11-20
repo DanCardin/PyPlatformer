@@ -1,7 +1,7 @@
 import pygame
 import const
 from animation import Animation
-from char import Dir
+from char import Dir, Health
 from collision import Collision
 from display import Display, Drawable
 from files import Files
@@ -15,11 +15,13 @@ from weapons import Weapon
 from ids import Id
 
 
-class MChar(Object, Dir, Id, Drawable):
-    def __init__(self, start, size, speed, tileset, control, level):
+class MChar(Object, Dir, Id, Drawable, Health):
+    def __init__(self, start, size, speed, tileset, control, level, maxHealth):
         Object.__init__(self, (start[0], start[1], size[0], size[1]))
         Dir.__init__(self, lambda: self.move.getDir(x=True))
         Id.__init__(self)
+        Health.__init__(self, maxHealth)
+
         self.collision = Collision(self, level)
         self.move = Move(self, speed, collision=self.collision)
         self._gravity = GravityLine(self, 2, h=level.map.h // 2)

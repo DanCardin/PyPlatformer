@@ -7,6 +7,7 @@ from background import Background
 from camera import Camera
 from editor import Editor
 from enemy import EnemyEmitter
+from healthbar import HealthBar
 from input import Input
 from map import Map
 from mchar import MChar
@@ -38,7 +39,7 @@ class Level(object):
                              entity=MChar(self.map.getStart(),
                                           (20, 26),
                                           const.playerSpeed,
-                                          const.playerTileset, True, self))
+                                          const.playerTileset, True, self, 5))
         self._camera = Camera(tuple([s * const.res for s in const.screenSize]),
                               self._total_surface,
                               self.map,
@@ -55,6 +56,7 @@ class Level(object):
         # self.sound = Sound("assets\\music.ogg")
         # self.sound.play(-1)
 
+        self._healthBar = HealthBar(10, 10, self.get(tid))
         self._enemySpawn = EnemyEmitter(Object(50, 100, 0, 0), Object(), self, 1)
 
     def addEntity(self, register=False, entity=None):
@@ -107,6 +109,7 @@ class Level(object):
                 entity.draw(self._total_surface, self._camera)
 
         self.map.draw(self._total_surface, self._camera)
+        self._healthBar.draw(self._total_surface)
         if self.editor.enabled():
             self.editor.draw(self._total_surface, self._camera)
 
