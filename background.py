@@ -9,8 +9,8 @@ class Background(object):
         self.camera = camera
         self._prevCameraPos = (self.camera[0], self.camera[1])
         self.layers = []
-        for i in layers:
-            self.layers.append(Layer(i[0], i[1], i[2]))
+        for i, (size, damp, image) in enumerate(layers):
+            self.layers.append(Layer(size, damp, image, i != 0))
 
     def draw(self, surface, camera):
         for i in self.layers:
@@ -31,8 +31,8 @@ class Background(object):
 
 
 class Layer(Object):
-    def __init__(self, size, dampSpeed, picture):
+    def __init__(self, size, dampSpeed, picture, transparency):
         Object.__init__(self, (0, 0, size[0], size[1]))
         self.dampSpeed = dampSpeed
         self.picture = Files.loadImage(picture)
-        self.display = Display(self.picture, self, True)
+        self.display = Display(self.picture, self, transparency)

@@ -13,7 +13,7 @@ playerSpeed = (6, 12)
 currLevel = 0
 
 backgrounds = [
-    ((480, 320), 4, "background.png"),
-    ((480, 320), 2, "background2.png"),
+    ((480, 320), 4, "back1.png"),
+    ((480, 320), 2, "back2.png"),
     ((480, 320), 0, "background3.png")
 ]

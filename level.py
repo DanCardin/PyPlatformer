@@ -18,19 +18,16 @@ from wall import Tiles
 class Level(object):
     def __init__(self, surface, level):
         self._surface = surface
-        self._complete = False
-        self._scale = 1
-
-        self.entities = {}
-        self.registered = {}
-
-        self._entity_map = {}
-        self._position_map = {}
-
         self.map = Map(level[0], level[1])
 
     def start(self):
-        self.entities = {}
+        self._scale = 1
+        self._complete = False
+        self.registered = {}
+        self._entity_map = {}
+        self._position_map = {}
+        self._entities = {}
+
         self.map.load()
         for x, y in self.map.getMap().keys():
             self._position_map[(x, y)] = []
@@ -57,24 +54,25 @@ class Level(object):
         # self.sound.play(-1)
 
         self._healthBar = HealthBar(10, 10, self.get(tid))
-        self._enemySpawn = EnemyEmitter(Object(50, 100, 0, 0), Object(), self, 1)
+        self._enemySpawn = EnemyEmitter(Object(50, 100, 0, 0), Object(), self, 2, 2)
+        # self._
 
     def addEntity(self, register=False, entity=None):
         if not entity:
             raise Exception("Entity must not be None.")
 
         tid = entity.getId()
-        reg = self.registered if register else self.entities
+        reg = self.registered if register else self._entities
 
         reg[tid] = entity
         self._entity_map[tid] = set()
         return tid
 
     def removeEntity(self, entity):
-        del self.entities[entity.id]
+        del self._entities[entity.id]
 
     def get(self, entityId):
-        result = self.entities.get(entityId)
+        result = self._entities.get(entityId)
         if not result:
             result = self.registered.get(entityId)
         return result
@@ -88,10 +86,10 @@ class Level(object):
             if Tiles.End in result.keys():
                 self._complete = True
 
-        for entity in list(self.entities.values()):
+        for entity in list(self._entities.values()):
             entity.tick()
             if not entity.isAlive():
-                self.entities.pop(entity.getId())
+                self._entities.pop(entity.getId())
 
         self._enemySpawn.tick()
         self._camera.tick()
@@ -104,8 +102,8 @@ class Level(object):
         self._surface.fill((0, 0, 0))
         self._background.draw(self._total_surface, self._camera)
         self._enemySpawn.draw(self._total_surface, self._camera)
-        for entities in [self.entities, self.registered]:
-            for entity in entities.values():
+        for _entities in [self._entities, self.registered]:
+            for entity in _entities.values():
                 entity.draw(self._total_surface, self._camera)
 
         self.map.draw(self._total_surface, self._camera)

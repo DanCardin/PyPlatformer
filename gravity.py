@@ -1,8 +1,11 @@
 from collision import Direction
+from wall import Tiles
 
 
 class Gravity(object):
     def __init__(self, parent, value):
+        self._ignore = [Tiles.Empty, Tiles.Start, Tiles.End, Tiles.Deadly]
+
         self._parent = parent
         self._mag = abs(value)
         self._value = value
@@ -26,6 +29,7 @@ class Gravity(object):
         self._parent.move.setSpeed(y=0)
 
     def tick(self, collisions):
+        collisions = {c for a, b in collisions.items() for c in b if a not in self._ignore}
         direction = Direction.Bottom if self.positiveDir() else Direction.Top
         if direction not in collisions:
             self._applyGravity()

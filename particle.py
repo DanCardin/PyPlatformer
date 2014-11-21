@@ -1,3 +1,4 @@
+import time
 from char import Alive
 from collision import Collision
 from display import Display, Drawable
@@ -104,3 +105,16 @@ class Emitter(object):
             p.tick()
             if not p.isAlive():
                 self._children.remove(p)
+
+
+class MinTimeEmitter(Emitter):
+    def __init__(self, anchor, offset, maxEmitted, duration):
+        super().__init__(anchor, offset, maxEmitted)
+        self._duration = 2
+        self._lastTime = time.perf_counter()
+
+    def _emit(self):
+        newTime = time.perf_counter()
+        if newTime - self._lastTime > self._duration:
+            self._lastTime = newTime
+            super()._emit()

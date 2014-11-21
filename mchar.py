@@ -7,7 +7,7 @@ from files import Files
 from gravity import GravityLine
 from input import Input
 from jumping import Jumping
-from libs.events import EventStream
+from libs.events import Subscribee, MinTimeEventStream
 from object import Object
 from move import Move
 from wall import Tiles
@@ -15,13 +15,12 @@ from weapons import Weapon
 from ids import Id
 
 
-class MChar(Object, Dir, Id, Drawable, Health, EventStream):
+class MChar(Object, Dir, Id, Drawable, Health, Subscribee):
     def __init__(self, start, size, speed, tileset, control, level, maxHealth):
         Object.__init__(self, (start[0], start[1], size[0], size[1]))
         Dir.__init__(self, lambda: self.move.getDir(x=True))
         Id.__init__(self)
         Health.__init__(self, maxHealth)
-        EventStream.__init__(self)
 
         self.collision = Collision(self, level)
         self.move = Move(self, speed, collision=self.collision)
@@ -29,6 +28,8 @@ class MChar(Object, Dir, Id, Drawable, Health, EventStream):
         self.jumping = Jumping(self.move, self._gravity, 2)
         self.input = Input()
         self.applyInputSettings()
+        self._damageTimer = MinTimeEventStream(2)
+        self._damageTimer.subscribe("self", self._takeDmg)
 
         def _isMoving():
             return self.move.getSpeed(x=True) != 0
@@ -75,6 +76,16 @@ class MChar(Object, Dir, Id, Drawable, Health, EventStream):
         self._display.draw(surface, camera)
         self._weapon.draw(surface, camera)
 
+    def subscribe(self, id, callback):
+        self._damageTimer.subscribe(id, callback)
+
+    def unsubscribe(self, id):
+        self._damageTimer.unsubscribe(id)
+
+    def _takeDmg(self, ignore):
+        self.decHealth(1)
+        self.move.setSpeed(y=8)
+
     def tick(self, inputs):
         self.input(inputs)
         self._weapon.tick(inputs)
@@ -84,8 +95,6 @@ class MChar(Object, Dir, Id, Drawable, Health, EventStream):
         self._gravity.tick(collisions)
 
         if collisions.get(Tiles.Deadly):
-            self.decHealth(1)
-            self.move.setSpeed(y=8)
-            self._notify()
+            self._damageTimer.notify()
 
         return collisions

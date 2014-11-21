@@ -1,8 +1,11 @@
+import time
+
+
 class EventStream(object):
     def __init__(self):
         self._observers = {}
 
-    def _notify(self):
+    def notify(self):
         for callback in self._observers.values():
             callback(self)
 
@@ -16,3 +19,24 @@ class EventStream(object):
     def unsubscribe(self, id):
         if not self._observers.pop(id):
             raise ValueError("id {} is not subscribed to {}".format(id, self))
+
+
+class Subscribee(object):
+    def subscribe(self, id, callback):
+        raise NotImplementedError()
+
+    def unsubscribe(self, id):
+        raise NotImplementedError()
+
+
+class MinTimeEventStream(EventStream):
+    def __init__(self, duration):
+        super().__init__()
+        self._duration = duration
+        self._lastTime = time.perf_counter()
+
+    def notify(self):
+        newTime = time.perf_counter()
+        if newTime - self._lastTime > self._duration:
+            self._lastTime = newTime
+            super().notify()

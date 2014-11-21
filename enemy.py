@@ -8,13 +8,13 @@ from gravity import GravityLine
 from ids import Id
 from move import Move
 from object import Object
-from particle import Emitter, Behaviors
+from particle import MinTimeEmitter, Behaviors
 from wall import Tiles
 
 
-class EnemyEmitter(Emitter):
-    def __init__(self, anchor, offset, level, maxEmitted=0):
-        super().__init__(anchor, offset, maxEmitted)
+class EnemyEmitter(MinTimeEmitter):
+    def __init__(self, anchor, offset, level, maxEmitted=0, timeBetween=0):
+        super().__init__(anchor, offset, maxEmitted, timeBetween)
         self._level = level
         self._part = None
 
@@ -67,7 +67,7 @@ class Enemy(Object, Dir, Id, Alive, Health, Drawable):
 
     def tick(self):
         collisions = self.move()
-        self.gravity.tick(collisions.get(Tiles.Solid, []))
+        self.gravity.tick(collisions)
         self._ai.tick(collisions)
 
         if collisions.get("bullet"):

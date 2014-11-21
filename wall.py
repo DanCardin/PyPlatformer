@@ -26,8 +26,8 @@ class Wall(Object, EventStream):
 
     def setType(self, type):
         self._type = Tiles(type)
-        self._notify()
+        self.notify()
 
     def setTile(self, tile):
         self._tile = tile
-        self._notify()
+        self.notify()
