@@ -1,14 +1,17 @@
 import pygame
 import const
+from libs.complete import Completeable
 from enableable import Enableable
 from input import Input
 from menu import Menu, MColor, MText, MAction
 from world import World
 
 
-class Game(Enableable):
+class Game(Enableable, Completeable):
     def __init__(self, surface, levels):
-        Enableable.__init__(self, True)
+        Enableable.__init__(self)
+        Completeable.__init__(self)
+
         self._surface = surface
         self._levAttr = levels
         self._world = None
@@ -23,10 +26,10 @@ class Game(Enableable):
         self._menu.addItem("editor", (0, 100, 100, 48), MColor((255, 0, 0), (0, 0, 255)),
                            MText("Editor", (0, 255, 0)), MAction(self._editor))
         self._menu.addItem("exit", (0, 150, 100, 48), MColor((255, 0, 0), (0, 0, 255)),
-                           MText("Exit", (0, 255, 0)), MAction(self.disable))
+                           MText("Exit", (0, 255, 0)), MAction(self.setFinished))
 
         self._input = Input()
-        self._input.set(pygame.KEYDOWN, pygame.K_m, "menu", self._menu)
+        self._input.set(pygame.KEYDOWN, pygame.K_m, "menu", self._menuToggle)
 
     def start(self):
         self.enable()
@@ -35,7 +38,7 @@ class Game(Enableable):
         self._menu.disable()
 
     def _resume(self):
-        if self._world is not None:
+        if self._world is not None and not self._world.isComplete():
             self.enable()
         else:
             self.start()
@@ -46,7 +49,7 @@ class Game(Enableable):
             self._world.level.editor.enabled()
             self._menu.disable()
 
-    def _menu(self):
+    def _menuToggle(self):
         self._menu.toggleEnabled()
         self.toggleEnabled()
 
@@ -57,7 +60,36 @@ class Game(Enableable):
             self._menu.tick(inputs)
             self._menu.draw()
         elif self.enabled:
-            self._world.tick(inputs)
+            if self._world.isComplete():
+                if self._world.isFinished():
+                    self._win()
+                elif self._world.isLost():
+                    self._gameOver()
+            else:
+                self._world.tick(inputs)
+
+    def _win(self):
+        self._endGame("YOU WIN!")
+
+    def _gameOver(self):
+        self._endGame("GAME OVER!")
+
+    def _endGame(self, text):
+        try:
+            self.__gameOverCount += 1
+        except AttributeError:
+            self.__gameOverCount = 1
+            self.__goText = pygame.font.Font(None, 100).render(text, 1, (255, 0, 0))
+            self.__gameOverX = int(self._surface.get_width() / 2 - self.__goText.get_width() / 2)
+            self.__gameOverY = int(self._surface.get_height() / 2 - self.__goText.get_height() / 2)
+
+        if self.__gameOverCount < (const.FPS * 5):
+            self._surface.fill((0, 0, 0))
+            self._surface.blit(self.__goText, (self.__gameOverX, self.__gameOverY))
+        else:
+            self.__gameOverCount = 0
+            self._surface.fill((0, 0, 0))
+            self._menuToggle()
 
     def getEvents(self):
         result = []
@@ -66,5 +98,5 @@ class Game(Enableable):
                               pygame.MOUSEBUTTONUP, pygame.MOUSEMOTION]:
                 result.append(event)
             if event.type == pygame.QUIT:
-                self.disable()
+                self.setFinished()
         return result

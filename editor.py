@@ -4,7 +4,6 @@ from display import Display
 from enableable import Enableable
 from input import Input
 from menu import Menu, MText, MAction, MImage, MColor, MAlpha, MenuItem
-from object import Object
 from showable import Showable
 from wall import Tiles
 
@@ -118,8 +117,8 @@ class Editor(Enableable, Showable):
         for i in range(const.TILE_SET_LENGTH):
             surf = ts.subsurface((0, i * const.res, 32, 32))
             self.menu.appendGroup("Brushes",
-                MenuItem((32 * i, 32, 32, 32), MImage(surf), alpha,
-                              MAction(_setBrush, TileBrush(i))))
+                                  MenuItem((32 * i, 32, 32, 32), MImage(surf), alpha,
+                                           MAction(_setBrush, TileBrush(i))))
 
     def tick(self, inputs, camera):
         self._input(inputs)
@@ -133,7 +132,7 @@ class Editor(Enableable, Showable):
                 if self._painting and self._tool and self._brush:
                     x, y = (int((event.pos[0] + camera.x) / const.res),
                             int((event.pos[1] + camera.y) / const.res))
-                    blocks = self._tool(x, y, self._brush)
+                    self._tool(x, y, self._brush)
 
     def _update(self, block):
         surf = pygame.surface.Surface((const.res, const.res))

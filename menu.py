@@ -28,12 +28,6 @@ class Menu(Object, Enableable):
 
                 if not matched:
                     leftOver.append(event)
-                # if len(t) > tmp:
-                #     for e in self.items.values():
-                #         if e.toggle:
-                #             if e.tGroup == item.tGroup:
-                #                 e.togState = {True: 1, False: 0}[e.togState == 2]
-                # item.tick(0, self, mPos)
         return leftOver
 
     def addItem(self, key, *args):
@@ -107,6 +101,7 @@ class MAlpha(MType):
     def update(self, image):
         image.set_alpha(self._alpha)
 
+
 class MImage(MType):
     def __init__(self, image):
         self._image = image
@@ -114,7 +109,7 @@ class MImage(MType):
 
     def update(self, image):
         for i in range(2):
-            # image.blit(image, (i * (image.get_width() / 2), 0))
+            # image.blit(self._image, (i * (image.get_width() / 2), 0))
             image.blit(self._image, (0, 0))
 
 

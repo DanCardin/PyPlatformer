@@ -12,8 +12,6 @@ pyPlatformer
 
 ### Menus
 - menus with keyboard input
-- Allows customizable keys in-game
-- Tabualar menus for stuff like "editor settings", "controls", etc
 
 ### savestate
 - Save and load gamestates
@@ -33,16 +31,3 @@ pyPlatformer
 
 ### add ledge grabbing (absolute least thing I care about)
 - The way its done in Stealth Bastard is really nice.
-
-
-## Things Done:
-- menus
-- compositing
-- animation
-- arbitrary gravity
-- npc/npc spawning
-- paralax background
-- infinite scaling- map scrolling
-- map editor transparency
-- multiple levels
-- particle effects (gun)

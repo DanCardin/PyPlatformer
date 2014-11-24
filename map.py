@@ -82,6 +82,7 @@ class Map(Object):
         Files.saveFile(''.join(s), self._file)
 
     def _updateMap(self, block):
+        self.display.update(pygame.surface.Surface((const.res, const.res)), (block.x, block.y))
         self.display.update(self._tileset, (block.x, block.y),
                             (0, block.getTile() * const.res, const.res, const.res))
 
