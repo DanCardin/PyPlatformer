@@ -7,6 +7,8 @@ class World(object):
         for i in levels:
             self.levels.append(Level(surface, i))
         self.currLevel = -1
+        self._complete = False
+        # self._lost
 
     def nextLevel(self):
         if self.currLevel < len(self.levels) - 1:
@@ -26,7 +28,7 @@ class World(object):
         return self._complete
 
     def gameOver(self):
-        ''
+        self._
 
     def tick(self, input):
         self.level.tick(input)

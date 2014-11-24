@@ -17,3 +17,6 @@ backgrounds = [
     ((480, 320), 2, "back2.png"),
     ((480, 320), 0, "background3.png")
 ]
+
+heartsImg = "hearts.png"
+numbers = ("numbers.png", 11)

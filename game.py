@@ -43,7 +43,7 @@ class Game(Enableable):
 
     def _editor(self):
         if self._world:
-            self._world.level.enabled()
+            self._world.level.editor.enabled()
             self._menu.disable()
 
     def _menu(self):

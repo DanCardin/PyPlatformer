@@ -84,6 +84,7 @@ class Particle(Object, Id, Alive, Drawable):
 
 class Emitter(object):
     def __init__(self, anchor, offset, maxEmitted=0):
+        super().__init__()
         self._anchor = anchor
         self._offset = offset
         self._children = []
@@ -91,6 +92,9 @@ class Emitter(object):
 
     def _emit(self):
         raise NotImplementedError("Subclasses should implement this method")
+
+    def emit(self):
+        self._emit()
 
     def getChildren(self):
         return self._children[:]
@@ -100,7 +104,7 @@ class Emitter(object):
             p.draw(surface, camera)
 
     def tick(self):
-        self._emit()
+        self.emit()
         for p in self._children[:]:
             p.tick()
             if not p.isAlive():
@@ -110,11 +114,11 @@ class Emitter(object):
 class MinTimeEmitter(Emitter):
     def __init__(self, anchor, offset, maxEmitted, duration):
         super().__init__(anchor, offset, maxEmitted)
-        self._duration = 2
-        self._lastTime = time.perf_counter()
+        self._duration = duration
+        self._lastTime = -duration
 
-    def _emit(self):
+    def emit(self):
         newTime = time.perf_counter()
         if newTime - self._lastTime > self._duration:
             self._lastTime = newTime
-            super()._emit()
+            super().emit()

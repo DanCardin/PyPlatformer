@@ -1,4 +1,5 @@
 import pygame
+import const
 from math import ceil
 from char import Health
 from display import Display, Drawable
@@ -14,7 +15,7 @@ class HealthBar(Object, Drawable):
         self._hearts = []
         self._parent = parent
 
-        hearts = Files.loadImage("hearts.png")
+        hearts = Files.loadImage(const.heartsImg)
         self._heartFilled = (hearts.subsurface(Object(0, 0, 10, 16)),
                              hearts.subsurface(Object(10, 0, 10, 16)))
         self._heartEmpty = (hearts.subsurface(Object(20, 0, 10, 16)),

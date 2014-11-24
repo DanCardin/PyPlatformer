@@ -1,10 +1,13 @@
 import const
+from enum import Enum
 from pygame import KEYDOWN, K_e, K_r
 from pygame.mixer import Sound
 from pygame.surface import Surface
 
 from background import Background
+from libs.complete
 from camera import Camera
+from countdown import CountdownTimer
 from editor import Editor
 from enemy import EnemyEmitter
 from healthbar import HealthBar
@@ -22,7 +25,7 @@ class Level(object):
 
     def start(self):
         self._scale = 1
-        self._complete = False
+        self._complete = Completion.InProgress
         self.registered = {}
         self._entity_map = {}
         self._position_map = {}
@@ -55,7 +58,7 @@ class Level(object):
 
         self._healthBar = HealthBar(10, 10, self.get(tid))
         self._enemySpawn = EnemyEmitter(Object(50, 100, 0, 0), Object(), self, 2, 2)
-        # self._
+        self._countdown = CountdownTimer(const.screenSize[0] * const.res - 50, 10, 3)
 
     def addEntity(self, register=False, entity=None):
         if not entity:
@@ -77,14 +80,17 @@ class Level(object):
             result = self.registered.get(entityId)
         return result
 
-    def isComplete(self):
-        return self._complete
+    def finished(self):
+        return self._complete == Completion.Finished
+
+    def lost(self):
+        return self._complete == Completion.Lost
 
     def process(self, inputs):
         for entity in self.registered.values():
             result = entity.tick(inputs)
             if Tiles.End in result.keys():
-                self._complete = True
+                self._complete = Completion.Finished
 
         for entity in list(self._entities.values()):
             entity.tick()
@@ -94,6 +100,9 @@ class Level(object):
         self._enemySpawn.tick()
         self._camera.tick()
         self._background.tick()
+        self._countdown.tick()
+        if self._countdown.finished():
+            self._complete = Completion.Lost
 
         if self.editor.enabled():
             self.editor.tick(inputs, self._camera)
@@ -108,6 +117,7 @@ class Level(object):
 
         self.map.draw(self._total_surface, self._camera)
         self._healthBar.draw(self._total_surface)
+        self._countdown.draw(self._total_surface)
         if self.editor.enabled():
             self.editor.draw(self._total_surface, self._camera)
 
