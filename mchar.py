@@ -1,6 +1,6 @@
 import pygame
 from animation import Animation
-from char import Dir, Health
+from char import Dir, Health, Alive
 from collision import Collision
 from display import Display, Drawable
 from files import Files
@@ -15,12 +15,13 @@ from weapons import Weapon
 from ids import Id
 
 
-class MChar(Object, Dir, Id, Drawable, Health, Subscribee):
+class MChar(Object, Dir, Id, Drawable, Health, Subscribee, Alive):
     def __init__(self, start, size, speed, tileset, control, level, maxHealth):
         Object.__init__(self, (start[0], start[1], size[0], size[1]))
         Dir.__init__(self, lambda: self.move.getDir(x=True))
         Id.__init__(self)
         Health.__init__(self, maxHealth)
+        Alive.__init__(self)
 
         self.collision = Collision(self, level)
         self.move = Move(self, speed, collision=self.collision)
@@ -29,7 +30,7 @@ class MChar(Object, Dir, Id, Drawable, Health, Subscribee):
         self.input = Input()
         self.applyInputSettings()
         self._damageTimer = MinTimeEventStream(2)
-        self._damageTimer.subscribe("self", self._takeDmg)
+        self._damageTimer.subscribe("self", self._takeDmg, autoInit=False)
 
         def _isMoving():
             return self.move.getSpeed(x=True) != 0
@@ -42,7 +43,7 @@ class MChar(Object, Dir, Id, Drawable, Health, Subscribee):
 
         image = Files.loadImage(tileset)
         self._display = Display(image, self, True, Animation(image, 11, _isMoving, _hDir, _vDir))
-        self._weapon = Weapon(self, (0, 0), level)
+        self._weapon = Weapon(self, lambda: ((5 * self.getDir()), 0), level)
 
     def applyInputSettings(self):
         self.input.set(pygame.KEYDOWN, pygame.K_a, "left", self.startMove, "left")
@@ -87,6 +88,7 @@ class MChar(Object, Dir, Id, Drawable, Health, Subscribee):
         self.move.setSpeed(y=8)
 
     def tick(self, inputs):
+        Dir.tick(self)
         self.input(inputs)
         self._weapon.tick(inputs)
 
@@ -96,5 +98,8 @@ class MChar(Object, Dir, Id, Drawable, Health, Subscribee):
 
         if collisions.get(Tiles.Deadly):
             self._damageTimer.notify()
+
+        if self.getHealth() == 0:
+            self.kill()
 
         return collisions

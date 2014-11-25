@@ -83,14 +83,14 @@ class Particle(Object, Id, Alive, Drawable):
 
 
 class Emitter(object):
-    def __init__(self, anchor, offset, maxEmitted=0):
+    def __init__(self, anchor, offsetFunc, maxEmitted=0):
         super().__init__()
         self._anchor = anchor
-        self._offset = offset
+        self._offsetFunc = offsetFunc
         self._children = []
         self._maxEmitted = maxEmitted
 
-    def _emit(self):
+    def _emit(self, x, y):
         raise NotImplementedError("Subclasses should implement this method")
 
     def emit(self):
@@ -112,8 +112,8 @@ class Emitter(object):
 
 
 class MinTimeEmitter(Emitter):
-    def __init__(self, anchor, offset, maxEmitted, duration):
-        super().__init__(anchor, offset, maxEmitted)
+    def __init__(self, anchor, offsetFunc, maxEmitted, duration):
+        super().__init__(anchor, offsetFunc, maxEmitted)
         self._duration = duration
         self._lastTime = -duration
 

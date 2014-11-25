@@ -43,5 +43,5 @@ class HealthBar(Object, Drawable):
         health = self._parent.getHealth()
         for i in range(self._heartLen):
             ind = i % 2
-            heartType = self._heartFilled if i <= health else self._heartEmpty
+            heartType = self._heartFilled if (i + 1) <= health else self._heartEmpty
             self._hearts[i].blit(heartType[ind], (0, 0))

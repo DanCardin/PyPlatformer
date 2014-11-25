@@ -13,14 +13,15 @@ from wall import Tiles
 
 
 class EnemyEmitter(MinTimeEmitter):
-    def __init__(self, anchor, offset, level, maxEmitted=0, timeBetween=0):
-        super().__init__(anchor, offset, maxEmitted, timeBetween)
+    def __init__(self, anchor, offsetFunc, level, maxEmitted=0, timeBetween=0):
+        super().__init__(anchor, offsetFunc, maxEmitted, timeBetween)
         self._level = level
         self._part = None
 
     def _emit(self):
         if len(self._children) < self._maxEmitted:
-            pos = Object(self._anchor.x + self._offset.x, self._anchor.y + self._offset.y, 20, 26)
+            x, y = self._offsetFunc()
+            pos = Object(self._anchor.x + x, self._anchor.y + y, 20, 26)
             _part = Enemy(pos, (3, 16), const.playerTileset, self._level, 3)
             self._children.append(_part)
 
@@ -72,7 +73,7 @@ class Enemy(Object, Dir, Id, Alive, Health, Drawable):
 
         if collisions.get("bullet"):
             self.decHealth(1)
-            self.move.setSpeed(y=-8)
+            self.move.setSpeed(y=self.gravity.getDir() * -8)
 
         if self.getHealth() == 0:
             self.kill()

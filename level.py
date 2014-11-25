@@ -52,11 +52,11 @@ class Level(Completeable):
         self.input.set(KEYDOWN, K_e, "editor", self.editor.toggleEnabled)
         self.input.set(KEYDOWN, K_r, "restart", self.start)
 
-        # self.sound = Sound("assets\\music.ogg")
-        # self.sound.play(-1)
+        self._sound = Sound("assets\\music.ogg")
+        # self._sound.play(-1)
 
         self._healthBar = HealthBar(10, 10, self.get(tid))
-        self._enemySpawn = EnemyEmitter(Object(50, 100, 0, 0), Object(), self, 2, 2)
+        self._enemySpawn = EnemyEmitter(Object(50, 100, 0, 0), lambda: (0, 0), self, 2, 2)
         self._countdown = CountdownTimer(const.screenSize[0] * const.res - 50, 10, 100)
 
     def addEntity(self, register=False, entity=None):
@@ -84,6 +84,8 @@ class Level(Completeable):
             result = entity.tick(inputs)
             if Tiles.End in result.keys():
                 self.setFinished()
+            if not entity.isAlive():
+                self.setLost()
 
         for entity in list(self._entities.values()):
             entity.tick()
@@ -99,6 +101,9 @@ class Level(Completeable):
 
         if self.editor.enabled():
             self.editor.tick(inputs, self._camera)
+
+        if self.isComplete():
+            self._sound.fadeout(3000)
 
     def render(self):
         self._surface.fill((0, 0, 0))

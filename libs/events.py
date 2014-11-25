@@ -9,10 +9,11 @@ class EventStream(object):
         for callback in self._observers.values():
             callback(self)
 
-    def subscribe(self, id, callback):
+    def subscribe(self, id, callback, autoInit=True):
         if not self._observers.get(id):
             self._observers[id] = callback
-            callback(self)
+            if autoInit:
+                callback(self)
         else:
             raise ValueError("id {} is already subscribed to {}".format(id, self))
 
