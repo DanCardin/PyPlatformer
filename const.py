@@ -2,7 +2,7 @@ res = 32
 PLAYER_NUM = 1
 TILE_SET_LENGTH = 20
 
-gameName = "Story of a Square"
+gameName = "PyPlatformer"
 levelFiles = [("level1.txt", "tileset3.bmp"),
               ("level2.txt", "tileset3.bmp")]
 playerTileset = "2run.bmp"
