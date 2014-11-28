@@ -15,6 +15,7 @@ class Game(Enableable, Completeable):
         self._surface = surface
         self._levAttr = levels
         self._world = None
+        self._paused = False
 
         self._menu = Menu((const.screenSize[0] * const.res / 2 - 50,
                           const.screenSize[1] * const.res / 2 - 100),
@@ -30,12 +31,16 @@ class Game(Enableable, Completeable):
 
         self._input = Input()
         self._input.set(pygame.KEYDOWN, pygame.K_m, "menu", self._menuToggle)
+        self._input.set(pygame.KEYDOWN, pygame.K_p, "pause", self._pause)
 
     def start(self):
         self.enable()
         self._world = World(self._surface, self._levAttr)
         self._world.nextLevel()
         self._menu.disable()
+
+    def _pause(self):
+        self._paused = not self._paused
 
     def _resume(self):
         if self._world is not None and not self._world.isComplete():
@@ -66,7 +71,8 @@ class Game(Enableable, Completeable):
                 elif self._world.isLost():
                     self._gameOver()
             else:
-                self._world.tick(inputs)
+                if not self._paused:
+                    self._world.tick(inputs)
 
     def _win(self):
         self._endGame("YOU WIN!")

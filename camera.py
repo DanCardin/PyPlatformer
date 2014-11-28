@@ -1,4 +1,4 @@
-from pygame.surface import Surface
+from surface import Surface
 from pygame import transform
 from display import Display
 from object import Object

@@ -1,10 +1,8 @@
 import pygame
-from collision import Collision
-from enemy import Enemy
 from input import Input
 from object import Object
 from particle import Particle, Emitter, Behaviors
-from wall import Tiles
+from surface import Surface
 
 
 class Weapon(Emitter):
@@ -13,7 +11,7 @@ class Weapon(Emitter):
 
         self._level = level
         self._part = None
-        self._s = pygame.surface.Surface((20, 10))
+        self._s = Surface((20, 10))
         self._s.fill((255, 0, 0))
 
         self._input = Input()
@@ -21,7 +19,7 @@ class Weapon(Emitter):
 
     def createNew(self):
         x, y = self._offsetFunc()
-        self._part = Particle(Object(self._anchor.x + x, self._anchor.y + y, 20, 10),
+        self._part = Particle((self._anchor.x + x, self._anchor.y + y, 20, 10),
                         (10, 0),
                         self._s,
                         self._level,

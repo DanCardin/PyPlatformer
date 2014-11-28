@@ -1,6 +1,6 @@
 import time
 import const
-from pygame.surface import Surface
+from surface import Surface
 from libs.complete import Completeable
 from display import Display, Drawable
 from enableable import Enableable
@@ -12,6 +12,7 @@ class CountdownTimer(Object, Drawable, Enableable, Completeable):
     def __init__(self, x, y, maxTime, numNums=3):
         image, width = const.numbers
         numbers = Files.loadImage(image)
+        numbers.set_colorkey(numbers.get_at((0, 0)))
 
         Object.__init__(self, x, y, width * numNums, numbers.get_height())
         Enableable.__init__(self, True)
@@ -21,6 +22,7 @@ class CountdownTimer(Object, Drawable, Enableable, Completeable):
         self._digits = []
         self._maxTime = maxTime
         self._currentTime = maxTime
+        self._blank = Display(Surface((width, self.h)))
 
         for i in range(width):
             self._numbers.append(Display(numbers.subsurface((i * width, 0, width, self.h))))
@@ -48,6 +50,7 @@ class CountdownTimer(Object, Drawable, Enableable, Completeable):
             newTime = time.perf_counter()
             if newTime - self._lastUpdate > 1:
                 for i, digit in enumerate(self._digits):
+                    self._blank.draw(digit)
                     self._numbers[self._getDigit(i)].draw(digit)
                 self._currentTime -= 1
                 self._lastUpdate = newTime

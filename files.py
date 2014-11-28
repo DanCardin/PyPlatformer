@@ -1,5 +1,6 @@
-import pygame
 import os
+import pygame
+from surface import Surface
 
 
 class Files(object):

@@ -1,7 +1,7 @@
 import const
 from pygame import KEYDOWN, K_e, K_r
 from pygame.mixer import Sound
-from pygame.surface import Surface
+from surface import Surface
 
 from background import Background
 from libs.complete import Completion, Completeable
@@ -24,7 +24,7 @@ class Level(Completeable):
         self.map = Map(level[0], level[1])
 
     def start(self):
-        self._scale = 1
+        self._scale = 2
         self.registered = {}
         self._entity_map = {}
         self._position_map = {}
@@ -119,20 +119,10 @@ class Level(Completeable):
         if self.editor.enabled():
             self.editor.draw(self._total_surface, self._camera)
 
-        # self.oscillate_test()
         self._camera.draw(self._surface, self._scale)
 
         if self.editor.enabled():
             self.editor.menu.draw()
-
-    def oscillate_test(self):
-        try:
-            self._scale += (0.01 * self._dir)
-        except AttributeError:
-            self._scale = 1
-            self._dir = 1
-        if self._scale >= 2 or self._scale <= 0.5:
-            self._dir *= -1
 
     def tick(self, inputs):
         self.input(inputs)

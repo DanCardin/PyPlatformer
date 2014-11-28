@@ -1,3 +1,4 @@
+import const
 from enum import Enum
 from object import Object
 from libs.events import EventStream
@@ -30,4 +31,32 @@ class Wall(Object, EventStream):
 
     def setTile(self, tile):
         self._tile = tile
+        self.notify()
+
+    @property
+    def relX(self):
+        return self.x % const.res
+
+    @property
+    def relY(self):
+        return self.y % const.res
+
+    @Object.x.setter
+    def x(self, value):
+        self._rect.x = value
+        self.notify()
+
+    @Object.y.setter
+    def y(self, value):
+        self._rect.y = value
+        self.notify()
+
+    @Object.w.setter
+    def w(self, value):
+        self._rect.w = value
+        self.notify()
+
+    @Object.h.setter
+    def h(self, value):
+        self._rect.h = value
         self.notify()

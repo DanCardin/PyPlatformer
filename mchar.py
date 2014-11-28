@@ -17,7 +17,7 @@ from ids import Id
 
 class MChar(Object, Dir, Id, Drawable, Health, Subscribee, Alive):
     def __init__(self, start, size, speed, tileset, control, level, maxHealth):
-        Object.__init__(self, (start[0], start[1], size[0], size[1]))
+        Object.__init__(self, (start.x, start.y, size[0], size[1]))
         Dir.__init__(self, lambda: self.move.getDir(x=True))
         Id.__init__(self)
         Health.__init__(self, maxHealth)

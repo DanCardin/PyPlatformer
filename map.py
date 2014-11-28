@@ -6,6 +6,7 @@ from object import Object
 from files import Files
 from wall import Wall
 from display import Display
+from surface import Surface
 from wall import Tiles
 
 
@@ -56,7 +57,7 @@ class Map(Object):
         self._hy = int(match.group(2))
         self.w = self._wx * const.res
         self.h = self._hy * const.res
-        self.display = Display(pygame.surface.Surface((self.w, self.h)), self, True)
+        self.display = Display(Surface((self.w, self.h)), self, True)
 
         tiles = re.findall("\((\d+),(\d+),(\d+),(\d+):(\d+),(\d+)\)", file)
         for i in range(self._hy):
@@ -82,9 +83,9 @@ class Map(Object):
         Files.saveFile(''.join(s), self._file)
 
     def _updateMap(self, block):
-        self.display.update(pygame.surface.Surface((const.res, const.res)), (block.x, block.y))
-        self.display.update(self._tileset, (block.x, block.y),
-                            (0, block.getTile() * const.res, const.res, const.res))
+        self.display.update(Surface((const.res, const.res)), block)
+        self.display.update(self._tileset, block,
+                            Object(0, block.getTile() * const.res, const.res, const.res))
 
     def draw(self, surface, camera):
         self.display.draw(surface, camera)

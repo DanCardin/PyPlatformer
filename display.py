@@ -27,8 +27,8 @@ class Display(object):
     def getImage(self):
         return self._image
 
-    def update(self, *args):
-        self._image.blit(*args)
+    def update(self, source, dest, area=None):
+        self._image.blit(source, dest.asRect(), area.asRect() if area else None)
 
     def replace(self, image):
         self._image = image
@@ -37,7 +37,7 @@ class Display(object):
         if self._animation:
             self.replace(self._animation.animate())
         rect = Display.translate(self._klass, camera)
-        surface.blit(self._image, rect)
+        surface.blit(self._image, (rect.x, rect.y))
 
     def addAnimation(self, animation):
         self._animation = animation

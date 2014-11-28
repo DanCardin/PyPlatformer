@@ -21,7 +21,7 @@ class EnemyEmitter(MinTimeEmitter):
     def _emit(self):
         if len(self._children) < self._maxEmitted:
             x, y = self._offsetFunc()
-            pos = Object(self._anchor.x + x, self._anchor.y + y, 20, 26)
+            pos = (self._anchor.x + x, self._anchor.y + y, 20, 26)
             _part = Enemy(pos, (3, 16), const.playerTileset, self._level, 3)
             self._children.append(_part)
 

@@ -3,6 +3,7 @@ from animation import Animation
 from display import Display, Drawable
 from enableable import Enableable
 from object import Object
+from surface import Surface
 
 
 class Menu(Object, Enableable):
@@ -42,8 +43,7 @@ class Menu(Object, Enableable):
     def draw(self):
         if self.enabled():
             for key, item in self.items.items():
-                item.draw(self._surface,
-                          Object((self.x * -1, self.y * -1, 0, 0)))
+                item.draw(self._surface, Object(self.x * -1, self.y * -1, 0, 0))
 
 
 class ItemGroup(Drawable):
@@ -73,8 +73,9 @@ class ItemGroup(Drawable):
                             self._selected.remove(MSelected)
                         item.update(self._groupSelect)
                         self._selected = item
+                    event = None
 
-        return event == None
+        return event is None
 
 
 class MType(object):
@@ -149,8 +150,8 @@ class MColor(MType):
     def update(self, image):
         width = image.get_width()
         height = image.get_height()
-        self._rImage = image.subsurface(Object(width / 2, height)).fill(self._rColor)
-        self._oImage = image.subsurface(Object(width / 2, 0, width / 2, height)).fill(self._oColor)
+        self._rImage = image.subsurface(Object(width / 2, height).asRect()).fill(self._rColor)
+        self._oImage = image.subsurface(Object(width / 2, 0, width / 2, height).asRect()).fill(self._oColor)
 
     def tick(self, display, collide, event):
         if collide:
@@ -167,7 +168,7 @@ class MenuItem(Object, Drawable):
         self._types = {}
         self._applicable = [pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP, pygame.MOUSEMOTION]
 
-        image = pygame.surface.Surface((self.w * 2, self.h))
+        image = Surface((self.w * 2, self.h))
         self._display = Display(image, self)
         self.update(*types)
 
@@ -194,11 +195,10 @@ class MenuItem(Object, Drawable):
 
     def tick(self, menu, event):
         collide = False
-        if event:
-            if event.type in self._applicable:
-                collide = pygame.Rect(menu.x + self.x, menu.y + self.y,
-                                      self.w, self.h).collidepoint(event.pos[0], event.pos[1])
-                self._collided = collide
+        if event and event.type in self._applicable:
+            collide = pygame.Rect(menu.x + self.x, menu.y + self.y,
+                                  self.w, self.h).collidepoint(event.pos[0], event.pos[1])
+            self._collided = collide
 
         for typ in self._types.values():
             typ.tick(self._display, collide, event)

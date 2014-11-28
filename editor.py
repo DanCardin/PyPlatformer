@@ -4,6 +4,7 @@ from display import Display
 from enableable import Enableable
 from input import Input
 from menu import Menu, MText, MAction, MImage, MColor, MAlpha, MenuItem
+from surface import Surface
 from showable import Showable
 from wall import Tiles
 
@@ -36,24 +37,47 @@ class Tool(object):
         except:
             print("Unable to get tile ({}, {}).", x, y)
 
+    def _getRelPos(self, x, y):
+        return x // const.res, y // const.res
+
     def _getBlocks(self, x, y):
         raise NotImplementedError()
 
-    def __call__(self, x, y, brush):
+    def __call__(self, x, y, brush, painting):
         raise NotImplementedError()
 
 
 class PenTool(Tool):
-    def __call__(self, x, y, brush):
-        block = self._getBlock(x, y)
-        if block:
-            brush(block)
-            return [block]
+    def __call__(self, x, y, brush, painting):
+        if brush:
+            block = self._getBlock(*self._getRelPos(x, y))
+            if block:
+                brush(block)
+                return [block]
+
+
+class ModifyTool(Tool):
+    def __init__(self, map):
+        super().__init__(map)
+        self._lastPainting = None
+        self._block = None
+
+    def __call__(self, x, y, brush, painting):
+        if self._lastPainting is not painting:
+            self._lastPainting = painting
+            self._block = self._getBlock(*self._getRelPos(x, y))
+        if self._block:
+            self._block.h = min(32, max(1, y - self._block.y))
+            return [self._block]
 
 
 class BoxTool(Tool):
-    def __call__(self, x, y, brush):
+    def __call__(self, x, y, dx, dy, brush):
         pass
+
+
+class Paint(object):
+    pass
 
 
 class Editor(Enableable, Showable):
@@ -62,11 +86,11 @@ class Editor(Enableable, Showable):
         Showable.__init__(self, True)
 
         self._map = map
-        self._brush = None
         self._tool = None
-        self._painting = False
+        self._brush = None
+        self._painting = None
 
-        surf = pygame.surface.Surface((map.w, map.h))
+        surf = Surface((map.w, map.h))
         self._display = Display(surf, surf.get_rect(), True, alpha=75)
         for tile in self._map.getMap().values():
             tile.subscribe("editor", self._update)
@@ -91,15 +115,15 @@ class Editor(Enableable, Showable):
         alpha = MAlpha(200)
         self.menu.addItem("save", (450, 0, 49, 32), color, alpha, MText("Save"),
                           MAction(self._map.save))
-        self.menu.addGroup("collision",
+        self.menu.addGroup("Collision",
                            MenuItem((500, 0, 49, 32), color, alpha, MText("Coll"),
                                     MAction(self.toggleShowing)))
 
         self.menu.addGroup("Tools",
-            MenuItem((0, 0, 31, 32), color, alpha, MText("Pen"),
+            MenuItem((0, 0, 40, 32), color, alpha, MText("Pen"),
                      MAction(_setTool, PenTool(self._map))),
-            MenuItem((32, 0, 31, 32), color, alpha, MText("Box"),
-                     MAction(_setTool, BoxTool(self._map))))
+            MenuItem((41, 0, 40, 32), color, alpha, MText("Mod"),
+                     MAction(_setTool, ModifyTool(self._map))))
 
         self.menu.addGroup("Brushes",
             MenuItem((196, 0, 31, 32), color, alpha, MText("W"),
@@ -127,20 +151,24 @@ class Editor(Enableable, Showable):
         for event in inputs:
             if event.type in [pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP, pygame.MOUSEMOTION]:
                 if event.type in [pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP]:
-                    self._painting = True if event.type == pygame.MOUSEBUTTONDOWN else False
+                    if self._painting and event.type == pygame.MOUSEBUTTONUP:
+                        self._painting = None
+                    elif not self._painting and event.type == pygame.MOUSEBUTTONDOWN:
+                        self._painting = Paint()
 
-                if self._painting and self._tool and self._brush:
-                    x, y = (int((event.pos[0] + camera.x) / const.res),
-                            int((event.pos[1] + camera.y) / const.res))
-                    self._tool(x, y, self._brush)
+                if self._painting and self._tool:
+                    x, y = event.pos[0] + camera.x, event.pos[1] + camera.y
+                    self._tool(x, y, self._brush, self._painting)
 
     def _update(self, block):
-        surf = pygame.surface.Surface((const.res, const.res))
-        surf.fill({Tiles.Empty: (0, 0, 0),
-                   Tiles.Solid: (0, 0, 255),
-                   Tiles.Start: (0, 255, 0),
-                   Tiles.End: (255, 0, 255),
-                   Tiles.Deadly: (255, 0, 0)}[block.getType()])
+        surf = Surface((const.res, const.res))
+        fill = {Tiles.Empty: (0, 0, 0),
+                Tiles.Solid: (0, 0, 255),
+                Tiles.Start: (0, 255, 0),
+                Tiles.End: (255, 0, 255),
+                Tiles.Deadly: (255, 0, 0)}[block.getType()]
+        pygame.draw.rect(surf, fill, (block.relX, block.relY, block.w, block.h))
+        pygame.draw.rect(surf, (255, 255, 255), (block.relX, block.relY, block.w, block.h), 1)
         self._display.update(surf, block)
 
     def draw(self, surface, camera):

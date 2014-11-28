@@ -7,7 +7,7 @@ from display import Display
 class Background(object):
     def __init__(self, camera, layers):
         self.camera = camera
-        self._prevCameraPos = (self.camera[0], self.camera[1])
+        self._prevCameraPos = (self.camera.x, self.camera.y)
         self.layers = []
         for i, (size, damp, image) in enumerate(layers):
             self.layers.append(Layer(size, damp, image, i != 0))
@@ -27,7 +27,7 @@ class Background(object):
                 if i.dampSpeed != 0:
                     i.x = (i.x + diff[0] / i.dampSpeed)
                     i.y = (i.y + diff[1] / i.dampSpeed)
-        self._prevCameraPos = (self.camera[0], self.camera[1])
+        self._prevCameraPos = (self.camera.x, self.camera.y)
 
 
 class Layer(Object):
