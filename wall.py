@@ -1,7 +1,7 @@
 import const
 from enum import Enum
 from object import Object
-from libs.events import EventStream
+from events import EventStream
 
 
 class Tiles(Enum):

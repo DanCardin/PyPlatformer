@@ -122,7 +122,7 @@ class MText(MType):
 
     def update(self, image):
         for i in range(2):
-            text = pygame.font.Font(None, 25).render(self._text, 1, self._textColor)
+            text = pygame.font.SysFont("arial", 25).render(self._text, 1, self._textColor)
             quarterW = image.get_width() / 4
             image.blit(text,
                        (int(quarterW + quarterW * 2 * i - (text.get_width() / 2)),

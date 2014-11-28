@@ -4,7 +4,7 @@ from pygame.mixer import Sound
 from surface import Surface
 
 from background import Background
-from libs.complete import Completion, Completeable
+from complete import Completion, Completeable
 from camera import Camera
 from countdown import CountdownTimer
 from editor import Editor
@@ -52,7 +52,7 @@ class Level(Completeable):
         self.input.set(KEYDOWN, K_e, "editor", self.editor.toggleEnabled)
         self.input.set(KEYDOWN, K_r, "restart", self.start)
 
-        self._sound = Sound("assets\\music.ogg")
+        # self._sound = Sound("assets\\music.ogg")
         # self._sound.play(-1)
 
         self._healthBar = HealthBar(10, 10, self.get(tid))
@@ -103,7 +103,8 @@ class Level(Completeable):
             self.editor.tick(inputs, self._camera)
 
         if self.isComplete():
-            self._sound.fadeout(3000)
+            pass
+            # self._sound.fadeout(3000)
 
     def render(self):
         self._surface.fill((0, 0, 0))

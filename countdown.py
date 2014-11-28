@@ -1,7 +1,7 @@
 import time
 import const
 from surface import Surface
-from libs.complete import Completeable
+from complete import Completeable
 from display import Display, Drawable
 from enableable import Enableable
 from files import Files

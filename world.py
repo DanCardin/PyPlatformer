@@ -1,4 +1,4 @@
-from libs.complete import Completeable
+from complete import Completeable
 from level import Level
 
 

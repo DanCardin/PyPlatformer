@@ -1,6 +1,6 @@
 import pygame
 import const
-from libs.complete import Completeable
+from complete import Completeable
 from enableable import Enableable
 from input import Input
 from menu import Menu, MColor, MText, MAction
