@@ -27,6 +27,12 @@ class WallBrush(Brush):
         block.setType(self._brush)
 
 
+class SpawnBrush(Brush):
+    def __call__(self, block):
+        block.setType(Tiles.EnemySpawn)
+        block.setAttr("spawnNum", self._brush)
+
+
 class Tool(object):
     def __init__(self, map):
         self._map = map
@@ -137,6 +143,22 @@ class Editor(Enableable, Showable):
             MenuItem((324, 0, 31, 32), color, alpha, MText("E"),
                      MAction(_setBrush, WallBrush(Tiles.End))))
 
+        spawnBrush = MenuItem((370, 0, 31, 32), color, alpha, MText("*"),
+                              MAction(_setBrush, SpawnBrush(1)))
+        self.__spawnBrushCount = 1
+        def newSpawn(diff):
+            self.__spawnBrushCount += diff
+            brush = SpawnBrush(self.__spawnBrushCount)
+            spawnBrush.update(MAction(_setBrush, brush))
+            if isinstance(self._brush, SpawnBrush):
+                self._brush = brush
+
+        self.menu.appendGroup("Brushes", spawnBrush)
+        self.menu.addItem("upSpawn", (402, 0, 31, 16), color, alpha, MText("+"),
+                          MAction(newSpawn, 1))
+        self.menu.addItem("downSpawn", (402, 17, 31, 15), color, alpha, MText("-"),
+                          MAction(newSpawn, -1))
+
         ts = self._map.getTileset()
         for i in range(const.TILE_SET_LENGTH):
             surf = ts.subsurface((0, i * const.res, 32, 32))
@@ -166,9 +188,16 @@ class Editor(Enableable, Showable):
                 Tiles.Solid: (0, 0, 255),
                 Tiles.Start: (0, 255, 0),
                 Tiles.End: (255, 0, 255),
-                Tiles.Deadly: (255, 0, 0)}[block.getType()]
+                Tiles.Deadly: (255, 0, 0),
+                Tiles.EnemySpawn: (0, 255, 255)}[block.getType()]
         pygame.draw.rect(surf, fill, (block.relX, block.relY, block.w, block.h))
         pygame.draw.rect(surf, (255, 255, 255), (block.relX, block.relY, block.w, block.h), 1)
+
+        isSpawn = block.getAttr("spawnNum")
+        if isSpawn:
+            text = pygame.font.SysFont("arial", 25).render(str(isSpawn), 1, (0, 0, 0))
+            surf.blit(text, (int(surf.get_width() / 2 - text.get_width() / 2),
+                             int(surf.get_height() / 2 - text.get_height() / 2)))
         self._display.update(surf, block)
 
     def draw(self, surface, camera):

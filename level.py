@@ -4,7 +4,7 @@ from pygame.mixer import Sound
 from surface import Surface
 
 from background import Background
-from complete import Completion, Completeable
+from complete import Completeable
 from camera import Camera
 from countdown import CountdownTimer
 from editor import Editor
@@ -24,28 +24,25 @@ class Level(Completeable):
         self.map = Map(level[0], level[1])
 
     def start(self):
+        self.map.load()
+
         self._scale = 2
         self.registered = {}
         self._entity_map = {}
         self._position_map = {}
         self._entities = {}
-
-        self.map.load()
+        self._enemySpawns = {}
         for x, y in self.map.getMap().keys():
             self._position_map[(x, y)] = []
+
         self._total_surface = Surface((self.map.w, self.map.h))
-        tid = self.addEntity(register=True,
-                             entity=MChar(self.map.getStart(),
-                                          (20, 26),
-                                          const.playerSpeed,
-                                          const.playerTileset, True, self, 5))
+        tid = self.addEntity(register=True, entity=MChar(self, self.map.getType(Tiles.Start)[0]))
         self._camera = Camera(tuple([s * const.res for s in const.screenSize]),
                               self._total_surface,
                               self.map,
                               Object(150, 200, 150, 200),
                               self.get(tid))
-        self._background = Background(self._camera,
-                                      const.backgrounds)
+        self._background = Background(self._camera, const.backgrounds)
         self.editor = Editor(self.map, self._surface)
 
         self.input = Input()
@@ -55,9 +52,16 @@ class Level(Completeable):
         # self._sound = Sound("assets\\music.ogg")
         # self._sound.play(-1)
 
-        self._healthBar = HealthBar(10, 10, self.get(tid))
-        self._enemySpawn = EnemyEmitter(Object(50, 100, 0, 0), lambda: (0, 0), self, 2, 2)
-        self._countdown = CountdownTimer(const.screenSize[0] * const.res - 50, 10, 100)
+        try:
+            self._healthBar = HealthBar(10, 10, self.get(tid))
+        except AssertionError:
+            pass
+
+        for block in self.map.getType(Tiles.EnemySpawn):
+            self._enemySpawns[block] = EnemyEmitter(Object(block.x, block.y, 0, 0),
+                                                    self, block.getAttr("spawnNum"), 2)
+        self._countdown = CountdownTimer(const.screenSize[0] * const.res - 50, 10,
+                                         self.map.getAttr("timeLim"))
 
     def addEntity(self, register=False, entity=None):
         if not entity:
@@ -92,7 +96,9 @@ class Level(Completeable):
             if not entity.isAlive():
                 self._entities.pop(entity.getId())
 
-        self._enemySpawn.tick()
+        for s in self._enemySpawns.values():
+            s.tick()
+
         self._camera.tick()
         self._background.tick()
         self._countdown.tick()
@@ -109,7 +115,8 @@ class Level(Completeable):
     def render(self):
         self._surface.fill((0, 0, 0))
         self._background.draw(self._total_surface, self._camera)
-        self._enemySpawn.draw(self._total_surface, self._camera)
+        for s in self._enemySpawns.values():
+            s.draw(self._total_surface, self._camera)
         for _entities in [self._entities, self.registered]:
             for entity in _entities.values():
                 entity.draw(self._total_surface, self._camera)

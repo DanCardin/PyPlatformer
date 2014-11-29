@@ -24,6 +24,8 @@ class HealthBar(Object, Drawable):
         self._display = Display(klass=self)
         self.update()
 
+        self._parent.subscribe("healthbar", self.recalculate)
+
     def update(self):
         self._heartLen = self._parent.getBaseHealth()
         self.w, self.h = 10 * self._heartLen + 2 * ceil(self._heartLen / 2), 16
@@ -37,7 +39,6 @@ class HealthBar(Object, Drawable):
         for i in range(self._heartLen):
             self._hearts.append(surf.subsurface(Object(10 * i + 2 * (i // 2), 0, 10, 16).asRect()))
 
-        self._parent.subscribe("healthbar", self.recalculate)
 
     def recalculate(self, parent):
         health = self._parent.getHealth()

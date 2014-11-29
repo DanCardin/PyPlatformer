@@ -1,4 +1,5 @@
 import pygame
+import const
 from animation import Animation
 from char import Dir, Health, Alive
 from collision import Collision
@@ -15,8 +16,8 @@ from weapons import Weapon
 from ids import Id
 
 
-class MChar(Object, Dir, Id, Drawable, Health, Subscribee, Alive):
-    def __init__(self, start, size, speed, tileset, control, level, maxHealth):
+class Char(Object, Dir, Id, Drawable, Health, Subscribee, Alive):
+    def __init__(self, level, start, size, speed, tileset, control, maxHealth):
         Object.__init__(self, (start.x, start.y, size[0], size[1]))
         Dir.__init__(self, lambda: self.move.getDir(x=True))
         Id.__init__(self)
@@ -43,7 +44,7 @@ class MChar(Object, Dir, Id, Drawable, Health, Subscribee, Alive):
 
         image = Files.loadImage(tileset)
         self._display = Display(image, self, True, Animation(image, 11, _isMoving, _hDir, _vDir))
-        self._weapon = Weapon(self, lambda: ((5 * self.getDir()), 0), level)
+        self._weapon = Weapon(self, level, lambda: ((5 * self.getDir()), 0))
 
     def applyInputSettings(self):
         self.input.set(pygame.KEYDOWN, pygame.K_a, "left", self.startMove, "left")
@@ -77,8 +78,8 @@ class MChar(Object, Dir, Id, Drawable, Health, Subscribee, Alive):
         self._display.draw(surface, camera)
         self._weapon.draw(surface, camera)
 
-    def subscribe(self, id, callback):
-        self._damageTimer.subscribe(id, callback)
+    def subscribe(self, id, callback, autoInit=True):
+        self._damageTimer.subscribe(id, callback, autoInit)
 
     def unsubscribe(self, id):
         self._damageTimer.unsubscribe(id)
@@ -103,3 +104,8 @@ class MChar(Object, Dir, Id, Drawable, Health, Subscribee, Alive):
             self.kill()
 
         return collisions
+
+
+class MChar(Char):
+    def __init__(self, level, start):
+        Char.__init__(self, level, start, (20, 26), const.playerSpeed, const.playerTileset, True, 5)

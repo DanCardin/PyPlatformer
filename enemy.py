@@ -13,7 +13,7 @@ from wall import Tiles
 
 
 class EnemyEmitter(MinTimeEmitter):
-    def __init__(self, anchor, offsetFunc, level, maxEmitted=0, timeBetween=0):
+    def __init__(self, anchor, level, maxEmitted=0, timeBetween=0, offsetFunc=lambda: (0, 0)):
         super().__init__(anchor, offsetFunc, maxEmitted, timeBetween)
         self._level = level
         self._part = None
@@ -38,7 +38,7 @@ class AI(object):
                 self._dir = 1
             if Direction.Right in solid and Direction.Bottom in solid:
                 self._dir = -1
-            self._klass.move.setSpeed(x= self._dir * self._klass.move.getTopSpeed(x=True))
+            self._klass.move.setSpeed(x=self._dir * self._klass.move.getTopSpeed(x=True))
 
 
 class Enemy(Object, Dir, Id, Alive, Health, Drawable):

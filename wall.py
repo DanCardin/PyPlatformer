@@ -10,14 +10,24 @@ class Tiles(Enum):
     Start = 2
     End = 3
     Deadly = 4
+    EnemySpawn = 5
 
 
 class Wall(Object, EventStream):
-    def __init__(self, pos, type, tile):
+    def __init__(self, pos, type, tile, attribs={}):
         Object.__init__(self, pos)
         EventStream.__init__(self)
+        self._lastType = None
         self._type = Tiles(type)
         self._tile = tile
+        self._attribs = attribs
+
+    def getAttr(self, key):
+        return self._attribs.get(key, None)
+
+    def setAttr(self, key, value):
+        self._attribs[key] = value
+        self.notify()
 
     def getTile(self):
         return self._tile
@@ -26,6 +36,7 @@ class Wall(Object, EventStream):
         return self._type
 
     def setType(self, type):
+        self._lastType = self._type
         self._type = Tiles(type)
         self.notify()
 

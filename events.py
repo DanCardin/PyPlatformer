@@ -23,7 +23,7 @@ class EventStream(object):
 
 
 class Subscribee(object):
-    def subscribe(self, id, callback):
+    def subscribe(self, id, callback, autoInit=True):
         raise NotImplementedError()
 
     def unsubscribe(self, id):

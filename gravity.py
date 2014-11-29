@@ -4,7 +4,7 @@ from wall import Tiles
 
 class Gravity(object):
     def __init__(self, parent, value):
-        self._ignore = [Tiles.Empty, Tiles.Start, Tiles.End, Tiles.Deadly]
+        self._ignore = [Tiles.Empty, Tiles.Start, Tiles.End, Tiles.Deadly, Tiles.EnemySpawn]
 
         self._parent = parent
         self._mag = abs(value)
