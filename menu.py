@@ -118,11 +118,12 @@ class MText(MType):
     def __init__(self, text="", textColor=(0, 0, 0)):
         self._text = text
         self._textColor = textColor
+        self._font = pygame.font.SysFont("arial", 25)
         super().__init__()
 
     def update(self, image):
         for i in range(2):
-            text = pygame.font.SysFont("arial", 25).render(self._text, 1, self._textColor)
+            text = self._font.render(self._text, 1, self._textColor)
             quarterW = image.get_width() / 4
             image.blit(text,
                        (int(quarterW + quarterW * 2 * i - (text.get_width() / 2)),
@@ -150,8 +151,10 @@ class MColor(MType):
     def update(self, image):
         width = image.get_width()
         height = image.get_height()
-        self._rImage = image.subsurface(Object(width / 2, height).asRect()).fill(self._rColor)
-        self._oImage = image.subsurface(Object(width / 2, 0, width / 2, height).asRect()).fill(self._oColor)
+        self._rImage = image.subsurface(Object(width / 2, height).asRect())
+        self._oImage = image.subsurface(Object(width / 2, 0, width / 2, height).asRect())
+        self._rImage.fill(self._rColor)
+        self._oImage.fill(self._oColor)
 
     def tick(self, display, collide, event):
         if collide:
@@ -168,11 +171,11 @@ class MenuItem(Object, Drawable):
         self._types = {}
         self._applicable = [pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP, pygame.MOUSEMOTION]
 
-        image = Surface((self.w * 2, self.h))
-        self._display = Display(image, self)
+        self._origImage = Surface((self.w * 2, self.h))
+        self._display = Display(self._origImage, self)
         self.update(*types)
 
-        anim = Animation(image, 2, self.collided, None, None)
+        anim = Animation(self._origImage, 2, self.collided)
         anim.build()
         self._display.addAnimation(anim)
 
@@ -183,7 +186,7 @@ class MenuItem(Object, Drawable):
         for arg in args:
             if isinstance(arg, MType):
                 self._types[arg.__class__] = arg
-                arg.update(self._display.getImage())
+                arg.update(self._origImage)
             else:
                 raise ValueError("Unrecognized type", arg)
 

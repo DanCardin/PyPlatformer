@@ -143,13 +143,13 @@ class Editor(Enableable, Showable):
             MenuItem((324, 0, 31, 32), color, alpha, MText("E"),
                      MAction(_setBrush, WallBrush(Tiles.End))))
 
-        spawnBrush = MenuItem((370, 0, 31, 32), color, alpha, MText("*"),
+        spawnBrush = MenuItem((370, 0, 31, 32), color, alpha, MText("1"),
                               MAction(_setBrush, SpawnBrush(1)))
         self.__spawnBrushCount = 1
         def newSpawn(diff):
             self.__spawnBrushCount += diff
             brush = SpawnBrush(self.__spawnBrushCount)
-            spawnBrush.update(MAction(_setBrush, brush))
+            spawnBrush.update(MAction(_setBrush, brush), color, MText(str(self.__spawnBrushCount)))
             if isinstance(self._brush, SpawnBrush):
                 self._brush = brush
 
