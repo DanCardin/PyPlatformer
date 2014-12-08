@@ -18,13 +18,16 @@ class Map(Object, Drawable):
         self._tileset.set_colorkey(self._tileset.get_at((0, 0)))
 
     def getType(self, typ):
-        return self._tiles[typ]
+        return self._tiles.get(typ, [])
 
     def getTileset(self):
         return self._tileset
 
     def getAttr(self, attr):
-        return self._attributes.get(attr, None)
+        result = self._attributes.get(attr, None)
+        if result == None:
+            raise ValueError("couldnt find attr: {}".format(attr))
+        return result
 
     def getSize(self, x=None, y=None):
         if x and y:
@@ -49,8 +52,8 @@ class Map(Object, Drawable):
 
     def loadAttributes(self, attribs):
         form = r"^\s*{0}:\s+{1},"
-        for a in ["w", "h", "timeLim"]:
-            self._attributes[a] = int(re.search(form.format(a, r"(\d+)"),
+        for typ, a in [(int, "w"), (int, "h"), (int, "timeLim"), (float, "scale")]:
+            self._attributes[a] = typ(re.search(form.format(a, r"([\d\.]+)"),
                                                 attribs, re.MULTILINE).group(1))
 
     def load(self):
@@ -121,5 +124,5 @@ class Map(Object, Drawable):
             pass
         self._tiles.setdefault(block.getType(), []).append(block)
         self._display.update(Surface((const.res, const.res)), block)
-        self._display.update(self._tileset, block,
+        self._display.update(self._tileset, Object(block.mapX * const.res, block.mapY * const.res, const.res, const.res),
                              Object(0, block.getTile() * const.res, const.res, const.res))

@@ -49,7 +49,7 @@ class Camera(Object):
         """Calculate the scaling and display to the inputted surface"""
         self._surface.draw(self._display.getImage())
 
-        if scale != self._lastScale:
+        if scale != 1:
             surfImg = self._surface.getImage()
             tScale = (int(self.w * scale), int(self.h * scale))
             if self._lastScale != scale:
@@ -59,5 +59,8 @@ class Camera(Object):
 
             self._display.replace(self._scaleSurfaceCache)
             self._lastScale = scale
-
         self._display.draw(surface)
+                           # Object(self.x, self.y,
+                           # Object((self._scaleSurfaceCache.get_width() - surface.get_width()) / 2,
+                           #        (self._scaleSurfaceCache.get_height() - surface.get_height()) / 2,
+                                  # 0, 0))

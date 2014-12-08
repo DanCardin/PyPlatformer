@@ -4,6 +4,7 @@ from display import Display
 from enableable import Enableable
 from input import Input
 from menu import Menu, MText, MAction, MImage, MColor, MAlpha, MenuItem
+from object import Object
 from surface import Surface
 from showable import Showable
 from wall import Tiles
@@ -68,14 +69,32 @@ class ModifyTool(Tool):
         self._lastPainting = None
         self._block = None
 
+    def _modBlock(self, x, y):
+        raise NotImplementedError()
+
     def __call__(self, x, y, brush, painting):
         if self._lastPainting is not painting:
             self._lastPainting = painting
             self._block = self._getBlock(*self._getRelPos(x, y))
         if self._block:
-            self._block.h = min(32, max(1, y - self._block.y))
+            self._modBlock(x, y)
             return [self._block]
 
+class ModifyToolX(ModifyTool):
+    def _modBlock(self, x, y):
+        self._block.x = x
+
+class ModifyToolY(ModifyTool):
+    def _modBlock(self, x, y):
+        self._block.y = y
+
+class ModifyToolW(ModifyTool):
+    def _modBlock(self, x, y):
+        self._block.w = x
+
+class ModifyToolH(ModifyTool):
+    def _modBlock(self, x, y):
+        self._block.h = y
 
 class BoxTool(Tool):
     def __call__(self, x, y, dx, dy, brush):
@@ -128,8 +147,14 @@ class Editor(Enableable, Showable):
         self.menu.addGroup("Tools",
             MenuItem((0, 0, 40, 32), color, alpha, MText("Pen"),
                      MAction(_setTool, PenTool(self._map))),
-            MenuItem((41, 0, 40, 32), color, alpha, MText("Mod"),
-                     MAction(_setTool, ModifyTool(self._map))))
+            # MenuItem((41, 8, 16, 16), color, alpha, MText("<"),
+            #          MAction(_setTool, ModifyToolX(self._map))),
+            MenuItem((75, 8, 16, 16), color, alpha, MText(">"),
+                     MAction(_setTool, ModifyToolW(self._map))),
+            # MenuItem((58, -1, 16, 16), color, alpha, MText("^"),
+            #          MAction(_setTool, ModifyToolY(self._map))),
+            MenuItem((58, 16, 16, 16), color, alpha, MText("v"),
+                     MAction(_setTool, ModifyToolH(self._map))))
 
         self.menu.addGroup("Brushes",
             MenuItem((196, 0, 31, 32), color, alpha, MText("W"),
@@ -198,7 +223,7 @@ class Editor(Enableable, Showable):
             text = pygame.font.SysFont("arial", 25).render(str(isSpawn), 1, (0, 0, 0))
             surf.blit(text, (int(surf.get_width() / 2 - text.get_width() / 2),
                              int(surf.get_height() / 2 - text.get_height() / 2)))
-        self._display.update(surf, block)
+        self._display.update(surf, Object(block.mapX * const.res, block.mapY * const.res, 0, 0))
 
     def draw(self, surface, camera):
         if self.showing():

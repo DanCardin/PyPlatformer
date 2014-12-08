@@ -26,7 +26,7 @@ class Level(Completeable):
     def start(self):
         self.map.load()
 
-        self._scale = 2
+        self._scale = self.map.getAttr("scale")
         self.registered = {}
         self._entity_map = {}
         self._position_map = {}
@@ -122,13 +122,13 @@ class Level(Completeable):
                 entity.draw(self._total_surface, self._camera)
 
         self.map.draw(self._total_surface, self._camera)
-        self._healthBar.draw(self._total_surface)
-        self._countdown.draw(self._total_surface)
         if self.editor.enabled():
             self.editor.draw(self._total_surface, self._camera)
 
         self._camera.draw(self._surface, self._scale)
 
+        self._healthBar.draw(self._surface)
+        self._countdown.draw(self._surface)
         if self.editor.enabled():
             self.editor.menu.draw()
 

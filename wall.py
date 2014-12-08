@@ -21,6 +21,8 @@ class Wall(Object, EventStream):
         self._type = Tiles(type)
         self._tile = tile
         self._attribs = attribs
+        self._mapX = self.x // const.res
+        self._mapY = self.y // const.res
 
     def getAttr(self, key):
         return self._attribs.get(key, None)
@@ -52,22 +54,34 @@ class Wall(Object, EventStream):
     def relY(self):
         return self.y % const.res
 
+    @property
+    def mapX(self):
+        return self._mapX
+
+    @property
+    def mapY(self):
+        return self._mapY
+
     @Object.x.setter
     def x(self, value):
-        self._rect.x = value
-        self.notify()
+        absX = const.res * self.mapX
+        relVal = min(absX + 31, max(absX, value))
+        self._rect.x = relVal
+        self.w = self.w
 
     @Object.y.setter
     def y(self, value):
-        self._rect.y = value
-        self.notify()
+        absY = const.res * self.mapY
+        relVal = min(absY + 31, max(absY, value))
+        self._rect.y = relVal
+        self.h = self.h
 
     @Object.w.setter
     def w(self, value):
-        self._rect.w = value
+        self._rect.w = min(32 - self.relX, max(1, value - self.x))
         self.notify()
 
     @Object.h.setter
     def h(self, value):
-        self._rect.h = value
+        self._rect.h = min(32 - self.relY, max(1, value - self.y))
         self.notify()
