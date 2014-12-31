@@ -21,7 +21,6 @@ class HealthBar(Object, Drawable):
         self._heartEmpty = (hearts.subsurface(Object(rect=(20, 0, 10, 16)).asRect()),
                             hearts.subsurface(Object(rect=(30, 0, 10, 16)).asRect()))
 
-        self._display = Display(klass=self)
         self.update()
 
         self._parent.subscribe("healthbar", self.recalculate)
@@ -34,7 +33,7 @@ class HealthBar(Object, Drawable):
         trans = self._heartFilled[0].get_at((0, 0))
         surf.fill(trans)
         surf.set_colorkey(trans)
-        self._display.replace(surf)
+        self._display = Display(surface=surf, klass=self)
 
         for i in range(self._heartLen):
             self._hearts.append(surf.subsurface(Object(rect=(10 * i + 2 * (i // 2), 0, 10, 16)).asRect()))
