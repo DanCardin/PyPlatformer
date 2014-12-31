@@ -1,15 +1,26 @@
 import os
 import pygame
-from surface import Surface
 
 
 class Files(object):
-    @staticmethod
-    def getFilePath(file):
-        return os.path.join("assets", file)
+    """
+    A static class for loading files and assets and saving them.
+    """
+
+    __RelPath = "assets"
 
     @staticmethod
-    def saveFile(input, file):
+    def getFilePath(file):
+        """
+        Returns the path of the `file` asset.
+        """
+        return os.path.join(Files.__RelPath, file)
+
+    @staticmethod
+    def saveFile(file, input):
+        """
+        Writes `input` into `file`. This will overwrite everything in the file.
+        """
         with open(Files.getFilePath(file), "w") as obj:
             obj.write(input)
 
@@ -23,6 +34,9 @@ class Files(object):
 
     @staticmethod
     def openFile(file):
+        """
+        Returns the contents of the `file`.
+        """
         def run():
             with open(Files.getFilePath(file)) as obj:
                 return obj.read()
@@ -30,6 +44,9 @@ class Files(object):
 
     @staticmethod
     def loadImage(file, colorkey=None):
+        """
+        Loads and returns the image asset, `file`, with the optional colorkey to set.
+        """
         def run():
             return pygame.image.load(Files.getFilePath(file))
 
