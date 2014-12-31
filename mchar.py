@@ -44,15 +44,15 @@ class Char(Object, Dir, Id, Drawable, Health, Subscribee, Alive):
         self._weapon = Weapon(self, level, lambda: ((5 * self.getDir()), 0))
 
     def applyInputSettings(self):
-        self.input.set(pygame.KEYDOWN, pygame.K_a, "left", self.startMove, "left")
-        self.input.set(pygame.KEYDOWN, pygame.K_d, "right", self.startMove, "right")
-        self.input.set(pygame.KEYDOWN, pygame.K_w, "up", self.startMove, "up")
-        self.input.set(pygame.KEYDOWN, pygame.K_s, "down", self.startMove, "down")
+        self.input.set(pygame.KEYDOWN, self.startMove, pygame.K_a, "left")
+        self.input.set(pygame.KEYDOWN, self.startMove, pygame.K_d, "right")
+        self.input.set(pygame.KEYDOWN, self.startMove, pygame.K_w, "up")
+        self.input.set(pygame.KEYDOWN, self.startMove, pygame.K_s, "down")
 
-        self.input.set(pygame.KEYUP, pygame.K_a, "left", self.stopMove, "left")
-        self.input.set(pygame.KEYUP, pygame.K_d, "right", self.stopMove, "right")
-        self.input.set(pygame.KEYUP, pygame.K_w, "up", self.stopMove, "up")
-        self.input.set(pygame.KEYUP, pygame.K_s, "down", self.stopMove, "down")
+        self.input.set(pygame.KEYUP, self.stopMove, pygame.K_a, "left")
+        self.input.set(pygame.KEYUP, self.stopMove, pygame.K_d, "right")
+        self.input.set(pygame.KEYUP, self.stopMove, pygame.K_w, "up")
+        self.input.set(pygame.KEYUP, self.stopMove, pygame.K_s, "down")
 
     def startMove(self, arg):
         if arg == "left":

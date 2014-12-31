@@ -14,7 +14,7 @@ class Weapon(Emitter):
         self._s.fill((255, 0, 0))
 
         self._input = Input()
-        self._input.set(pygame.KEYDOWN, pygame.K_f, "fire", self.createNew)
+        self._input.set(pygame.KEYDOWN, self.createNew, pygame.K_f)
 
     def createNew(self):
         x, y = self._offsetFunc()

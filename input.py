@@ -1,31 +1,41 @@
 class Input(object):
+    """
+    A class for managing inputs.
+
+    After registering input events with `set(...)`, calls to this class will
+    perform the specified actions on inputs that match the registered events.
+
+    For example:
+        set(KEYDOWN, exFunc, KEY_R, True)
+
+        will call exFunc(True) when the R-keydown event is one of the events
+        when this class is called.
+    """
     def __init__(self):
-        self.keys = {}
-        self.shortcuts = {}
+        self._registeredEvents = {}
 
-    def set(self, event, key, label, action, arg=False):
-        if not self.keys.get(key):
-            self.keys[key] = label
-        if not self.shortcuts.get(event):
-            self.shortcuts[event] = {}
-        self.shortcuts[event][label] = (action, arg)
+    def set(self, event, action, ident=None, arg=()):
+        """
+        Registers an event, with an action to perform upon seeing that event.
 
-    def _use(self, event, key):
-        action, argument = event[key]
-        if action:
-            if hasattr(action, "__call__"):
-                if argument:
-                    action(argument)
-                else:
-                    action()
-            else:
-                action = argument
+        `event` - The event to look for.
+        `action` - The function to call on an event match.
+        `ident` - (Optional) Information to further specify an `event`.
+        `args` - (Optional) A tuple of arguments to pass to the `action`.
+        """
+        self._registeredEvents[(event, ident)] = (action, arg)
 
     def __call__(self, inputs):
-        if inputs is not None:
-            for event in inputs:
-                validEvent = self.shortcuts.get(event.type)
-                if validEvent:
-                    validShortcut = self.keys.get(event.key)
-                    if validShortcut and validEvent.get(validShortcut):
-                            self._use(validEvent, validShortcut)
+        """
+        Performs the registered actions upon matching the registered events.
+
+        `inputs` - A list of inputs that can be used to match from.
+        """
+        for event in inputs:
+            validEvent = self._registeredEvents.get((event.type, event.key))
+            if validEvent:
+                action, args = validEvent
+                if isinstance(args, tuple):
+                    action(*args)
+                else:
+                    action(args)

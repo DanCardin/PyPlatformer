@@ -3,7 +3,7 @@ from pygame import KEYDOWN, K_e, K_r
 from pygame.mixer import Sound
 from surface import Surface
 
-from background import Background
+from parallax import Parallax
 from complete import Completeable
 from camera import Camera
 from countdown import CountdownTimer
@@ -40,12 +40,12 @@ class Level(Completeable):
                               (150, 200, 150, 200),
                               self.map,
                               self.get(tid))
-        self._background = Background(const.backgrounds)
+        self._background = Parallax(const.backgrounds)
         self.editor = Editor(self.map, self._surface)
 
         self.input = Input()
-        self.input.set(KEYDOWN, K_e, "editor", self.editor.toggleEnabled)
-        self.input.set(KEYDOWN, K_r, "restart", self.start)
+        self.input.set(KEYDOWN, self.editor.toggleEnabled, K_e)
+        self.input.set(KEYDOWN, self.start, K_r)
 
         # self._sound = Sound("assets\\music.ogg")
         # self._sound.play(-1)

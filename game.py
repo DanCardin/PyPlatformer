@@ -1,5 +1,6 @@
 import pygame
 import const
+from collections import namedtuple
 from complete import Completeable
 from enableable import Enableable
 from input import Input
@@ -30,8 +31,8 @@ class Game(Enableable, Completeable):
                            MText("Exit", (0, 255, 0)), MAction(self.setFinished))
 
         self._input = Input()
-        self._input.set(pygame.KEYDOWN, pygame.K_m, "menu", self._menuToggle)
-        self._input.set(pygame.KEYDOWN, pygame.K_p, "pause", self._pause)
+        self._input.set(pygame.KEYDOWN, self._menuToggle, pygame.K_m)
+        self._input.set(pygame.KEYDOWN, self._pause, pygame.K_p)
 
     def start(self):
         self.enable()
@@ -97,12 +98,16 @@ class Game(Enableable, Completeable):
             self._surface.fill((0, 0, 0))
             self._menuToggle()
 
+    Event = namedtuple("Event", "type key pos")
     def getEvents(self):
         result = []
         for event in pygame.event.get():
-            if event.type in [pygame.KEYDOWN, pygame.KEYUP, pygame.MOUSEBUTTONDOWN,
-                              pygame.MOUSEBUTTONUP, pygame.MOUSEMOTION]:
-                result.append(event)
+            if event.type in [pygame.KEYDOWN, pygame.KEYUP]:
+                result.append(Game.Event(event.type, event.key, None))
+
+            if event.type in [pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP, pygame.MOUSEMOTION]:
+                result.append(Game.Event(event.type, None, event.pos))
+
             if event.type == pygame.QUIT:
                 self.setFinished()
         return result

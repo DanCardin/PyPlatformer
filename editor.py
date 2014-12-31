@@ -127,9 +127,9 @@ class Editor(Enableable, Showable):
         self._createMenu(surface)
 
         self._input = Input()
-        self._input.set(pygame.KEYDOWN, pygame.K_o, "overlay", self.toggleShowing)
-        self._input.set(pygame.KEYDOWN, pygame.K_t, "menu", self.menu.toggleEnabled)
-        self._input.set(pygame.KEYDOWN, pygame.K_RETURN, "save", self._map.save)
+        self._input.set(pygame.KEYDOWN, self.toggleShowing, pygame.K_o)
+        self._input.set(pygame.KEYDOWN, self.menu.toggleEnabled, pygame.K_t)
+        self._input.set(pygame.KEYDOWN, self._map.save, pygame.K_RETURN)
 
     def _createMenu(self, surface):
         self.menu = Menu((0, (const.screenSize[1] - 2) * const.res), surface)
