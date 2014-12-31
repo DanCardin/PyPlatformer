@@ -25,8 +25,6 @@ class Level(Completeable):
 
     def start(self):
         self.map.load()
-
-        self._scale = self.map.getAttr("scale")
         self.registered = {}
         self._entity_map = {}
         self._position_map = {}
@@ -38,11 +36,11 @@ class Level(Completeable):
         self._total_surface = Surface((self.map.w, self.map.h))
         tid = self.addEntity(register=True, entity=MChar(self, self.map.getType(Tiles.Start)[0]))
         self._camera = Camera(tuple([s * const.res for s in const.screenSize]),
-                              self._total_surface,
+                              lambda: self.map.getAttr("scale"),
+                              (150, 200, 150, 200),
                               self.map,
-                              Object(150, 200, 150, 200),
                               self.get(tid))
-        self._background = Background(self._camera, const.backgrounds)
+        self._background = Background(const.backgrounds)
         self.editor = Editor(self.map, self._surface)
 
         self.input = Input()
@@ -58,7 +56,7 @@ class Level(Completeable):
             pass
 
         for block in self.map.getType(Tiles.EnemySpawn):
-            self._enemySpawns[block] = EnemyEmitter(Object(block.x, block.y, 0, 0),
+            self._enemySpawns[block] = EnemyEmitter(Object(pos=(block.x, block.y)),
                                                     self, block.getAttr("spawnNum"), 2)
         self._countdown = CountdownTimer(const.screenSize[0] * const.res - 50, 10,
                                          self.map.getAttr("timeLim"))
@@ -100,7 +98,6 @@ class Level(Completeable):
             s.tick()
 
         self._camera.tick()
-        self._background.tick()
         self._countdown.tick()
         if self._countdown.isFinished():
             self.setLost()
@@ -116,16 +113,16 @@ class Level(Completeable):
         self._surface.fill((0, 0, 0))
         self._background.draw(self._total_surface, self._camera)
         for s in self._enemySpawns.values():
-            s.draw(self._total_surface, self._camera)
+            s.draw(self._total_surface)
         for _entities in [self._entities, self.registered]:
             for entity in _entities.values():
-                entity.draw(self._total_surface, self._camera)
+                entity.draw(self._total_surface)
 
-        self.map.draw(self._total_surface, self._camera)
+        self.map.draw(self._total_surface)
         if self.editor.enabled():
-            self.editor.draw(self._total_surface, self._camera)
+            self.editor.draw(self._total_surface)
 
-        self._camera.draw(self._surface, self._scale)
+        self._camera.draw(self._surface, self._total_surface)
 
         self._healthBar.draw(self._surface)
         self._countdown.draw(self._surface)

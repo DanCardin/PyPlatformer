@@ -1,24 +1,34 @@
-from surface import Surface
 from pygame import transform
 from display import Display
-from object import Object
+from object import Object, ScaledObject, ScaledOffsetObject
+from scaleable import Scaled
+from surface import Surface
 
 
-class Camera(Object):
-    def __init__(self, size, surface, maxBounds, boundBox, target):
-        Object.__init__(self, size)
+class Camera(ScaledObject, Scaled):
+    def __init__(self, size, scale, boundBox, maxBounds, target):
+        super().__init__(size=size, scale=scale)
 
-        self._surface = Display(surface)
-        self._display = Display(Surface((self.w, self.h)))
+        self._boundBox = ScaledOffsetObject(rect=boundBox, scale=self.getScale)
+        """The bounding box inside which the target must stay, relative to the
+           `size` of the camera"""
+
         self._maxBounds = maxBounds
-        self._boundBox = boundBox
-        self._target = target
+        """The bounds inside which the `Camera  itself must stay"""
 
-        self._scaleSurfaceCache = None
-        self._lastScale = 1
-        self._scaleChanged = True
+        self._target = target
+        """The object that the camera follows"""
+
+        self._display = Display(Surface(size))
+        self._displaySurfaceCache = self._display.getImage()
+        self._surfaceCache = None
+
+        self._lastScale = None
 
         assert target is not None
+
+    def getAbsolutePos(self, pos):
+        return self.x + (pos[0] * self.getScale()), self.y + (pos[1] * self.getScale())
 
     def tick(self):
         if self.x > self._target.x - self._boundBox.x:
@@ -45,22 +55,21 @@ class Camera(Object):
         if (self.y < 0) and (self.y + self.h > self._maxBounds.h):
             self.y = self._target.y + self._target.h / 2 - self.h / 2
 
-    def draw(self, surface, scale=1):
+    def draw(self, surface, total_surface):
         """Calculate the scaling and display to the inputted surface"""
-        self._surface.draw(self._display.getImage())
-
+        scale = self.getScale()
         if scale != 1:
-            surfImg = self._surface.getImage()
-            tScale = (int(self.w * scale), int(self.h * scale))
-            if self._lastScale != scale:
-                self._scaleSurfaceCache = transform.scale(surfImg, tScale)
-            else:
-                transform.scale(surfImg, tScale, self._scaleSurfaceCache)
+            if scale != self._lastScale:
+                self._surfaceCache = Surface((self.w, self.h))
+            self._surfaceCache.blit(total_surface, (-self.x, -self.y))
 
-            self._display.replace(self._scaleSurfaceCache)
+            scaleTo = self.unscaled()
+            transform.scale(self._surfaceCache, (scaleTo.w, scaleTo.h), self._displaySurfaceCache)
             self._lastScale = scale
+        else:
+            import time
+            if time.time() % 2 > 1.9:
+                print(self._boundBox, self.asRect())
+            self._display.update(total_surface, Display.translate(total_surface.get_rect(), self))
+
         self._display.draw(surface)
-                           # Object(self.x, self.y,
-                           # Object((self._scaleSurfaceCache.get_width() - surface.get_width()) / 2,
-                           #        (self._scaleSurfaceCache.get_height() - surface.get_height()) / 2,
-                                  # 0, 0))
