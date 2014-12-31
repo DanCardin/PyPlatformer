@@ -63,9 +63,7 @@ class Behaviors(object):
 
 class Particle(Object, Id, Alive, Drawable):
     def __init__(self, size, topSpeed, tileset, collide, *strategies, altname=None):
-        Object.__init__(self, size)
-        Id.__init__(self, altname)
-        Alive.__init__(self)
+        super().__init__(rect=size, idName=altname)
 
         self._display = Display(tileset, self)
         if collide:
@@ -99,7 +97,7 @@ class Emitter(object):
     def getChildren(self):
         return self._children[:]
 
-    def draw(self, surface, camera):
+    def draw(self, surface, camera=Object()):
         for p in self._children:
             p.draw(surface, camera)
 

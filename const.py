@@ -14,8 +14,8 @@ FPS = 30
 playerSpeed = (6, 12)
 
 backgrounds = [
-    ((480, 320), 4, "back1.png"),
-    ((480, 320), 2, "back2.png"),
+    ((480, 320), 2, "back1.png"),
+    ((480, 320), 4, "back2.png"),
     ((480, 320), 0, "background3.png")
 ]
 

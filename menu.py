@@ -8,8 +8,7 @@ from surface import Surface
 
 class Menu(Object, Enableable):
     def __init__(self, pos, surface, enabled=True):
-        Object.__init__(self, pos[0], pos[1], 0, 0)
-        Enableable.__init__(self, enabled)
+        super().__init__(pos=pos, enabled=enabled)
 
         self._surface = surface
         self.pos = pos
@@ -43,7 +42,7 @@ class Menu(Object, Enableable):
     def draw(self):
         if self.enabled():
             for key, item in self.items.items():
-                item.draw(self._surface, Object(self.x * -1, self.y * -1, 0, 0))
+                item.draw(self._surface, Object(pos=(self.x * -1, self.y * -1)))
 
 
 class ItemGroup(Drawable):
@@ -151,8 +150,8 @@ class MColor(MType):
     def update(self, image):
         width = image.get_width()
         height = image.get_height()
-        self._rImage = image.subsurface(Object(width / 2, height).asRect())
-        self._oImage = image.subsurface(Object(width / 2, 0, width / 2, height).asRect())
+        self._rImage = image.subsurface(Object(size=(width / 2, height)).asRect())
+        self._oImage = image.subsurface(Object(rect=(width / 2, 0, width / 2, height)).asRect())
         self._rImage.fill(self._rColor)
         self._oImage.fill(self._oColor)
 
@@ -165,7 +164,7 @@ class MColor(MType):
 
 class MenuItem(Object, Drawable):
     def __init__(self, rect, *types):
-        Object.__init__(self, rect)
+        super().__init__(rect=rect)
         self._selected = False
         self._collided = False
         self._types = {}

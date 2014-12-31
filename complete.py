@@ -8,8 +8,9 @@ class Completion(Enum):
 
 
 class Completeable(object):
-    def __init__(self, default=Completion.InProgress):
-        self._progress = default
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._progress = kwargs.get("progress", Completion.InProgress)
 
     def isComplete(self):
         return True if self._progress in [Completion.Finished, Completion.Lost] else False

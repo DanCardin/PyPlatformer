@@ -21,8 +21,8 @@ class EnemyEmitter(MinTimeEmitter):
     def _emit(self):
         if len(self._children) < self._maxEmitted:
             x, y = self._offsetFunc()
-            pos = (self._anchor.x + x, self._anchor.y + y, 20, 26)
-            _part = Enemy(pos, (3, 16), const.playerTileset, self._level, 3)
+            rect = (self._anchor.x + x, self._anchor.y + y, 20, 26)
+            _part = Enemy(rect, (3, 16), const.playerTileset, self._level, 3)
             self._children.append(_part)
 
 
@@ -42,12 +42,9 @@ class AI(object):
 
 
 class Enemy(Object, Dir, Id, Alive, Health, Drawable):
-    def __init__(self, size, speed, tileset, level, maxHealth):
-        Object.__init__(self, size)
-        Dir.__init__(self, lambda: self.move.getDir(x=True))
-        Id.__init__(self, altname="enemy")
-        Alive.__init__(self)
-        Health.__init__(self, maxHealth)
+    def __init__(self, rect, speed, tileset, level, maxHealth):
+        super().__init__(rect=rect, dirRule=lambda: self.move.getDir(x=True), idName="enemy",
+                         baseHealth=maxHealth)
 
         self.collision = Collision(self, level, "enemy")
         self.move = Move(self, speed, self.collision)

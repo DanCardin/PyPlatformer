@@ -2,7 +2,7 @@ import time
 
 
 class EventStream(object):
-    def __init__(self):
+    def __init__(self, **kwargs):
         self._observers = {}
 
     def notify(self):

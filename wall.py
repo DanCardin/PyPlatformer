@@ -14,9 +14,8 @@ class Tiles(Enum):
 
 
 class Wall(Object, EventStream):
-    def __init__(self, pos, type, tile, attribs={}):
-        Object.__init__(self, pos)
-        EventStream.__init__(self)
+    def __init__(self, rect, type, tile, attribs={}):
+        super().__init__(rect=rect)
         self._lastType = None
         self._type = Tiles(type)
         self._tile = tile

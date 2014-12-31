@@ -1,17 +1,16 @@
 import re
 import const
 
-from object import Object
-from files import Files
-from wall import Wall
 from display import Display, Drawable
+from files import Files
+from object import Object
 from surface import Surface
-from wall import Tiles
+from wall import Wall
 
 
 class Map(Object, Drawable):
     def __init__(self, file, tileset):
-        Object.__init__(self)
+        super().__init__()
 
         self._file = file
         self._tileset = Files.loadImage(tileset)
@@ -124,5 +123,7 @@ class Map(Object, Drawable):
             pass
         self._tiles.setdefault(block.getType(), []).append(block)
         self._display.update(Surface((const.res, const.res)), block)
-        self._display.update(self._tileset, Object(block.mapX * const.res, block.mapY * const.res, const.res, const.res),
-                             Object(0, block.getTile() * const.res, const.res, const.res))
+        self._display.update(self._tileset,
+                             Object(rect=(block.mapX * const.res, block.mapY * const.res,
+                                          const.res, const.res)),
+                             Object(rect=(0, block.getTile() * const.res, const.res, const.res)))

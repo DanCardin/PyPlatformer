@@ -1,7 +1,8 @@
 class Dir(object):
-    def __init__(self, rule, default=1):
-        self._rule = rule
-        self._dir = 1
+    def __init__(self, **kwargs):
+        self._rule = kwargs.pop("dirRule")
+        self._dir = kwargs.pop("dirDefault", 1)
+        super().__init__(**kwargs)
 
     def getDir(self):
         return self._dir
@@ -13,8 +14,9 @@ class Dir(object):
 
 
 class Alive(object):
-    def __init__(self, default=True):
-        self._alive = True
+    def __init__(self, **kwargs):
+        self._alive = kwargs.pop("alive", True)
+        super().__init__(**kwargs)
 
     def kill(self):
         self._alive = False
@@ -24,9 +26,10 @@ class Alive(object):
 
 
 class Health(object):
-    def __init__(self, baseHealth):
-        self._baseHealth = baseHealth
+    def __init__(self, **kwargs):
+        self._baseHealth = kwargs.pop("baseHealth")
         self._health = self._baseHealth
+        super().__init__(**kwargs)
 
     def setBaseHealth(self, value):
         self._baseHealth = value

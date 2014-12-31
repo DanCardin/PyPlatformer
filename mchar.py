@@ -18,12 +18,9 @@ from ids import Id
 
 class Char(Object, Dir, Id, Drawable, Health, Subscribee, Alive):
     def __init__(self, level, start, size, speed, tileset, control, maxHealth):
-        Object.__init__(self, (start.x, start.y, size[0], size[1]))
-        Dir.__init__(self, lambda: self.move.getDir(x=True))
-        Id.__init__(self)
-        Health.__init__(self, maxHealth)
-        Alive.__init__(self)
-
+        super().__init__(rect=(start.x, start.y, size[0], size[1]),
+                         dirRule=lambda: self.move.getDir(x=True),
+                         baseHealth=maxHealth)
         self.collision = Collision(self, level)
         self.move = Move(self, speed, collision=self.collision)
         self._gravity = GravityLine(self, 2, h=level.map.h // 2)
@@ -74,7 +71,7 @@ class Char(Object, Dir, Id, Drawable, Health, Subscribee, Alive):
         if arg == "up":
             self.jumping.muteJump()
 
-    def draw(self, surface, camera):
+    def draw(self, surface, camera=Object()):
         self._display.draw(surface, camera)
         self._weapon.draw(surface, camera)
 

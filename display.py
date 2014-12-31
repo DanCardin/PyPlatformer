@@ -1,12 +1,16 @@
-from animation import Animation
 from object import Object
 from files import Files
 
 
-class Display(object):
+class Drawable(object):
+    def draw(self, surface, camera=Object()):
+        self._display.draw(surface, camera)
+
+
+class Display(Drawable):
     @staticmethod
     def translate(rect, cam):
-        return Object((rect.x - cam.x, rect.y - cam.y, rect.w, rect.h))
+        return Object(rect=(rect.x - cam.x, rect.y - cam.y, rect.w, rect.h))
 
     def __init__(self, surface=None, klass=None, transparent=False, anim=None, alpha=None):
         self._image = Files.loadImage(surface) if isinstance(surface, str) else surface
@@ -41,8 +45,3 @@ class Display(object):
 
     def addAnimation(self, animation):
         self._animation = animation
-
-
-class Drawable(object):
-    def draw(self, surface, camera=Object()):
-        self._display.draw(surface, camera)

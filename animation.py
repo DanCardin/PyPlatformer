@@ -41,7 +41,7 @@ class Animation(object):
         ix = self._image.get_width() / self._tLength
         iy = self._image.get_height()
 
-        self._anim[1][1][False].append(self._image.subsurface(Object(0, 0, ix, iy).asRect()))
+        self._anim[1][1][False].append(self._image.subsurface(Object(rect=(0, 0, ix, iy)).asRect()))
         top = self._anim[1][1][False][-1]
         self._anim[-1][1][False].append(pygame.transform.flip(top, True, False))
         self._anim[1][-1][False].append(pygame.transform.flip(top, False, True))
@@ -49,7 +49,7 @@ class Animation(object):
 
         for i in range(1, self._tLength):
             for e in range(2):
-                self._anim[1][1][True].append(self._image.subsurface(Object(ix * i, 0, ix, iy).asRect()))
+                self._anim[1][1][True].append(self._image.subsurface(Object(rect=(ix * i, 0, ix, iy)).asRect()))
                 top = self._anim[1][1][True][-1]
                 if self._hFlip:
                     self._anim[-1][1][True].append(pygame.transform.flip(top, True, False))

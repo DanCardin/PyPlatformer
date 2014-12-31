@@ -14,9 +14,7 @@ class CountdownTimer(Object, Drawable, Enableable, Completeable):
         numbers = Files.loadImage(image)
         numbers.set_colorkey(numbers.get_at((0, 0)))
 
-        Object.__init__(self, x, y, width * numNums, numbers.get_height())
-        Enableable.__init__(self, True)
-        Completeable.__init__(self)
+        super().__init__(rect=(x, y, width * numNums, numbers.get_height()), enabled=True)
 
         self._numbers = []
         self._digits = []

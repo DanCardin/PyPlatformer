@@ -80,21 +80,26 @@ class ModifyTool(Tool):
             self._modBlock(x, y)
             return [self._block]
 
+
 class ModifyToolX(ModifyTool):
     def _modBlock(self, x, y):
         self._block.x = x
+
 
 class ModifyToolY(ModifyTool):
     def _modBlock(self, x, y):
         self._block.y = y
 
+
 class ModifyToolW(ModifyTool):
     def _modBlock(self, x, y):
         self._block.w = x
 
+
 class ModifyToolH(ModifyTool):
     def _modBlock(self, x, y):
         self._block.h = y
+
 
 class BoxTool(Tool):
     def __call__(self, x, y, dx, dy, brush):
@@ -107,8 +112,7 @@ class Paint(object):
 
 class Editor(Enableable, Showable):
     def __init__(self, map, surface):
-        Enableable.__init__(self, False)
-        Showable.__init__(self, True)
+        super().__init__(enabled=False, showing=True)
 
         self._map = map
         self._tool = None
@@ -204,7 +208,7 @@ class Editor(Enableable, Showable):
                         self._painting = Paint()
 
                 if self._painting and self._tool:
-                    x, y = event.pos[0] + camera.x, event.pos[1] + camera.y
+                    x, y = camera.getAbsolutePos(event.pos)
                     self._tool(x, y, self._brush, self._painting)
 
     def _update(self, block):
@@ -223,8 +227,8 @@ class Editor(Enableable, Showable):
             text = pygame.font.SysFont("arial", 25).render(str(isSpawn), 1, (0, 0, 0))
             surf.blit(text, (int(surf.get_width() / 2 - text.get_width() / 2),
                              int(surf.get_height() / 2 - text.get_height() / 2)))
-        self._display.update(surf, Object(block.mapX * const.res, block.mapY * const.res, 0, 0))
+        self._display.update(surf, Object(pos=(block.mapX * const.res, block.mapY * const.res)))
 
-    def draw(self, surface, camera):
+    def draw(self, surface, camera=Object()):
         if self.showing():
             self._display.draw(surface, camera)

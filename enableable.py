@@ -1,6 +1,7 @@
 class Enableable(object):
-    def __init__(self, default=True):
-        self._enabled = default
+    def __init__(self, **kwargs):
+        self._enabled = kwargs.pop("enabled", True)
+        super().__init__(**kwargs)
 
     def enable(self):
         self._enabled = True

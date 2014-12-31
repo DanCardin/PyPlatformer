@@ -1,6 +1,7 @@
 class Showable(object):
-    def __init__(self, default=True):
-        self._showing = default
+    def __init__(self, **kwargs):
+        self._showing = kwargs.pop("showing", True)
+        super().__init__(**kwargs)
 
     def show(self):
         self._enabled = True

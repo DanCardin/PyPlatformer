@@ -9,17 +9,17 @@ from surface import Surface
 
 class HealthBar(Object, Drawable):
     def __init__(self, x, y, parent):
-        Object.__init__(self, x, y, 0, 0)
+        super().__init__(pos=(x, y))
         assert isinstance(parent, Health)
 
         self._hearts = []
         self._parent = parent
 
         hearts = Files.loadImage(const.heartsImg)
-        self._heartFilled = (hearts.subsurface(Object(0, 0, 10, 16).asRect()),
-                             hearts.subsurface(Object(10, 0, 10, 16).asRect()))
-        self._heartEmpty = (hearts.subsurface(Object(20, 0, 10, 16).asRect()),
-                            hearts.subsurface(Object(30, 0, 10, 16).asRect()))
+        self._heartFilled = (hearts.subsurface(Object(rect=(0, 0, 10, 16)).asRect()),
+                             hearts.subsurface(Object(rect=(10, 0, 10, 16)).asRect()))
+        self._heartEmpty = (hearts.subsurface(Object(rect=(20, 0, 10, 16)).asRect()),
+                            hearts.subsurface(Object(rect=(30, 0, 10, 16)).asRect()))
 
         self._display = Display(klass=self)
         self.update()
@@ -37,7 +37,7 @@ class HealthBar(Object, Drawable):
         self._display.replace(surf)
 
         for i in range(self._heartLen):
-            self._hearts.append(surf.subsurface(Object(10 * i + 2 * (i // 2), 0, 10, 16).asRect()))
+            self._hearts.append(surf.subsurface(Object(rect=(10 * i + 2 * (i // 2), 0, 10, 16)).asRect()))
 
 
     def recalculate(self, parent):
