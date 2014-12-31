@@ -18,11 +18,13 @@ screen = pygame.display.set_mode((const.screenSize[0] * const.res,
                                   const.screenSize[1] * const.res))
 game = Game(screen, const.levelFiles)
 
-# --- Main Loop
-while not game.isComplete():
-    game.tick()
-    clock.tick(const.FPS)
-    pygame.display.flip()
 
+def run():
+    while not game.isComplete():
+        game.tick()
+        clock.tick(const.FPS)
+        pygame.display.flip()
+
+run()
 pygame.quit()
 sys.exit()
