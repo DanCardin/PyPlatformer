@@ -13,10 +13,10 @@ from object import Object
 from move import Move
 from wall import Tiles
 from weapons import Weapon
-from ids import Id
+from ids import IDed
 
 
-class Char(Object, Dir, Id, Drawable, Health, Subscribee, Alive):
+class Char(Object, Dir, IDed, Drawable, Health, Subscribee, Alive):
     def __init__(self, level, start, size, speed, tileset, control, maxHealth):
         super().__init__(rect=(start.x, start.y, size[0], size[1]),
                          dirRule=lambda: self.move.getDir(x=True),
@@ -40,7 +40,7 @@ class Char(Object, Dir, Id, Drawable, Health, Subscribee, Alive):
             return {False: -1, True: 1}[self._gravity.positiveDir()]
 
         image = Files.loadImage(tileset)
-        self._display = Display(image, self, True, Animation(image, 11, _isMoving, _hDir, _vDir))
+        self._display = Display(image, self, Animation(image, 11, _isMoving, _hDir, _vDir), True)
         self._weapon = Weapon(self, level, lambda: ((5 * self.getDir()), 0))
 
     def applyInputSettings(self):

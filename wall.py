@@ -5,6 +5,9 @@ from events import EventStream
 
 
 class Tiles(Enum):
+    """
+    The different types that a Tile can be.
+    """
     Empty = 0
     Solid = 1
     Start = 2
@@ -14,7 +17,16 @@ class Tiles(Enum):
 
 
 class Wall(Object, EventStream):
+    """
+    A Rectangular object that represents an in-game unit of the Map.
+    """
     def __init__(self, rect, type, tile, attribs={}):
+        """
+        `rect` - The absolute position and size of the Wall in in-game units.
+        `type` - The type of the Wall, in `Tiles`
+        `tile` - The integer to indicate the tileset tile to use when displaying this object.
+        `attribs` - A `Dict` containing any additional metadata to associate with the `Wall`.
+        """
         super().__init__(rect=rect)
         self._lastType = None
         self._type = Tiles(type)
@@ -24,24 +36,43 @@ class Wall(Object, EventStream):
         self._mapY = self.y // const.res
 
     def getAttr(self, key):
+        """
+        Returns the attribute associated with the key, `key`.
+        Returns `None` if `key` does not exist.
+        """
         return self._attribs.get(key, None)
 
     def setAttr(self, key, value):
+        """
+        Sets the attribute, `key` to `value`.
+        """
         self._attribs[key] = value
         self.notify()
 
     def getTile(self):
+        """
+        Returns the tile of the `Wall`.
+        """
         return self._tile
 
     def getType(self):
+        """
+        Returns the type of the `Wall`.
+        """
         return self._type
 
     def setType(self, type):
+        """
+        Sets the type of the `Wall` to `type`.
+        """
         self._lastType = self._type
         self._type = Tiles(type)
         self.notify()
 
     def setTile(self, tile):
+        """
+        Sets the tile of the `Wall` to `tile`.
+        """
         self._tile = tile
         self.notify()
 

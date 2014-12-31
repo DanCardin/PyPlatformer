@@ -5,7 +5,7 @@ from collision import Collision, Direction
 from display import Display, Drawable
 from files import Files
 from gravity import GravityLine
-from ids import Id
+from ids import IDed
 from move import Move
 from object import Object
 from particle import MinTimeEmitter, Behaviors
@@ -41,7 +41,7 @@ class AI(object):
             self._klass.move.setSpeed(x=self._dir * self._klass.move.getTopSpeed(x=True))
 
 
-class Enemy(Object, Dir, Id, Alive, Health, Drawable):
+class Enemy(Object, Dir, IDed, Alive, Health, Drawable):
     def __init__(self, rect, speed, tileset, level, maxHealth):
         super().__init__(rect=rect, dirRule=lambda: self.move.getDir(x=True), idName="enemy",
                          baseHealth=maxHealth)
@@ -61,7 +61,7 @@ class Enemy(Object, Dir, Id, Alive, Health, Drawable):
             return {False: -1, True: 1}[self.gravity.positiveDir()]
 
         image = Files.loadImage(tileset)
-        self._display = Display(image, self, True, Animation(image, 11, _isMoving, _hDir, _vDir))
+        self._display = Display(image, self, Animation(image, 11, _isMoving, _hDir, _vDir), True)
 
     def tick(self):
         collisions = self.move()

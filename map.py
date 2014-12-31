@@ -114,7 +114,7 @@ class Map(Object, Drawable):
                 s.append(")")
             s.append("\n")
         s.append("}")
-        Files.saveFile(''.join(s), self._file)
+        Files.saveFile(self._file, ''.join(s))
 
     def _updateMap(self, block):
         try:

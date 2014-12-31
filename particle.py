@@ -3,7 +3,7 @@ from char import Alive
 from collision import Collision
 from display import Display, Drawable
 from move import Move
-from ids import Id
+from ids import IDed
 from object import Object
 
 
@@ -61,7 +61,7 @@ class Behaviors(object):
         return _cleanupCollision
 
 
-class Particle(Object, Id, Alive, Drawable):
+class Particle(Object, IDed, Alive, Drawable):
     def __init__(self, size, topSpeed, tileset, collide, *strategies, altname=None):
         super().__init__(rect=size, idName=altname)
 
