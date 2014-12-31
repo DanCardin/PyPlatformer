@@ -5,7 +5,7 @@ from surface import Surface
 
 from parallax import Parallax
 from complete import Completeable
-from camera import Camera
+from viewport import Viewport
 from countdown import CountdownTimer
 from editor import Editor
 from enemy import EnemyEmitter
@@ -35,11 +35,11 @@ class Level(Completeable):
 
         self._total_surface = Surface((self.map.w, self.map.h))
         tid = self.addEntity(register=True, entity=MChar(self, self.map.getType(Tiles.Start)[0]))
-        self._camera = Camera(tuple([s * const.res for s in const.screenSize]),
-                              lambda: self.map.getAttr("scale"),
-                              (150, 200, 150, 200),
-                              self.map,
-                              self.get(tid))
+        self._camera = Viewport(tuple([s * const.res for s in const.screenSize]),
+                                lambda: self.map.getAttr("scale"),
+                                self.get(tid),
+                                (150, 200, 150, 200),
+                                self.map)
         self._background = Parallax(const.backgrounds)
         self.editor = Editor(self.map, self._surface)
 
