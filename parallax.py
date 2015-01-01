@@ -37,7 +37,7 @@ class Layer(Object, Drawable):
         super().__init__(size=size)
         self._dampSpeed = dampSpeed
         self._picture = Files.loadImage(picture)
-        self._display = Display(self._picture, self, transparency)
+        self._display = Display(self._picture, klass=self, transparent=transparency)
 
     def getDampSpeed(self):
         return self._dampSpeed

@@ -64,7 +64,7 @@ class Map(Object, Drawable):
         self.loadAttributes(re.search("attribs: {(.*?)}", file, flags=re.DOTALL).group(1))
         self.w = self.getAttr("w") * const.res
         self.h = self.getAttr("h") * const.res
-        self._display = Display(Surface((self.w, self.h)), self, True)
+        self._display = Display(Surface((self.w, self.h)), klass=self, transparent=True)
 
         file = re.search("map: {(.*?)}", file, flags=re.DOTALL).group(1)
         for tile in re.finditer(r"\((.*?):(.*?)\)", file):

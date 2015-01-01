@@ -120,7 +120,7 @@ class Editor(Enableable, Showable):
         self._painting = None
 
         surf = Surface((map.w, map.h))
-        self._display = Display(surf, surf.get_rect(), True, alpha=75)
+        self._display = Display(surf, klass=surf.get_rect(), transparent=True, alpha=75)
         for tile in self._map.getMap().values():
             tile.subscribe("editor", self._update)
 
