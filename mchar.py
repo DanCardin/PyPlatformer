@@ -6,7 +6,7 @@ from collision import Collision
 from display import Display, Drawable
 from files import Files
 from gravity import GravityLine
-from input import Input
+from input import Input, Inputable
 from jumping import Jumping
 from events import Subscribee, MinTimeEventStream
 from object import Object
@@ -16,16 +16,15 @@ from weapons import Weapon
 from ids import IDed
 
 
-class Char(Object, Dir, IDed, Drawable, Health, Subscribee, Alive):
-    def __init__(self, level, start, size, speed, tileset, control, maxHealth):
-        super().__init__(rect=(start.x, start.y, size[0], size[1]),
-                         dirRule=lambda: self.move.getDir(x=True),
-                         baseHealth=maxHealth)
+class Char(Object, Dir, IDed, Drawable, Health, Subscribee, Alive, Inputable):
+    def __init__(self, level, speed, tileset, **kwargs):
+        super().__init__(dirRule=lambda: self.move.getDir(x=True),
+                         **kwargs)
         self.collision = Collision(self, level)
         self.move = Move(self, speed, collision=self.collision)
         self._gravity = GravityLine(self, 2, h=level.map.h // 2)
         self.jumping = Jumping(self.move, self._gravity, 2)
-        self.input = Input()
+        self._input = Input(inputStream=self.getInputStream())
         self.applyInputSettings()
         self._damageTimer = MinTimeEventStream(2)
         self._damageTimer.subscribe("self", self._takeDmg, autoInit=False)
@@ -41,18 +40,21 @@ class Char(Object, Dir, IDed, Drawable, Health, Subscribee, Alive):
 
         image = Files.loadImage(tileset)
         self._display = Display(image, self, Animation(image, 11, _isMoving, _hDir, _vDir), True)
-        self._weapon = Weapon(self, level, lambda: ((5 * self.getDir()), 0))
+        self._weapon = Weapon(level,
+                              anchor=self,
+                              offsetFunc=lambda: ((5 * self.getDir()), 0),
+                              inputStream=self.getInputStream())
 
     def applyInputSettings(self):
-        self.input.set(pygame.KEYDOWN, self.startMove, pygame.K_a, "left")
-        self.input.set(pygame.KEYDOWN, self.startMove, pygame.K_d, "right")
-        self.input.set(pygame.KEYDOWN, self.startMove, pygame.K_w, "up")
-        self.input.set(pygame.KEYDOWN, self.startMove, pygame.K_s, "down")
+        self._input.set(pygame.KEYDOWN, self.startMove, pygame.K_a, "left")
+        self._input.set(pygame.KEYDOWN, self.startMove, pygame.K_d, "right")
+        self._input.set(pygame.KEYDOWN, self.startMove, pygame.K_w, "up")
+        self._input.set(pygame.KEYDOWN, self.startMove, pygame.K_s, "down")
 
-        self.input.set(pygame.KEYUP, self.stopMove, pygame.K_a, "left")
-        self.input.set(pygame.KEYUP, self.stopMove, pygame.K_d, "right")
-        self.input.set(pygame.KEYUP, self.stopMove, pygame.K_w, "up")
-        self.input.set(pygame.KEYUP, self.stopMove, pygame.K_s, "down")
+        self._input.set(pygame.KEYUP, self.stopMove, pygame.K_a, "left")
+        self._input.set(pygame.KEYUP, self.stopMove, pygame.K_d, "right")
+        self._input.set(pygame.KEYUP, self.stopMove, pygame.K_w, "up")
+        self._input.set(pygame.KEYUP, self.stopMove, pygame.K_s, "down")
 
     def startMove(self, arg):
         if arg == "left":
@@ -85,10 +87,10 @@ class Char(Object, Dir, IDed, Drawable, Health, Subscribee, Alive):
         self.decHealth(1)
         self.move.setSpeed(y=8)
 
-    def tick(self, inputs):
-        Dir.tick(self)
-        self.input(inputs)
-        self._weapon.tick(inputs)
+    def tick(self):
+        super().tick()
+        self._input()
+        self._weapon.tick()
 
         collisions = self.move()
         self.jumping.tick(collisions)
@@ -104,5 +106,7 @@ class Char(Object, Dir, IDed, Drawable, Health, Subscribee, Alive):
 
 
 class MChar(Char):
-    def __init__(self, level, start):
-        Char.__init__(self, level, start, (20, 26), const.playerSpeed, const.playerTileset, True, 5)
+    def __init__(self, level, start, **kwargs):
+        super().__init__(level=level, pos=(start.x, start.y), size=const.playerSize,
+                         speed=const.playerSpeed, tileset=const.playerTileset, baseHealth=5,
+                         **kwargs)

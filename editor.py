@@ -2,7 +2,7 @@ import pygame
 import const
 from display import Display
 from enableable import Enableable
-from input import Input
+from input import Input, Inputable
 from menu import Menu, MText, MAction, MImage, MColor, MAlpha, MenuItem
 from object import Object
 from surface import Surface
@@ -110,9 +110,9 @@ class Paint(object):
     pass
 
 
-class Editor(Enableable, Showable):
-    def __init__(self, map, surface):
-        super().__init__(enabled=False, showing=True)
+class Editor(Enableable, Showable, Inputable):
+    def __init__(self, map, surface, **kwargs):
+        super().__init__(**kwargs)
 
         self._map = map
         self._tool = None
@@ -126,13 +126,15 @@ class Editor(Enableable, Showable):
 
         self._createMenu(surface)
 
-        self._input = Input()
+        self._input = Input(inputStream=self.getInputStream())
         self._input.set(pygame.KEYDOWN, self.toggleShowing, pygame.K_o)
         self._input.set(pygame.KEYDOWN, self.menu.toggleEnabled, pygame.K_t)
         self._input.set(pygame.KEYDOWN, self._map.save, pygame.K_RETURN)
 
     def _createMenu(self, surface):
-        self.menu = Menu((0, (const.screenSize[1] - 2) * const.res), surface)
+        self.menu = Menu(surface=surface,
+                         pos=(0, (const.screenSize[1] - 2) * const.res),
+                         inputStream=self.getInputStream())
 
         def _setTool(tool):
             self._tool = tool
@@ -195,11 +197,11 @@ class Editor(Enableable, Showable):
                                   MenuItem((32 * i, 32, 32, 32), MImage(surf), alpha,
                                            MAction(_setBrush, TileBrush(i))))
 
-    def tick(self, inputs, camera):
-        self._input(inputs)
-        inputs = self.menu.tick(inputs)
+    def tick(self, camera):
+        self._input()
+        self.menu.tick()
 
-        for event in inputs:
+        for event in self.getInputStream():
             if event.type in [pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP, pygame.MOUSEMOTION]:
                 if event.type in [pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP]:
                     if self._painting and event.type == pygame.MOUSEBUTTONUP:

@@ -1,4 +1,18 @@
-class Input(object):
+class Inputable(object):
+    def __init__(self, **kwargs):
+        self._inputStream = kwargs.get("inputStream", [])
+
+    def getInputStream(self):
+        return self._inputStream
+
+    def clearInputStream(self):
+        self._inputStream[:] = []
+
+    def popInputStream(self, index):
+        del self._inputStream[index]
+
+
+class Input(Inputable):
     """
     A class for managing inputs.
 
@@ -11,7 +25,8 @@ class Input(object):
         will call exFunc(True) when the R-keydown event is one of the events
         when this class is called.
     """
-    def __init__(self):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self._registeredEvents = {}
 
     def set(self, event, action, ident=None, arg=()):
@@ -25,13 +40,13 @@ class Input(object):
         """
         self._registeredEvents[(event, ident)] = (action, arg)
 
-    def __call__(self, inputs):
+    def __call__(self):
         """
         Performs the registered actions upon matching the registered events.
 
         `inputs` - A list of inputs that can be used to match from.
         """
-        for event in inputs:
+        for event in self.getInputStream():
             validEvent = self._registeredEvents.get((event.type, event.key))
             if validEvent:
                 action, args = validEvent

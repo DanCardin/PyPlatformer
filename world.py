@@ -1,13 +1,14 @@
 from complete import Completeable
+from input import Inputable
 from level import Level
 
 
-class World(Completeable):
-    def __init__(self, surface, levels):
-        super().__init__()
+class World(Completeable, Inputable):
+    def __init__(self, surface, levels, **kwargs):
+        super().__init__(**kwargs)
         self.levels = []
         for i in levels:
-            self.levels.append(Level(surface, i))
+            self.levels.append(Level(surface, i, **kwargs))
         self.currLevel = -1
 
     def nextLevel(self):
@@ -23,8 +24,8 @@ class World(Completeable):
             self.currLevel -= 1
         self.level.start()
 
-    def tick(self, input):
-        self.level.tick(input)
+    def tick(self):
+        self.level.tick()
         if self.level.isComplete():
             if self.level.isLost():
                 self.setLost()
