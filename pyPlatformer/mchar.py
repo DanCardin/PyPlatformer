@@ -32,7 +32,7 @@ class Char(Object, Dir, IDed, Drawable, Health, Subscribee, Alive, Inputable):
         self.jumping = Jumping(self.move, self._gravity, 2)
         self._input = Input(inputStream=self.getInputStream())
         self.applyInputSettings()
-        self._damageTimer = MinTimeEventStream(2)
+        self._damageTimer = MinTimeEventStream(duration=2)
         self._damageTimer.subscribe("self", self._takeDmg, autoInit=False)
 
         def _isMoving():

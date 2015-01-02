@@ -5,7 +5,7 @@
 			"name": "Python",
 			"selector": "source.python",
 			"working_dir": "$project_path",
-			"shell_cmd": "python -u \"main.py\""
+			"shell_cmd": "python -u \"pyplatformer\\main.py\""
 		}
 	],
 	"folders":

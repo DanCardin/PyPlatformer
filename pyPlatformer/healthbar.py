@@ -38,7 +38,6 @@ class HealthBar(Object, Drawable):
         for i in range(self._heartLen):
             self._hearts.append(surf.subsurface(Object(rect=(10 * i + 2 * (i // 2), 0, 10, 16)).asRect()))
 
-
     def recalculate(self, parent):
         health = self._parent.getHealth()
         for i in range(self._heartLen):

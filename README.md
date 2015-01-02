@@ -1,7 +1,30 @@
 pyPlatformer
 ==========
 
+## About
+A 2D sidescrolling platforming engine.
+
+Currently this is being developed alongside a generic game. At the moment, there isnt necessarily
+much of a distinction between the engine and the game, but slowly game functionality is being moved
+out into seperate files.
+
+Random list of features:
+- Parallax background scrolling
+- Arbitrarily zoomable viewport onto the map
+- NPCs (very basic AI (almost non-existent))
+- Simple particle emitters (used for weapon firing and NPC spawns)
+
+## Setup
+
 ## TODO:
+### Engine vs Game
+- Menus should probably be represented a in a flat file and loaded into the Game rather than
+hardcoded into Game itself.
+- MChar should be moved to game-space since Char is generic, but MChar is very specific to the
+particular tileset and game
+- Gravity currently is applied per-entity. This should really be a level attribute, and objects
+should opt-in to being effected by gravity.
+
 ### add triggers/textual triggers 
 - When colliding with this it will make some action happen.
 - Textual trigger would be a bit of text that shows up on screen when a trigger is hit.

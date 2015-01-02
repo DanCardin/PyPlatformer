@@ -1,3 +1,4 @@
+import os
 import pygame
 import const
 from collections import namedtuple
@@ -9,10 +10,19 @@ from world import World
 
 
 class Game(Enableable, Completable, Inputable):
-    def __init__(self, surface, levels):
+    def __init__(self, levels):
         super().__init__()
 
-        self._surface = surface
+        # --- Inits
+        os.environ["SDL_VIDEO_CENTERED"] = "1"
+        pygame.mixer.pre_init(44100, 16, 2, 4096)
+        pygame.init()
+        pygame.font.init()
+
+        pygame.display.set_caption(const.gameName)
+        self._surface = pygame.display.set_mode((const.screenSize[0] * const.res,
+                                                 const.screenSize[1] * const.res))
+        self._clock = pygame.time.Clock()
         self._levAttr = levels
         self._world = None
         self._paused = False
@@ -76,6 +86,9 @@ class Game(Enableable, Completable, Inputable):
                 if not self._paused:
                     self._world.tick()
         self.clearInputStream()
+
+        self._clock.tick(const.FPS)
+        pygame.display.flip()
 
     def _win(self):
         self._endGame("YOU WIN!")
