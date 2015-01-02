@@ -1,7 +1,8 @@
 import const
 from animation import Animation
-from char import Health, Alive, Dir
-from collision import Collision, Direction
+from char import Health, Alive
+from collision import Collision
+from direction import Direction, Dir
 from display import Display, Drawable
 from files import Files
 from gravity import GravityLine
@@ -44,7 +45,13 @@ class AI(object):
 
 class Enemy(Object, Dir, IDed, Alive, Health, Drawable, Inputable):
     def __init__(self, rect, speed, tileset, level, maxHealth, **kwargs):
-        super().__init__(rect=rect, dirRule=lambda: self.move.getDir(x=True), idName="enemy",
+        super().__init__(rect=rect,
+                         dirRule=lambda: {
+                            -1: Direction.Left,
+                            0: None,
+                            1: Direction.Right,
+                         }[self.move.getDir(x=True)],
+                         idName="enemy",
                          baseHealth=maxHealth, **kwargs)
 
         self.collision = Collision(self, level, "enemy")

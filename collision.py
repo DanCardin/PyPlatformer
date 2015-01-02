@@ -1,13 +1,6 @@
 import const
-from enum import Enum
+from direction import Direction
 from wall import Tiles
-
-
-class Direction(Enum):
-    Top = 1
-    Bottom = 2
-    Left = 3
-    Right = 4
 
 
 class Collision(object):

@@ -23,7 +23,7 @@ class Weapon(Emitter, Inputable):
                               self._s,
                               self._level,
                               Behaviors.killAt(150, 150),
-                              Behaviors.moveAt(self._anchor.getDir() * 10, 0),
+                              Behaviors.moveAt(self._anchor.getIntDir() * 10, 0),
                               Behaviors.killOnCollision(exceptions=(self._anchor.getId(),)),
                               Behaviors.cleanupCollision(),
                               altname="bullet")

@@ -1,8 +1,9 @@
 import pygame
 import const
 from animation import Animation
-from char import Dir, Health, Alive
+from char import Health, Alive
 from collision import Collision
+from direction import Direction, Dir
 from display import Display, Drawable
 from files import Files
 from gravity import GravityLine
@@ -18,8 +19,13 @@ from ids import IDed
 
 class Char(Object, Dir, IDed, Drawable, Health, Subscribee, Alive, Inputable):
     def __init__(self, level, speed, tileset, **kwargs):
-        super().__init__(dirRule=lambda: self.move.getDir(x=True),
-                         **kwargs)
+        super().__init__(
+            dirRule=lambda: {
+                -1: Direction.Left,
+                0: None,
+                1: Direction.Right
+            }[self.move.getDir(x=True)],
+            **kwargs)
         self.collision = Collision(self, level)
         self.move = Move(self, speed, collision=self.collision)
         self._gravity = GravityLine(self, 2, h=level.map.h // 2)
@@ -42,7 +48,7 @@ class Char(Object, Dir, IDed, Drawable, Health, Subscribee, Alive, Inputable):
         self._display = Display(image, self, Animation(image, 11, _isMoving, _hDir, _vDir), True)
         self._weapon = Weapon(level,
                               anchor=self,
-                              offsetFunc=lambda: ((5 * self.getDir()), 0),
+                              offsetFunc=lambda: ((5 * self.getIntDir()), 0),
                               inputStream=self.getInputStream())
 
     def applyInputSettings(self):
