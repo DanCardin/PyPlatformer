@@ -29,5 +29,5 @@ pyPlatformer
         + Two points per block can be connected form a line that will be the terrain for that block.
         + Then simply detect for collision with that line segment and appropriately push out depending on the type of collision.
 
-### add ledge grabbing (absolute least thing I care about)
+### ledge grabbing and wall jumping
 - The way its done in Stealth Bastard is really nice.
