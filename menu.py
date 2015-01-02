@@ -18,19 +18,16 @@ class Menu(Object, Enableable, Inputable):
         return self.items.get(key)
 
     def tick(self):
-        leftOver = []
         if self.enabled():
-            for i, event in enumerate(self.getInputStream()):
-                matched = False
+            matched = set()
+            stream = self.getInputStream()
+            for event in stream:
                 for item in self.items.values():
-                    if item.tick(self, event):
-                        matched = True
+                    if item.tick(self, event) and event not in matched:
+                        matched.add(event)
 
-                if not matched:
-                    leftOver.append(i)
-
-        for i in leftOver:
-            self.popInputStream(i)
+            for event in matched:
+                stream.remove(event)
 
     def addItem(self, key, *args):
         self.items[key] = MenuItem(*args)

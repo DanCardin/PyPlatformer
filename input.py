@@ -1,15 +1,26 @@
 class Inputable(object):
+    """
+    Classes should inherit from this class in order to become `Inputable`.
+
+    This means that they consume input from some stream of inputs.
+    """
     def __init__(self, **kwargs):
+        """
+        `inputStream` - (Optional) The source of input. If not set, creates new, empty stream.
+        """
         self._inputStream = kwargs.get("inputStream", [])
 
     def getInputStream(self):
+        """
+        Returns the input stream.
+        """
         return self._inputStream
 
     def clearInputStream(self):
+        """
+        Removes all inputs in from the stream.
+        """
         self._inputStream[:] = []
-
-    def popInputStream(self, index):
-        del self._inputStream[index]
 
 
 class Input(Inputable):
