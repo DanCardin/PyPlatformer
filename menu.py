@@ -2,33 +2,35 @@ import pygame
 from animation import Animation
 from display import Display, Drawable
 from enableable import Enableable
+from input import Inputable
 from object import Object
 from surface import Surface
 
 
-class Menu(Object, Enableable):
-    def __init__(self, pos, surface, enabled=True):
-        super().__init__(pos=pos, enabled=enabled)
+class Menu(Object, Enableable, Inputable):
+    def __init__(self, surface, **kwargs):
+        super().__init__(**kwargs)
 
         self._surface = surface
-        self.pos = pos
         self.items = {}
 
     def select(self, key):
         return self.items.get(key)
 
-    def tick(self, inputs):
+    def tick(self):
         leftOver = []
         if self.enabled():
-            for event in inputs:
+            for i, event in enumerate(self.getInputStream()):
                 matched = False
                 for item in self.items.values():
                     if item.tick(self, event):
                         matched = True
 
                 if not matched:
-                    leftOver.append(event)
-        return leftOver
+                    leftOver.append(i)
+
+        for i in leftOver:
+            self.popInputStream(i)
 
     def addItem(self, key, *args):
         self.items[key] = MenuItem(*args)

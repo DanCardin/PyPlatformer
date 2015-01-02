@@ -6,15 +6,16 @@ from display import Display, Drawable
 from files import Files
 from gravity import GravityLine
 from ids import IDed
+from input import Inputable
 from move import Move
 from object import Object
 from particle import MinTimeEmitter, Behaviors
 from wall import Tiles
 
 
-class EnemyEmitter(MinTimeEmitter):
-    def __init__(self, anchor, level, maxEmitted=0, timeBetween=0, offsetFunc=lambda: (0, 0)):
-        super().__init__(anchor, offsetFunc, maxEmitted, timeBetween)
+class EnemySpawn(MinTimeEmitter, Inputable):
+    def __init__(self, level, **kwargs):
+        super().__init__(**kwargs)
         self._level = level
         self._part = None
 
@@ -41,10 +42,10 @@ class AI(object):
             self._klass.move.setSpeed(x=self._dir * self._klass.move.getTopSpeed(x=True))
 
 
-class Enemy(Object, Dir, IDed, Alive, Health, Drawable):
-    def __init__(self, rect, speed, tileset, level, maxHealth):
+class Enemy(Object, Dir, IDed, Alive, Health, Drawable, Inputable):
+    def __init__(self, rect, speed, tileset, level, maxHealth, **kwargs):
         super().__init__(rect=rect, dirRule=lambda: self.move.getDir(x=True), idName="enemy",
-                         baseHealth=maxHealth)
+                         baseHealth=maxHealth, **kwargs)
 
         self.collision = Collision(self, level, "enemy")
         self.move = Move(self, speed, self.collision)
@@ -75,6 +76,7 @@ class Enemy(Object, Dir, IDed, Alive, Health, Drawable):
         if self.getHealth() == 0:
             self.kill()
 
+        return collisions
 
     @Behaviors.cleanupCollision
     def kill(self):

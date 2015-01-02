@@ -8,44 +8,50 @@ from complete import Completeable
 from viewport import Viewport
 from countdown import CountdownTimer
 from editor import Editor
-from enemy import EnemyEmitter
+from enemy import EnemySpawn
 from healthbar import HealthBar
-from input import Input
+from input import Input, Inputable
 from map import Map
 from mchar import MChar
 from object import Object
 from wall import Tiles
 
 
-class Level(Completeable):
-    def __init__(self, surface, level):
-        super().__init__()
+class Level(Completeable, Inputable):
+    def __init__(self, surface, level, **kwargs):
+        super().__init__(**kwargs)
         self._surface = surface
         self.map = Map(level[0], level[1])
 
     def start(self):
         self.map.load()
-        self.registered = {}
         self._entity_map = {}
         self._position_map = {}
         self._entities = {}
+        self._registered = {}
         self._enemySpawns = {}
         for x, y in self.map.getMap().keys():
             self._position_map[(x, y)] = []
 
         self._total_surface = Surface((self.map.w, self.map.h))
-        tid = self.addEntity(register=True, entity=MChar(self, self.map.getType(Tiles.Start)[0]))
+        tid = self.addEntity(register=True,
+                             entity=MChar(self,
+                                          self.map.getType(Tiles.Start)[0],
+                                          inputStream=self.getInputStream()))
         self._camera = Viewport(tuple([s * const.res for s in const.screenSize]),
                                 lambda: self.map.getAttr("scale"),
                                 self.get(tid),
                                 (150, 200, 150, 200),
                                 self.map)
         self._background = Parallax(const.backgrounds)
-        self.editor = Editor(self.map, self._surface)
+        self.editor = Editor(self.map,
+                             self._surface,
+                             enabled=False,
+                             inputStream=self.getInputStream())
 
-        self.input = Input()
-        self.input.set(KEYDOWN, self.editor.toggleEnabled, K_e)
-        self.input.set(KEYDOWN, self.start, K_r)
+        self._input = Input(inputStream=self.getInputStream())
+        self._input.set(KEYDOWN, self.editor.toggleEnabled, K_e)
+        self._input.set(KEYDOWN, self.start, K_r)
 
         # self._sound = Sound("assets\\music.ogg")
         # self._sound.play(-1)
@@ -56,8 +62,11 @@ class Level(Completeable):
             pass
 
         for block in self.map.getType(Tiles.EnemySpawn):
-            self._enemySpawns[block] = EnemyEmitter(Object(pos=(block.x, block.y)),
-                                                    self, block.getAttr("spawnNum"), 2)
+            self._enemySpawns[block] = EnemySpawn(level=self,
+                                                  anchor=Object(pos=(block.x, block.y)),
+                                                  maxEmitted=block.getAttr("spawnNum"),
+                                                  timeBetween=2)
+
         self._countdown = CountdownTimer(const.screenSize[0] * const.res - 50, 10,
                                          self.map.getAttr("timeLim"))
 
@@ -66,9 +75,11 @@ class Level(Completeable):
             raise Exception("Entity must not be None.")
 
         tid = entity.getId()
-        reg = self.registered if register else self._entities
 
-        reg[tid] = entity
+        self._entities[tid] = entity
+        if register:
+            self._registered[tid] = entity
+
         self._entity_map[tid] = set()
         return tid
 
@@ -76,23 +87,21 @@ class Level(Completeable):
         del self._entities[entity.id]
 
     def get(self, entityId):
-        result = self._entities.get(entityId)
-        if not result:
-            result = self.registered.get(entityId)
-        return result
+        return self._entities.get(entityId)
 
-    def process(self, inputs):
-        for entity in self.registered.values():
-            result = entity.tick(inputs)
-            if Tiles.End in result.keys():
-                self.setFinished()
-            if not entity.isAlive():
-                self.setLost()
+    def process(self):
+        for entity in self._entities.values():
+            result = entity.tick()
 
-        for entity in list(self._entities.values()):
-            entity.tick()
             if not entity.isAlive():
                 self._entities.pop(entity.getId())
+
+            # This should generally only apply to playable characters.
+            if entity in self._registered.values():
+                if Tiles.End in result.keys():
+                    self.setFinished()
+                if not entity.isAlive():
+                    self.setLost()
 
         for s in self._enemySpawns.values():
             s.tick()
@@ -103,7 +112,7 @@ class Level(Completeable):
             self.setLost()
 
         if self.editor.enabled():
-            self.editor.tick(inputs, self._camera)
+            self.editor.tick(self._camera)
 
         if self.isComplete():
             pass
@@ -114,9 +123,8 @@ class Level(Completeable):
         self._background.draw(self._total_surface, self._camera)
         for s in self._enemySpawns.values():
             s.draw(self._total_surface)
-        for _entities in [self._entities, self.registered]:
-            for entity in _entities.values():
-                entity.draw(self._total_surface)
+        for entity in self._entities.values():
+            entity.draw(self._total_surface)
 
         self.map.draw(self._total_surface)
         if self.editor.enabled():
@@ -129,7 +137,7 @@ class Level(Completeable):
         if self.editor.enabled():
             self.editor.menu.draw()
 
-    def tick(self, inputs):
-        self.input(inputs)
-        self.process(inputs)
+    def tick(self):
+        self._input()
+        self.process()
         self.render()

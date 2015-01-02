@@ -6,6 +6,7 @@ TILE_SET_LENGTH = 20
 gameName = "PyPlatformer"
 screenSize = (20, 17)
 playerSpeed = (6, 12)
+playerSize = (20, 26)
 
 levelFiles = [
     ("level1.txt", "tileset3.png"),

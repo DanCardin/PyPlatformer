@@ -3,24 +3,24 @@ import const
 from collections import namedtuple
 from complete import Completeable
 from enableable import Enableable
-from input import Input
+from input import Input, Inputable
 from menu import Menu, MColor, MText, MAction
 from world import World
 
 
-class Game(Enableable, Completeable):
+class Game(Enableable, Completeable, Inputable):
     def __init__(self, surface, levels):
-        Enableable.__init__(self)
-        Completeable.__init__(self)
+        super().__init__()
 
         self._surface = surface
         self._levAttr = levels
         self._world = None
         self._paused = False
 
-        self._menu = Menu((const.screenSize[0] * const.res / 2 - 50,
-                          const.screenSize[1] * const.res / 2 - 100),
-                          self._surface)
+        self._menu = Menu(surface=self._surface,
+                          pos=(const.screenSize[0] * const.res / 2 - 50,
+                               const.screenSize[1] * const.res / 2 - 100),
+                          inputStream=self.getInputStream())
         self._menu.addItem("resume", (0, 0, 100, 48), MColor((255, 0, 0), (0, 0, 255)),
                            MText("Resume", (0, 255, 0)), MAction(self._resume))
         self._menu.addItem("start", (0, 50, 100, 48), MColor((255, 0, 0), (0, 0, 255)),
@@ -30,13 +30,13 @@ class Game(Enableable, Completeable):
         self._menu.addItem("exit", (0, 150, 100, 48), MColor((255, 0, 0), (0, 0, 255)),
                            MText("Exit", (0, 255, 0)), MAction(self.setFinished))
 
-        self._input = Input()
+        self._input = Input(inputStream=self.getInputStream())
         self._input.set(pygame.KEYDOWN, self._menuToggle, pygame.K_m)
         self._input.set(pygame.KEYDOWN, self._pause, pygame.K_p)
 
     def start(self):
         self.enable()
-        self._world = World(self._surface, self._levAttr)
+        self._world = World(self._surface, self._levAttr, inputStream=self.getInputStream())
         self._world.nextLevel()
         self._menu.disable()
 
@@ -60,10 +60,11 @@ class Game(Enableable, Completeable):
         self.toggleEnabled()
 
     def tick(self):
-        inputs = self.getEvents()
-        self._input(inputs)
+        self.getEvents()
+        self._input()
+
         if self._menu.enabled():
-            self._menu.tick(inputs)
+            self._menu.tick()
             self._menu.draw()
         elif self.enabled:
             if self._world.isComplete():
@@ -73,7 +74,8 @@ class Game(Enableable, Completeable):
                     self._gameOver()
             else:
                 if not self._paused:
-                    self._world.tick(inputs)
+                    self._world.tick()
+        self.clearInputStream()
 
     def _win(self):
         self._endGame("YOU WIN!")
@@ -100,7 +102,7 @@ class Game(Enableable, Completeable):
 
     Event = namedtuple("Event", "type key pos")
     def getEvents(self):
-        result = []
+        result = self.getInputStream()
         for event in pygame.event.get():
             if event.type in [pygame.KEYDOWN, pygame.KEYUP]:
                 result.append(Game.Event(event.type, event.key, None))
@@ -110,4 +112,3 @@ class Game(Enableable, Completeable):
 
             if event.type == pygame.QUIT:
                 self.setFinished()
-        return result
