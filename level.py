@@ -4,7 +4,7 @@ from pygame.mixer import Sound
 from surface import Surface
 
 from parallax import Parallax
-from complete import Completeable
+from complete import Completable
 from viewport import Viewport
 from countdown import CountdownTimer
 from editor import Editor
@@ -17,7 +17,7 @@ from object import Object
 from wall import Tiles
 
 
-class Level(Completeable, Inputable):
+class Level(Completable, Inputable):
     def __init__(self, surface, level, **kwargs):
         super().__init__(**kwargs)
         self._surface = surface

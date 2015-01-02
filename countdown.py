@@ -1,14 +1,14 @@
 import time
 import const
 from surface import Surface
-from complete import Completeable
+from complete import Completable
 from display import Display, Drawable
 from enableable import Enableable
 from files import Files
 from object import Object
 
 
-class CountdownTimer(Object, Drawable, Enableable, Completeable):
+class CountdownTimer(Object, Drawable, Enableable, Completable):
     def __init__(self, x, y, maxTime, numNums=3):
         image, width = const.numbers
         numbers = Files.loadImage(image)

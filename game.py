@@ -1,14 +1,14 @@
 import pygame
 import const
 from collections import namedtuple
-from complete import Completeable
+from complete import Completable
 from enableable import Enableable
 from input import Input, Inputable
 from menu import Menu, MColor, MText, MAction
 from world import World
 
 
-class Game(Enableable, Completeable, Inputable):
+class Game(Enableable, Completable, Inputable):
     def __init__(self, surface, levels):
         super().__init__()
 
