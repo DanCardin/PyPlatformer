@@ -49,11 +49,21 @@ class Map(Object, Drawable):
     def set(self, x, y, to):
         self._map[self.inRange(x, y)] = to
 
-    def loadAttributes(self, attribs):
-        form = r"^\s*{0}:\s+{1},"
-        for typ, a in [(int, "w"), (int, "h"), (int, "timeLim"), (float, "scale")]:
-            self._attributes[a] = typ(re.search(form.format(a, r"([\d\.]+)"),
-                                                attribs, re.MULTILINE).group(1))
+    def loadAttributes(self, attrName, data):
+        result = {}
+        attrMatch = r"^\s*({0}):\s*"
+        _, attrSet = re.search(r"{0}\{{(.*?)\}}".format(attrMatch.format(attrName)),
+                               data,
+                               flags=(re.DOTALL | re.MULTILINE)).groups()
+
+        attrKey = r"\S+(?:.*?\S)?"
+        strToClass = globals()
+        for match in re.finditer(r"{0}(?:\((\w+)\))?(.*),$".format(attrMatch.format(attrKey)),
+                                 attrSet,
+                                 flags=re.MULTILINE):
+            name, typ, value = match.groups()
+            result[name] = strToClass['__builtins__'].get(typ, int)(value)
+        return result
 
     def load(self):
         self._map = {}
@@ -61,7 +71,7 @@ class Map(Object, Drawable):
         self._attributes = {}
 
         file = Files.openFile(self._file)
-        self.loadAttributes(re.search("attribs: {(.*?)}", file, flags=re.DOTALL).group(1))
+        self._attributes = self.loadAttributes('attribs', file)
         self.w = self.getAttr("w") * const.res
         self.h = self.getAttr("h") * const.res
         self._display = Display(Surface((self.w, self.h)), klass=self, transparent=True)
@@ -70,15 +80,13 @@ class Map(Object, Drawable):
         for tile in re.finditer(r"\((.*?):(.*?)\)", file):
             rect, right = tile.group(1), tile.group(2)
             rect = re.match(r"(\d+),(\d+),(\d+),(\d+),(\d+),(\d+)", rect)
+            if not rect:
+                raise Exception("Unrecognized pattern: {}".format(rect))
 
             details = re.match(r"(\d+),(\d+)$", right)
             attrib = {}
             if not details:
-                details = re.match(r"(\d+),(\d+),\[(\d+)\]", right)
-                if details:
-                    attrib["spawnNum"] = int(details.group(3))
-                else:
-                    raise Exception("Unrecognized pattern: {}".format(right))
+                raise Exception("Unrecognized pattern: {}".format(right))
 
             i, e = int(rect.group(1)), int(rect.group(2))
             x, y, w, h = rect.group(3), rect.group(4), rect.group(5), rect.group(6)
