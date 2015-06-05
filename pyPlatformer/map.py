@@ -23,9 +23,9 @@ class Map(Object, Drawable):
         return self._tileset
 
     def getAttr(self, attr):
-        result = self._attributes.get(attr, None)
-        if result == None:
-            raise ValueError("couldnt find attr: {}".format(attr))
+        result = self._attributes.get(attr)
+        if result is None:
+            raise ValueError("couldnt find attr: {}, valid attrs are: {}".format(attr, self._attributes.keys()))
         return result
 
     def getSize(self, x=None, y=None):
@@ -49,11 +49,35 @@ class Map(Object, Drawable):
     def set(self, x, y, to):
         self._map[self.inRange(x, y)] = to
 
-    def loadAttributes(self, attribs):
-        form = r"^\s*{0}:\s+{1},"
-        for typ, a in [(int, "w"), (int, "h"), (int, "timeLim"), (float, "scale")]:
-            self._attributes[a] = typ(re.search(form.format(a, r"([\d\.]+)"),
-                                                attribs, re.MULTILINE).group(1))
+    def loadAttributes(self, attrName, data):
+        strToClass = globals()['__builtins__']
+        result = {}
+        sectionMatch = r"^\s*{0}:\s*".format(attrName)
+        attrSet = re.search(r"{0}\{{(.*?)\}}".format(sectionMatch), data, flags=(re.DOTALL | re.MULTILINE)).groups()[0]
+
+        def do_nothing(input):
+            return input.group()
+
+        def capture_tuple(input):
+            cast_str, key = input.groups()
+            cast = strToClass[cast_str]
+            return tuple(cast(i) for i in key.split(', ') if cast)
+
+        attrMatches = [(r"(\w+)", do_nothing), (r"(\w*)\((\w+,\s*\w+)\)", capture_tuple)]
+        total_line_match = r"^\s*(.*?):\s*\((\w+)\)(.*),$"
+
+        singleKeyMatch = re.finditer(total_line_match, attrSet, flags=re.MULTILINE)
+        for match in singleKeyMatch:
+            for attrMatch, key_func in attrMatches:
+                name, typ, value = match.groups()
+                name_match = re.match(r"^{}$".format(attrMatch), name)
+                if name_match:
+                    result[key_func(name_match)] = strToClass[typ](value)
+        return result
+
+    @property
+    def enemies(self):
+        return self._enemies.copy()
 
     def load(self):
         self._map = {}
@@ -61,7 +85,8 @@ class Map(Object, Drawable):
         self._attributes = {}
 
         file = Files.openFile(self._file)
-        self.loadAttributes(re.search("attribs: {(.*?)}", file, flags=re.DOTALL).group(1))
+        self._attributes = self.loadAttributes('attribs', file)
+        self._enemies = self.loadAttributes('enemies', file)
         self.w = self.getAttr("w") * const.res
         self.h = self.getAttr("h") * const.res
         self._display = Display(Surface((self.w, self.h)), klass=self, transparent=True)
@@ -70,21 +95,19 @@ class Map(Object, Drawable):
         for tile in re.finditer(r"\((.*?):(.*?)\)", file):
             rect, right = tile.group(1), tile.group(2)
             rect = re.match(r"(\d+),(\d+),(\d+),(\d+),(\d+),(\d+)", rect)
+            if not rect:
+                raise Exception("Unrecognized pattern: {}".format(rect))
 
             details = re.match(r"(\d+),(\d+)$", right)
-            attrib = {}
             if not details:
-                details = re.match(r"(\d+),(\d+),\[(\d+)\]", right)
-                if details:
-                    attrib["spawnNum"] = int(details.group(3))
-                else:
-                    raise Exception("Unrecognized pattern: {}".format(right))
+                raise Exception("Unrecognized pattern: {}".format(right))
 
             i, e = int(rect.group(1)), int(rect.group(2))
             x, y, w, h = rect.group(3), rect.group(4), rect.group(5), rect.group(6)
             x, y, w, h = int(x), int(y), int(w), int(h)
             typ, tile = int(details.group(1)), int(details.group(2))
 
+            attrib = {}
             wall = Wall((x, y, w, h), typ, tile, attrib)
             wall.subscribe("map", self._updateMap)
 

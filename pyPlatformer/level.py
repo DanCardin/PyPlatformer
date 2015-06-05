@@ -61,10 +61,11 @@ class Level(Completable, Inputable):
         except AssertionError:
             pass
 
-        for block in self.map.getType(Tiles.EnemySpawn):
+        for (x, y), val in self.map.enemies.items():
+            block = self.map.get(x, y)
             self._enemySpawns[block] = EnemySpawn(level=self,
                                                   anchor=Object(pos=(block.x, block.y)),
-                                                  maxEmitted=block.getAttr("spawnNum"),
+                                                  maxEmitted=val,
                                                   timeBetween=2)
 
         self._countdown = CountdownTimer(const.screenSize[0] * const.res - 50, 10,
